@@ -1,4 +1,4 @@
-package dev.shadowsoffire.apothic_enchanting.table;
+package dev.shadowsoffire.apothic_enchanting.table.infusion;
 
 import javax.annotation.Nullable;
 
@@ -25,16 +25,16 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
-public class EnchantingRecipe implements Recipe<Container> {
+public class InfusionRecipe implements Recipe<Container> {
 
     public static final Stats NO_MAX = new Stats(-1, -1, -1, -1, -1, -1);
 
-    public static final Codec<EnchantingRecipe> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-        ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(EnchantingRecipe::getOutput),
-        Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(EnchantingRecipe::getInput),
-        Stats.CODEC.fieldOf("requirements").forGetter(EnchantingRecipe::getRequirements),
-        ExtraCodecs.strictOptionalField(Stats.CODEC, "max_requirements", NO_MAX).forGetter(EnchantingRecipe::getMaxRequirements))
-        .apply(inst, EnchantingRecipe::new));
+    public static final Codec<InfusionRecipe> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+        ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(InfusionRecipe::getOutput),
+        Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(InfusionRecipe::getInput),
+        Stats.CODEC.fieldOf("requirements").forGetter(InfusionRecipe::getRequirements),
+        ExtraCodecs.strictOptionalField(Stats.CODEC, "max_requirements", NO_MAX).forGetter(InfusionRecipe::getMaxRequirements))
+        .apply(inst, InfusionRecipe::new));
 
     public static final Serializer SERIALIZER = new Serializer();
 
@@ -43,7 +43,7 @@ public class EnchantingRecipe implements Recipe<Container> {
     protected final Stats requirements, maxRequirements;
 
     /**
-     * Defines an Enchanting Recipe.
+     * Defines an Infusion Enchanting recipe.
      *
      * @param id           The Recipe ID
      * @param output       The output ItemStack
@@ -51,7 +51,7 @@ public class EnchantingRecipe implements Recipe<Container> {
      * @param requirements The Level, Quanta, and Arcana requirements respectively.
      * @param displayLevel The level to show on the fake "Infusion" Enchantment that will show up.
      */
-    public EnchantingRecipe(ItemStack output, Ingredient input, Stats requirements, Stats maxRequirements) {
+    public InfusionRecipe(ItemStack output, Ingredient input, Stats requirements, Stats maxRequirements) {
         this.output = output;
         this.input = input;
         this.requirements = requirements;
@@ -114,7 +114,7 @@ public class EnchantingRecipe implements Recipe<Container> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return EnchantingRecipe.SERIALIZER;
+        return InfusionRecipe.SERIALIZER;
     }
 
     @Override
@@ -131,24 +131,24 @@ public class EnchantingRecipe implements Recipe<Container> {
         return Pair.of(stats, maxStats);
     }
 
-    public static class Serializer implements RecipeSerializer<EnchantingRecipe> {
+    public static class Serializer implements RecipeSerializer<InfusionRecipe> {
 
         @Override
-        public Codec<EnchantingRecipe> codec() {
+        public Codec<InfusionRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        public EnchantingRecipe fromNetwork(FriendlyByteBuf buf) {
+        public InfusionRecipe fromNetwork(FriendlyByteBuf buf) {
             ItemStack output = buf.readItem();
             Ingredient input = Ingredient.fromNetwork(buf);
             Stats stats = Stats.read(buf);
             Stats maxStats = buf.readBoolean() ? Stats.read(buf) : NO_MAX;
-            return new EnchantingRecipe(output, input, stats, maxStats);
+            return new InfusionRecipe(output, input, stats, maxStats);
         }
 
         @Override
-        public void toNetwork(FriendlyByteBuf buf, EnchantingRecipe recipe) {
+        public void toNetwork(FriendlyByteBuf buf, InfusionRecipe recipe) {
             buf.writeItem(recipe.output);
             recipe.input.toNetwork(buf);
             recipe.requirements.write(buf);
@@ -161,7 +161,7 @@ public class EnchantingRecipe implements Recipe<Container> {
     }
 
     @Nullable
-    public static EnchantingRecipe findMatch(Level level, ItemStack input, float eterna, float quanta, float arcana) {
+    public static InfusionRecipe findMatch(Level level, ItemStack input, float eterna, float quanta, float arcana) {
         return level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION.get()).stream()
             .map(RecipeHolder::value)
             .sorted((r1, r2) -> -Float.compare(r1.requirements.eterna(), r2.requirements.eterna()))
@@ -170,7 +170,7 @@ public class EnchantingRecipe implements Recipe<Container> {
     }
 
     @Nullable
-    public static EnchantingRecipe findItemMatch(Level level, ItemStack toEnchant) {
+    public static InfusionRecipe findItemMatch(Level level, ItemStack toEnchant) {
         return level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION.get()).stream()
             .map(RecipeHolder::value)
             .filter(r -> r.getInput().test(toEnchant))

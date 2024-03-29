@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.EnchantmentInfo;
+import dev.shadowsoffire.apothic_enchanting.api.IEnchantableItem;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;

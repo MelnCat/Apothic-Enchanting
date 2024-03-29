@@ -8,7 +8,7 @@ import dev.shadowsoffire.apothic_enchanting.Ench.Particles;
 import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
 import dev.shadowsoffire.apothic_enchanting.client.DrawsOnLeft;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryScreen;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantScreen;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
@@ -48,7 +48,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 @EventBusSubscriber(modid = ApothicEnchanting.MODID, bus = Bus.MOD, value = Dist.CLIENT)
-public class EnchModuleClient {
+public class ApothEnchClient {
 
     private static final BlockHitResult MISS = BlockHitResult.miss(Vec3.ZERO, Direction.NORTH, BlockPos.ZERO);
 
@@ -59,7 +59,7 @@ public class EnchModuleClient {
 
     @SubscribeEvent
     public static void screens(RegisterMenuScreensEvent e) {
-        e.register(Ench.Menus.ENCHANTING_TABLE.get(), ApothEnchantScreen::new);
+        e.register(Ench.Menus.ENCHANTING_TABLE.get(), ApothEnchantmentScreen::new);
         e.register(Ench.Menus.LIBRARY.get(), EnchLibraryScreen::new);
     }
 
@@ -149,7 +149,7 @@ public class EnchModuleClient {
                             tooltip.add(Component.translatable(ench.getDescriptionId() + ".desc").withStyle(ChatFormatting.DARK_GRAY));
                         }
                     }
-                    if (EnchConfig.showEnchantedBookMetadata) {
+                    if (ApothEnchConfig.showEnchantedBookMetadata) {
                         var info = ApothicEnchanting.getEnchInfo(ench);
                         Object[] args = new Object[4];
                         args[0] = boolComp("discoverable", info.isDiscoverable());

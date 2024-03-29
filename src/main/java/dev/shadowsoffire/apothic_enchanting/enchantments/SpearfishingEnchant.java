@@ -1,7 +1,6 @@
 package dev.shadowsoffire.apothic_enchanting.enchantments;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
-import dev.shadowsoffire.apothic_enchanting.EnchModuleEvents.TridentGetter;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
@@ -47,7 +46,7 @@ public class SpearfishingEnchant extends Enchantment {
         DamageSource src = e.getSource();
         if (src.getDirectEntity() instanceof ThrownTrident trident) {
             if (trident.level().isClientSide) return;
-            ItemStack triStack = ((TridentGetter) trident).getTridentItem();
+            ItemStack triStack = trident.getPickupItemStackOrigin();
             int level = triStack.getEnchantmentLevel(this);
             RandomSource rand = trident.level().random;
             if (rand.nextFloat() < 3.5F * level) {

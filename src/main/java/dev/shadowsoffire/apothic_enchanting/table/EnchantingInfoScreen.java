@@ -39,7 +39,7 @@ public class EnchantingInfoScreen extends Screen {
 
     protected static ChatFormatting[] colors = { ChatFormatting.WHITE, ChatFormatting.YELLOW, ChatFormatting.BLUE, ChatFormatting.GOLD };
 
-    protected final ApothEnchantScreen parent;
+    protected final ApothEnchantmentScreen parent;
     protected final int imageWidth, imageHeight;
     protected final ItemStack toEnchant;
     protected final int[] costs;
@@ -57,7 +57,7 @@ public class EnchantingInfoScreen extends Screen {
     List<EnchantmentDataWrapper> enchantments = Collections.emptyList();
     Map<Enchantment, List<Enchantment>> exclusions = new HashMap<>();
 
-    public EnchantingInfoScreen(ApothEnchantScreen parent) {
+    public EnchantingInfoScreen(ApothEnchantmentScreen parent) {
         super(TooltipUtil.lang("menu", "enchanting_info"));
         this.parent = parent;
         this.imageWidth = 240;

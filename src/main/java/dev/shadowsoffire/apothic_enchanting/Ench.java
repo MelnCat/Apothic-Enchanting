@@ -41,8 +41,9 @@ import dev.shadowsoffire.apothic_enchanting.objects.TypedShelfBlock;
 import dev.shadowsoffire.apothic_enchanting.objects.TypedShelfBlock.SculkShelfBlock;
 import dev.shadowsoffire.apothic_enchanting.objects.WardenLootModifier;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu;
-import dev.shadowsoffire.apothic_enchanting.table.EnchantingRecipe;
-import dev.shadowsoffire.apothic_enchanting.table.KeepNBTEnchantingRecipe;
+import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableItemHandler;
+import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
+import dev.shadowsoffire.apothic_enchanting.table.infusion.NBTInfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.color.GradientColor;
@@ -72,6 +73,9 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
+/**
+ * Registration and object holders. Each type of object has its own subclass.
+ */
 public class Ench {
 
     private static final DeferredHelper R = DeferredHelper.create(ApothicEnchanting.MODID);
@@ -352,7 +356,7 @@ public class Ench {
     }
 
     public static class RecipeTypes {
-        public static final Supplier<RecipeType<EnchantingRecipe>> INFUSION = R.recipe("infusion", () -> new RecipeType<EnchantingRecipe>(){});
+        public static final Supplier<RecipeType<InfusionRecipe>> INFUSION = R.recipe("infusion", () -> new RecipeType<InfusionRecipe>(){});
 
         private static void bootstrap() {}
     }
@@ -367,9 +371,10 @@ public class Ench {
     }
 
     static {
-        R.recipeSerializer("infusion", () -> EnchantingRecipe.SERIALIZER);
-        R.recipeSerializer("keep_nbt_infusion", () -> KeepNBTEnchantingRecipe.SERIALIZER);
+        R.recipeSerializer("infusion", () -> InfusionRecipe.SERIALIZER);
+        R.recipeSerializer("keep_nbt_infusion", () -> NBTInfusionRecipe.SERIALIZER);
         R.custom("warden_tendril", NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> WardenLootModifier.CODEC);
+        R.custom("enchantment_table_item_handler", NeoForgeRegistries.Keys.ATTACHMENT_TYPES, () -> EnchantmentTableItemHandler.TYPE);
     }
 
     public static void bootstrap(IEventBus bus) {

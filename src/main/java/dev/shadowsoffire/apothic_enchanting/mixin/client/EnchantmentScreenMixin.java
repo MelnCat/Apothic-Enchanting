@@ -2,7 +2,7 @@ package dev.shadowsoffire.apothic_enchanting.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantScreen.SuperRender;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen.SuperRender;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;

@@ -2,7 +2,7 @@ package dev.shadowsoffire.apothic_enchanting;
 
 import dev.shadowsoffire.placebo.config.Configuration;
 
-public class EnchConfig {
+public class ApothEnchConfig {
 
     public static boolean showEnchantedBookMetadata = true;
     public static int sculkShelfNoiseChance = 200;

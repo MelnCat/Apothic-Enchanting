@@ -10,9 +10,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
-import dev.shadowsoffire.apothic_enchanting.table.EnchantingRecipe;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry.Stats;
+import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -37,10 +37,10 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
-public class EnchantingCategory implements IRecipeCategory<EnchantingRecipe> {
+public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
 
     public static final ResourceLocation UID = ApothicEnchanting.loc("enchanting");
-    public static final RecipeType<EnchantingRecipe> TYPE = RecipeType.create(ApothicEnchanting.MODID, "enchanting", EnchantingRecipe.class);
+    public static final RecipeType<InfusionRecipe> TYPE = RecipeType.create(ApothicEnchanting.MODID, "enchanting", InfusionRecipe.class);
     public static final ResourceLocation TEXTURES = ApothicEnchanting.loc("textures/gui/enchanting_jei.png");
     private static final Map<Class<?>, Extension<?>> EXTENSIONS = new HashMap<>();
 
@@ -48,7 +48,7 @@ public class EnchantingCategory implements IRecipeCategory<EnchantingRecipe> {
     private final IDrawable icon;
     private final Component localizedName;
 
-    public EnchantingCategory(IGuiHelper guiHelper) {
+    public InfusionRecipeCategory(IGuiHelper guiHelper) {
         this.background = guiHelper.createDrawable(TEXTURES, 0, 0, 170, 56);
         this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(Blocks.ENCHANTING_TABLE));
         this.localizedName = TooltipUtil.lang("recipes", "infusion");
@@ -70,12 +70,12 @@ public class EnchantingCategory implements IRecipeCategory<EnchantingRecipe> {
     }
 
     @Override
-    public RecipeType<EnchantingRecipe> getRecipeType() {
+    public RecipeType<InfusionRecipe> getRecipeType() {
         return TYPE;
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, EnchantingRecipe recipe, IFocusGroup focuses) {
+    public void setRecipe(IRecipeLayoutBuilder builder, InfusionRecipe recipe, IFocusGroup focuses) {
         IRecipeSlotBuilder input = builder.addSlot(RecipeIngredientRole.INPUT, 6, 6);
         IRecipeSlotBuilder output = builder.addSlot(RecipeIngredientRole.OUTPUT, 37, 6);
         Extension<?> ext = EXTENSIONS.get(recipe.getClass());
@@ -87,7 +87,7 @@ public class EnchantingCategory implements IRecipeCategory<EnchantingRecipe> {
     }
 
     @Override
-    public void draw(EnchantingRecipe recipe, IRecipeSlotsView slots, GuiGraphics gfx, double mouseX, double mouseY) {
+    public void draw(InfusionRecipe recipe, IRecipeSlotsView slots, GuiGraphics gfx, double mouseX, double mouseY) {
         boolean hover = false;
         if (mouseX > 57 && mouseX <= 57 + 108 && mouseY > 4 && mouseY <= 4 + 19) {
             gfx.blit(TEXTURES, 57, 4, 0, 0, 71, 108, 19, 256, 256);
@@ -185,12 +185,12 @@ public class EnchantingCategory implements IRecipeCategory<EnchantingRecipe> {
 
     }
 
-    public static <T extends EnchantingRecipe> void registerExtension(Class<T> cls, Extension<T> ext) {
+    public static <T extends InfusionRecipe> void registerExtension(Class<T> cls, Extension<T> ext) {
         EXTENSIONS.put(cls, ext);
     }
 
-    public static interface Extension<T extends EnchantingRecipe> {
-        public void setRecipe(IRecipeLayoutBuilder builder, IRecipeSlotBuilder input, IRecipeSlotBuilder output, EnchantingRecipe recipe, IFocusGroup focuses);
+    public static interface Extension<T extends InfusionRecipe> {
+        public void setRecipe(IRecipeLayoutBuilder builder, IRecipeSlotBuilder input, IRecipeSlotBuilder output, InfusionRecipe recipe, IFocusGroup focuses);
     }
 
 }

@@ -1,7 +1,8 @@
-package dev.shadowsoffire.apothic_enchanting.table;
+package dev.shadowsoffire.apothic_enchanting.api;
 
 import java.util.List;
 
+import dev.shadowsoffire.apothic_enchanting.table.RealEnchantmentHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.EnchantedBookItem;
@@ -20,7 +21,7 @@ public interface IEnchantableItem {
      * @param enchantments The enchantments being applied.
      * @return The newly-enchanted itemstack.
      */
-    default ItemStack onEnchantment(ItemStack stack, List<EnchantmentInstance> enchantments) {
+    default ItemStack applyEnchantments(ItemStack stack, List<EnchantmentInstance> enchantments) {
         boolean isBook = stack.is(Items.BOOK);
         if (isBook) {
             ItemStack enchBook = new ItemStack(Items.ENCHANTED_BOOK);

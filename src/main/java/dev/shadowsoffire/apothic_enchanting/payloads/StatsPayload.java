@@ -1,10 +1,11 @@
-package dev.shadowsoffire.apothic_enchanting.table;
+package dev.shadowsoffire.apothic_enchanting.payloads;
 
 import java.util.List;
 import java.util.Optional;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.TableStats;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
+import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
 import dev.shadowsoffire.placebo.network.PayloadHelper;
 import dev.shadowsoffire.placebo.network.PayloadProvider;
 import net.minecraft.client.Minecraft;
@@ -15,13 +16,13 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
-public class StatsMessage implements CustomPacketPayload {
+public class StatsPayload implements CustomPacketPayload {
 
     public static final ResourceLocation ID = ApothicEnchanting.loc("stats");
 
-    protected final TableStats stats;
+    protected final EnchantmentTableStats stats;
 
-    public StatsMessage(TableStats stats) {
+    public StatsPayload(EnchantmentTableStats stats) {
         this.stats = stats;
     }
 
@@ -35,7 +36,7 @@ public class StatsMessage implements CustomPacketPayload {
         return ID;
     }
 
-    public static class Provider implements PayloadProvider<StatsMessage, PlayPayloadContext> {
+    public static class Provider implements PayloadProvider<StatsPayload, PlayPayloadContext> {
 
         @Override
         public ResourceLocation id() {
@@ -43,15 +44,15 @@ public class StatsMessage implements CustomPacketPayload {
         }
 
         @Override
-        public StatsMessage read(FriendlyByteBuf buf) {
-            return new StatsMessage(TableStats.read(buf));
+        public StatsPayload read(FriendlyByteBuf buf) {
+            return new StatsPayload(EnchantmentTableStats.read(buf));
         }
 
         @Override
-        public void handle(StatsMessage msg, PlayPayloadContext ctx) {
+        public void handle(StatsPayload msg, PlayPayloadContext ctx) {
             PayloadHelper.handle(() -> {
-                if (Minecraft.getInstance().screen instanceof ApothEnchantScreen es) {
-                    es.menu.stats = msg.stats;
+                if (Minecraft.getInstance().screen instanceof ApothEnchantmentScreen es) {
+                    es.getMenu().setStats(msg.stats);
                 }
             }, ctx);
         }

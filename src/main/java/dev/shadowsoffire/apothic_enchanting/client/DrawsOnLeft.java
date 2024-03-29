@@ -10,6 +10,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.item.ItemStack;
 
 /**
+ * TODO: Move to Placebo, useful as a general drawing utility.
  * Implement this on a screen class to be able to call {@link #drawOnLeft(GuiGraphics, List, int)}
  */
 public interface DrawsOnLeft {

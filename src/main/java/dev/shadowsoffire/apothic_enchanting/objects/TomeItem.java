@@ -3,7 +3,7 @@ package dev.shadowsoffire.apothic_enchanting.objects;
 import java.util.List;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.table.IEnchantableItem;
+import dev.shadowsoffire.apothic_enchanting.api.IEnchantableItem;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -75,7 +75,7 @@ public class TomeItem extends BookItem implements IEnchantableItem {
     }
 
     @Override
-    public ItemStack onEnchantment(ItemStack stack, List<EnchantmentInstance> enchantments) {
+    public ItemStack applyEnchantments(ItemStack stack, List<EnchantmentInstance> enchantments) {
         stack = new ItemStack(Items.ENCHANTED_BOOK);
         for (EnchantmentInstance inst : enchantments) {
             EnchantedBookItem.addEnchantment(stack, inst);

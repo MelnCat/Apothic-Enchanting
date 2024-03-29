@@ -3,7 +3,7 @@ package dev.shadowsoffire.apothic_enchanting.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-import dev.shadowsoffire.apothic_enchanting.table.IEnchantableItem;
+import dev.shadowsoffire.apothic_enchanting.api.IEnchantableItem;
 import net.minecraft.world.item.Item;
 
 @Mixin(value = Item.class, remap = false)

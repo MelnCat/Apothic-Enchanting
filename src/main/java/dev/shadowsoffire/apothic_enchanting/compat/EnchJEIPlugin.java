@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
-import dev.shadowsoffire.apothic_enchanting.table.EnchantingRecipe;
+import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -64,22 +64,22 @@ public class EnchJEIPlugin implements IModPlugin {
 
         reg.addIngredientInfo(new ItemStack(Blocks.ENCHANTING_TABLE), VanillaTypes.ITEM_STACK, TooltipUtil.lang("info", "enchanting"));
         reg.addIngredientInfo(new ItemStack(Ench.Blocks.LIBRARY.get()), VanillaTypes.ITEM_STACK, TooltipUtil.lang("info", "library"));
-        List<EnchantingRecipe> recipes = Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION.get())
+        List<InfusionRecipe> recipes = Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION.get())
             .stream()
             .map(RecipeHolder::value)
             .sorted((r1, r2) -> Float.compare(r1.getRequirements().eterna(), r2.getRequirements().eterna()))
             .toList();
-        reg.addRecipes(EnchantingCategory.TYPE, recipes);
+        reg.addRecipes(InfusionRecipeCategory.TYPE, recipes);
     }
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration reg) {
-        reg.addRecipeCatalyst(new ItemStack(Blocks.ENCHANTING_TABLE), EnchantingCategory.TYPE);
+        reg.addRecipeCatalyst(new ItemStack(Blocks.ENCHANTING_TABLE), InfusionRecipeCategory.TYPE);
     }
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration reg) {
-        reg.addRecipeCategories(new EnchantingCategory(reg.getJeiHelpers().getGuiHelper()));
+        reg.addRecipeCategories(new InfusionRecipeCategory(reg.getJeiHelpers().getGuiHelper()));
     }
 
 }

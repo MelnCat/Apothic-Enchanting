@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import dev.shadowsoffire.apothic_enchanting.EnchModuleEvents.TridentGetter;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -22,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
  * Mixin to tridents to enable Piercing to work.
  */
 @Mixin(value = ThrownTrident.class, remap = false)
-public abstract class ThrownTridentMixin extends AbstractArrow implements TridentGetter {
+public abstract class ThrownTridentMixin extends AbstractArrow {
 
     @Unique
     private int pierces = 0;

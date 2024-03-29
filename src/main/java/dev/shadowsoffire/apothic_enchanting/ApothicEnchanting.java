@@ -16,10 +16,10 @@ import dev.shadowsoffire.apothic_enchanting.EnchantmentInfo.PowerFunc;
 import dev.shadowsoffire.apothic_enchanting.asm.EnchHooks;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile;
 import dev.shadowsoffire.apothic_enchanting.objects.TomeItem;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantTile;
-import dev.shadowsoffire.apothic_enchanting.table.ClueMessage;
+import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
+import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentTableBlock;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
-import dev.shadowsoffire.apothic_enchanting.table.StatsMessage;
 import dev.shadowsoffire.apothic_enchanting.util.MiscDatagen;
 import dev.shadowsoffire.placebo.config.Configuration;
 import dev.shadowsoffire.placebo.events.ResourceReloadEvent;
@@ -56,7 +56,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.capabilities.Capabilities.ItemHandler;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -92,7 +91,7 @@ public class ApothicEnchanting {
     public void init(FMLCommonSetupEvent e) {
         this.reload(null);
 
-        NeoForge.EVENT_BUS.register(new EnchModuleEvents());
+        NeoForge.EVENT_BUS.register(new ApothEnchEvents());
         NeoForge.EVENT_BUS.addListener(this::reload);
         e.enqueueWork(() -> {
             LootSystem.defaultBlockTable(Ench.Blocks.HELLSHELF.get());
@@ -141,14 +140,12 @@ public class ApothicEnchanting {
                 Enchantments.REFLECTIVE, Enchantments.SCAVENGER, Enchantments.SHIELD_BASH, Enchantments.SPEARFISHING, Enchantments.STABLE_FOOTING, Enchantments.TEMPTING);
 
             PlaceboUtil.registerCustomColor(Ench.Colors.LIGHT_BLUE_FLASH);
-
-            ObfuscationReflectionHelper.<BlockEntityType<?>, BlockEntityType.BlockEntitySupplier<?>>setPrivateValue(BlockEntityType.class, BlockEntityType.ENCHANTING_TABLE, ApothEnchantTile::new, "factory");
         });
 
         EnchantingStatRegistry.INSTANCE.registerToBus();
 
-        PayloadHelper.registerPayload(new ClueMessage.Provider());
-        PayloadHelper.registerPayload(new StatsMessage.Provider());
+        PayloadHelper.registerPayload(new CluePayload.Provider());
+        PayloadHelper.registerPayload(new StatsPayload.Provider());
     }
 
     /**
@@ -177,7 +174,7 @@ public class ApothicEnchanting {
     public void caps(RegisterCapabilitiesEvent e) {
         e.registerBlockEntity(ItemHandler.BLOCK, Ench.Tiles.LIBRARY.get(), EnchLibraryTile::getItemHandler);
         e.registerBlockEntity(ItemHandler.BLOCK, Ench.Tiles.ENDER_LIBRARY.get(), EnchLibraryTile::getItemHandler);
-        e.registerBlockEntity(ItemHandler.BLOCK, BlockEntityType.ENCHANTING_TABLE, (be, ctx) -> ((ApothEnchantTile) be).getItemHandler(ctx));
+        e.registerBlockEntity(ItemHandler.BLOCK, BlockEntityType.ENCHANTING_TABLE, ApothEnchantmentTableBlock::getItemHandler);
     }
 
     @SubscribeEvent
@@ -278,7 +275,7 @@ public class ApothicEnchanting {
         }
 
         if (e == null && enchInfoConfig.hasChanged()) enchInfoConfig.save();
-        EnchConfig.load(new Configuration(ApothicAttributes.getConfigFile(MODID)));
+        ApothEnchConfig.load(new Configuration(ApothicAttributes.getConfigFile(MODID)));
     }
 
     public static ResourceLocation loc(String path) {

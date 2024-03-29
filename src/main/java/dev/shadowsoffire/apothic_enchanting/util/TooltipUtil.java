@@ -5,9 +5,8 @@ import java.util.function.Consumer;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.TableStats;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
+import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -64,7 +63,7 @@ public class TooltipUtil {
     }
 
     public static void appendTableStats(Level world, BlockPos pos, Consumer<Component> tooltip) {
-        TableStats stats = ApothEnchantmentMenu.gatherStats(world, pos, 0);
+        EnchantmentTableStats stats = EnchantmentTableStats.gatherStats(world, pos, 0);
         tooltip.accept(TooltipUtil.lang("info", "eterna.t", String.format("%.2f", stats.eterna()), String.format("%.2f", EnchantingStatRegistry.getAbsoluteMaxEterna())).withStyle(ChatFormatting.GREEN));
         tooltip.accept(TooltipUtil.lang("info", "quanta.t", String.format("%.2f", Math.min(100, stats.quanta()))).withStyle(ChatFormatting.RED));
         tooltip.accept(TooltipUtil.lang("info", "arcana.t", String.format("%.2f", Math.min(100, stats.arcana()))).withStyle(ChatFormatting.DARK_PURPLE));

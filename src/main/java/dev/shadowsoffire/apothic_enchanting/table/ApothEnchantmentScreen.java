@@ -14,6 +14,7 @@ import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.client.DrawsOnLeft;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
+import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
@@ -38,7 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
-public class ApothEnchantScreen extends EnchantmentScreen implements DrawsOnLeft {
+public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOnLeft {
 
     public static final ResourceLocation TEXTURES = ApothicEnchanting.loc("textures/gui/enchanting_table.png");
 
@@ -49,7 +50,7 @@ public class ApothEnchantScreen extends EnchantmentScreen implements DrawsOnLeft
     protected boolean[] hasAllClues = { false, false, false };
 
     // menu type is weak due to weird generic stuff regarding screen registration.
-    public ApothEnchantScreen(EnchantmentMenu container, Inventory inv, Component title) {
+    public ApothEnchantmentScreen(EnchantmentMenu container, Inventory inv, Component title) {
         super(container, inv, title);
         this.menu = (ApothEnchantmentMenu) container;
         this.imageHeight = 197;
@@ -197,7 +198,7 @@ public class ApothEnchantScreen extends EnchantmentScreen implements DrawsOnLeft
             int cost = slot + 1;
             if (this.isHovering(60, 14 + 19 * slot, 108, 17, mouseX, mouseY) && level > 0) {
                 List<Component> list = Lists.newArrayList();
-                boolean isFailedInfusion = slot == 2 && enchantment == null && EnchantingRecipe.findItemMatch(this.minecraft.level, this.menu.getSlot(0).getItem()) != null;
+                boolean isFailedInfusion = slot == 2 && enchantment == null && InfusionRecipe.findItemMatch(this.minecraft.level, this.menu.getSlot(0).getItem()) != null;
 
                 if (enchantment != null) {
                     if (!this.clues.get(slot).isEmpty()) {

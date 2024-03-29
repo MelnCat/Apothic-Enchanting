@@ -28,7 +28,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
-public class EnchModuleEvents {
+public class ApothEnchEvents {
 
     @SubscribeEvent
     public void anvilEvent(AnvilUpdateEvent e) {
@@ -103,13 +103,9 @@ public class EnchModuleEvents {
     public void looting(LootingLevelEvent e) {
         DamageSource src = e.getDamageSource();
         if (src != null && src.getDirectEntity() instanceof ThrownTrident trident) {
-            ItemStack triStack = ((TridentGetter) trident).getTridentItem();
+            ItemStack triStack = trident.getPickupItemStackOrigin();
             e.setLootingLevel(triStack.getEnchantmentLevel(Enchantments.MOB_LOOTING));
         }
-    }
-
-    public static interface TridentGetter {
-        ItemStack getTridentItem();
     }
 
     /**

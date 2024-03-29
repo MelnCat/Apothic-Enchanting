@@ -1,4 +1,4 @@
-package dev.shadowsoffire.apothic_enchanting.table;
+package dev.shadowsoffire.apothic_enchanting.mixin;
 
 import java.util.List;
 

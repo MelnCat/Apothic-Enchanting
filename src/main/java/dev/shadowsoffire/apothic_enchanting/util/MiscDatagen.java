@@ -34,6 +34,7 @@ import net.minecraft.world.item.crafting.Ingredient.TagValue;
 import net.minecraft.world.item.crafting.Ingredient.Value;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.crafting.NBTIngredient;
@@ -64,7 +65,7 @@ public class MiscDatagen implements DataProvider {
         addShaped(new ItemStack(Ench.Items.PICKAXE_TOME.get(), 3), 3, 3, book, book, book, null, blaze, null, null, stick, null);
         addShaped(new ItemStack(Ench.Items.FISHING_TOME.get(), 2), 3, 3, null, null, blaze, null, stick, book, stick, null, book);
         addShaped(new ItemStack(Ench.Items.BOW_TOME.get(), 3), 3, 3, null, stick, book, blaze, null, book, null, stick, book);
-        // addShapeless(new ItemStack(Ench.Items.OTHER_TOME.get(), 6), book, book, book, book, book, book, blaze);
+        addShapeless(new ItemStack(Ench.Items.OTHER_TOME.get(), 6), book, book, book, book, book, book, blaze);
         addShaped(new ItemStack(Ench.Items.SCRAP_TOME.get(), 8), 3, 3, book, book, book, book, Blocks.ANVIL, book, book, book, book);
         Ingredient maxHellshelf = Ingredient.of(Ench.Blocks.INFUSED_HELLSHELF.get());
         addShaped(Ench.Blocks.BLAZING_HELLSHELF.get(), 3, 3, null, Items.FIRE_CHARGE, null, Items.FIRE_CHARGE, maxHellshelf, Items.FIRE_CHARGE, Items.BLAZE_POWDER, Items.BLAZE_POWDER, Items.BLAZE_POWDER);
@@ -167,6 +168,12 @@ public class MiscDatagen implements DataProvider {
         ItemStack out = makeStack(output);
         ShapedRecipe recipe = this.genShaped(out, width, height, input);
         write(recipe, ShapedRecipe.CODEC, "recipes", BuiltInRegistries.ITEM.getKey(out.getItem()).getPath());
+    }
+
+    public void addShapeless(Object output, Object... inputs) {
+        ItemStack out = makeStack(output);
+        ShapelessRecipe recipe = new ShapelessRecipe(ApothicEnchanting.MODID, CraftingBookCategory.MISC, out, createInput(ApothicEnchanting.MODID, false, inputs));
+        write(recipe, ShapelessRecipe.CODEC, "recipes", BuiltInRegistries.ITEM.getKey(out.getItem()).getPath());
     }
 
     private <T> void write(T object, Codec<T> codec, String type, String path) {
