@@ -171,7 +171,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
                     this.random.setSeed(this.enchantmentSeed.get());
 
                     for (int slot = 0; slot < 3; ++slot) {
-                        this.costs[slot] = RealEnchantmentHelper.getEnchantmentCost(this.random, slot, eterna, toEnchant);
+                        this.costs[slot] = ApothEnchantmentHelper.getEnchantmentCost(this.random, slot, eterna, toEnchant);
                         this.enchantClue[slot] = -1;
                         this.levelClue[slot] = -1;
 
@@ -235,7 +235,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
 
     private List<EnchantmentInstance> getEnchantmentList(ItemStack stack, int enchantSlot, int level) {
         this.random.setSeed(this.enchantmentSeed.get() + enchantSlot);
-        List<EnchantmentInstance> list = RealEnchantmentHelper.selectEnchantment(this.random, stack, level, this.stats.quanta(), this.stats.arcana(), this.stats.rectification(), this.stats.treasure(), this.stats.blacklist());
+        List<EnchantmentInstance> list = ApothEnchantmentHelper.selectEnchantment(this.random, stack, level, this.stats.quanta(), this.stats.arcana(), this.stats.rectification(), this.stats.treasure(), this.stats.blacklist());
         InfusionRecipe match = this.access.evaluate((world, pos) -> Optional.ofNullable(InfusionRecipe.findMatch(world, stack, this.stats.eterna(), this.stats.quanta(), this.stats.arcana()))).get().orElse(null);
         if (enchantSlot == 2 && match != null) {
             list.clear();

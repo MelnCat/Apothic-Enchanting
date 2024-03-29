@@ -13,7 +13,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
-import dev.shadowsoffire.apothic_enchanting.table.RealEnchantmentHelper.ArcanaEnchantmentData;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper.ArcanaEnchantmentData;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -258,7 +258,7 @@ public class EnchantingInfoScreen extends Screen {
     protected void recomputeEnchantments() {
         Arcana arc = Arcana.getForThreshold(this.parent.getMenu().stats.arcana());
         Set<Enchantment> blacklist = this.parent.getMenu().stats.blacklist();
-        this.enchantments = RealEnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, this.treasure, Collections.emptySet())
+        this.enchantments = ApothEnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, this.treasure, Collections.emptySet())
             .stream()
             .map(e -> new ArcanaEnchantmentData(arc, e))
             .map(a -> new EnchantmentDataWrapper(a, blacklist.contains(a.data.enchantment)))

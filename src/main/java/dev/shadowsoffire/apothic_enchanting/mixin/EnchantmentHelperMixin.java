@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import dev.shadowsoffire.apothic_enchanting.table.RealEnchantmentHelper;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.util.RandomSource;
@@ -29,7 +29,7 @@ public class EnchantmentHelperMixin {
      */
     @Overwrite
     public static List<EnchantmentInstance> getAvailableEnchantmentResults(int power, ItemStack stack, boolean allowTreasure) {
-        return RealEnchantmentHelper.getAvailableEnchantmentResults(power, stack, allowTreasure, Collections.emptySet());
+        return ApothEnchantmentHelper.getAvailableEnchantmentResults(power, stack, allowTreasure, Collections.emptySet());
     }
 
     /**
@@ -43,7 +43,7 @@ public class EnchantmentHelperMixin {
      */
     @Overwrite
     public static List<EnchantmentInstance> selectEnchantment(RandomSource pRandom, ItemStack pItemStack, int pLevel, boolean pAllowTreasure) {
-        return RealEnchantmentHelper.selectEnchantment(pRandom, pItemStack, pLevel, 15F, 0, 0, pAllowTreasure, Collections.emptySet());
+        return ApothEnchantmentHelper.selectEnchantment(pRandom, pItemStack, pLevel, 15F, 0, 0, pAllowTreasure, Collections.emptySet());
     }
 
     /**

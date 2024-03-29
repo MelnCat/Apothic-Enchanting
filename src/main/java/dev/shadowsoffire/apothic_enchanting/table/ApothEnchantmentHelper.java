@@ -24,7 +24,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
-public class RealEnchantmentHelper {
+public class ApothEnchantmentHelper {
 
     /**
      * Determines the level of the given enchantment table slot.
