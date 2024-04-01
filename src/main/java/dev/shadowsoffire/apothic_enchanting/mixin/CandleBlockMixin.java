@@ -2,7 +2,7 @@ package dev.shadowsoffire.apothic_enchanting.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantmentStatBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.AbstractCandleBlock;
@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(value = CandleBlock.class, remap = false)
-public abstract class CandleBlockMixin extends AbstractCandleBlock implements IEnchantingBlock {
+public abstract class CandleBlockMixin extends AbstractCandleBlock implements EnchantmentStatBlock {
 
     protected CandleBlockMixin(Properties pProperties) {
         super(pProperties);

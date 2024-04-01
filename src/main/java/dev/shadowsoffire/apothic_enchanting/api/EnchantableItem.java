@@ -3,6 +3,7 @@ package dev.shadowsoffire.apothic_enchanting.api;
 import java.util.List;
 
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper;
+import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.EnchantedBookItem;
@@ -11,7 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
-public interface IEnchantableItem {
+public interface EnchantableItem {
 
     /**
      * Handles the enchanting of an item.<br>
@@ -56,7 +57,7 @@ public interface IEnchantableItem {
      * @param treasure  If treasure enchantments can be selected or not.
      * @return The list of enchantments selected, given the context.
      */
-    default List<EnchantmentInstance> selectEnchantments(List<EnchantmentInstance> builtList, RandomSource rand, ItemStack stack, int level, float quanta, float arcana, boolean treasure) {
+    default List<EnchantmentInstance> selectEnchantments(List<EnchantmentInstance> builtList, RandomSource rand, ItemStack stack, int level, EnchantmentTableStats stats) {
         return builtList;
     }
 

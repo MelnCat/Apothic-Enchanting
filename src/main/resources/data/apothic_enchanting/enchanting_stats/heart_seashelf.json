@@ -2,9 +2,8 @@
 	"block": "apothic_enchanting:heart_seashelf",
 	"stats": {
 		"maxEterna": 60,
-		"eterna": 6,
+		"eterna": 15,
 		"quanta": 0,
-		"arcana": 10,
-		"rectification": -5
+		"arcana": 20
 	}
 }

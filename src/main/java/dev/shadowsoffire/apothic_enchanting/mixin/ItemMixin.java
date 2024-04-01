@@ -3,11 +3,11 @@ package dev.shadowsoffire.apothic_enchanting.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantableItem;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantableItem;
 import net.minecraft.world.item.Item;
 
 @Mixin(value = Item.class, remap = false)
-public class ItemMixin implements IEnchantableItem {
+public class ItemMixin implements EnchantableItem {
 
     /**
      * @author Shadows

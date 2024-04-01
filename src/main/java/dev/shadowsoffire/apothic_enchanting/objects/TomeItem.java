@@ -3,7 +3,7 @@ package dev.shadowsoffire.apothic_enchanting.objects;
 import java.util.List;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantableItem;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantableItem;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
-public class TomeItem extends BookItem implements IEnchantableItem {
+public class TomeItem extends BookItem implements EnchantableItem {
 
     final ItemStack rep;
     final EnchantmentCategory type;

@@ -7,11 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
-
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.EnchantmentInfo;
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantableItem;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantableItem;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -40,7 +38,7 @@ public class ApothEnchantmentHelper {
      * @return The level that the table will use for this specific slot.
      */
     public static int getEnchantmentCost(RandomSource rand, int num, float eterna, ItemStack stack) {
-        int level = Math.round(eterna * 2);
+        int level = Math.round(eterna);
         if (num == 2) return level;
         float lowBound = 0.6F - 0.4F * (1 - num);
         float highBound = 0.8F - 0.4F * (1 - num);
@@ -50,73 +48,60 @@ public class ApothEnchantmentHelper {
     /**
      * Creates a list of enchantments for a specific slot given various variables.
      *
-     * @param rand      Pre-seeded random.
-     * @param stack     Itemstack to be enchanted.
-     * @param level     Enchanting Slot XP Level
-     * @param quanta    Quanta Level
-     * @param arcana    Arcana Level
-     * @param treasure  If treasure enchantments can show up.
-     * @param blacklist A list of all enchantments that may not be selected.
-     * @return A list of enchantments based on the seed, item, and eterna/quanta/arcana levels.
+     * @param rand  Pre-seeded random.
+     * @param stack Itemstack to be enchanted.
+     * @param level The level of the selected enchantment slot.
+     * @param stats The stats of the enchantment table.
+     * @return A list of enchantments based on the seed, item, and table stats.
      */
-    public static List<EnchantmentInstance> selectEnchantment(RandomSource rand, ItemStack stack, int level, float quanta, float arcana, float rectification, boolean treasure, Set<Enchantment> blacklist) {
-        List<EnchantmentInstance> chosenEnchants = Lists.newArrayList();
+    public static List<EnchantmentInstance> selectEnchantment(RandomSource rand, ItemStack stack, int level, EnchantmentTableStats stats) {
+        List<EnchantmentInstance> chosenEnchants = new ArrayList<>();
         int enchantability = stack.getEnchantmentValue();
-        int srcLevel = level;
         if (enchantability > 0) {
-            float quantaFactor = 1 + getQuantaFactor(rand, quanta, rectification);
-            // if (!FMLEnvironment.production) EnchModule.LOGGER.debug("Quanta: {} | Rect: {} | Quanta Roll: {}", quanta, rectification, quantaFactor);
-            level = Mth.clamp(Math.round(level * quantaFactor), 1, EnchantingStatRegistry.getAbsoluteMaxPower());
-            Arcana arcanaVals = Arcana.getForThreshold(arcana);
-            List<EnchantmentInstance> allEnchants = getAvailableEnchantmentResults(level, stack, treasure, blacklist);
+            float quantaFactor = getQuantaFactor(rand, stats.quanta(), stats.stable());
+            int power = Mth.clamp(Math.round(level * quantaFactor), 1, 200);
+            Arcana arcanaVals = Arcana.getForThreshold(stats.arcana());
+            List<EnchantmentInstance> allEnchants = getAvailableEnchantmentResults(power, stack, stats.treasure(), stats.blacklist());
             Map<Enchantment, Integer> enchants = EnchantmentHelper.getEnchantments(stack);
             allEnchants.removeIf(e -> enchants.containsKey(e.enchantment)); // Remove duplicates.
             List<ArcanaEnchantmentData> possibleEnchants = allEnchants.stream().map(d -> new ArcanaEnchantmentData(arcanaVals, d)).collect(Collectors.toList());
-            if (!possibleEnchants.isEmpty()) {
-                chosenEnchants.add(WeightedRandom.getRandomItem(rand, possibleEnchants).get().data);
-                removeIncompatible(possibleEnchants, Util.lastOf(chosenEnchants));
 
-                if (arcana >= 25F && !possibleEnchants.isEmpty()) {
-                    chosenEnchants.add(WeightedRandom.getRandomItem(rand, possibleEnchants).get().data);
-                    removeIncompatible(possibleEnchants, Util.lastOf(chosenEnchants));
-                }
-
-                if (arcana >= 75F && !possibleEnchants.isEmpty()) {
-                    chosenEnchants.add(WeightedRandom.getRandomItem(rand, possibleEnchants).get().data);
-                }
-
-                int randomBound = 50;
-                if (level > 45) {
-                    level = (int) (srcLevel * 1.15F);
-                }
-
-                while (rand.nextInt(randomBound) <= level) {
-                    if (!chosenEnchants.isEmpty()) removeIncompatible(possibleEnchants, Util.lastOf(chosenEnchants));
-
-                    if (possibleEnchants.isEmpty()) {
-                        break;
-                    }
-
-                    chosenEnchants.add(WeightedRandom.getRandomItem(rand, possibleEnchants).get().data);
-                    level /= 2;
+            // At least one enchantment is guaranteed, with an extra one per 33 Arcana.
+            for (int i = 0; i < 100; i += 33) {
+                if (stats.arcana() >= i && possibleEnchants.size() > 0) {
+                    pickEnchantment(rand, chosenEnchants, possibleEnchants);
                 }
             }
+
+            // A random number of extra enchantments are added, with the chance reducing per enchantment added.
+            int randomBound = Math.max(50, (int) (level * 1.25F)); // Vanilla threshold is 50 for all levels.
+            while (rand.nextInt(randomBound) <= level && possibleEnchants.size() > 0) {
+                pickEnchantment(rand, chosenEnchants, possibleEnchants);
+                level /= 2;
+            }
+
         }
-        return ((IEnchantableItem) stack.getItem()).selectEnchantments(chosenEnchants, rand, stack, srcLevel, quanta, arcana, treasure);
+        return ((EnchantableItem) stack.getItem()).selectEnchantments(chosenEnchants, rand, stack, level, stats);
+    }
+
+    /**
+     * Randomly selects a random enchantment from the possible enchantments and adds it to the list of chosen enchantments.
+     */
+    public static void pickEnchantment(RandomSource rand, List<EnchantmentInstance> chosenEnchants, List<ArcanaEnchantmentData> possibleEnchants) {
+        chosenEnchants.add(WeightedRandom.getRandomItem(rand, possibleEnchants).get().data);
+        removeIncompatible(possibleEnchants, Util.lastOf(chosenEnchants));
     }
 
     /**
      * Removes all enchantments from the list that are incompatible with the passed enchantment.
      */
-    public static void removeIncompatible(List<ArcanaEnchantmentData> list, EnchantmentInstance data) {
-        Iterator<ArcanaEnchantmentData> iterator = list.iterator();
-
+    public static void removeIncompatible(List<ArcanaEnchantmentData> possibleEnchants, EnchantmentInstance data) {
+        Iterator<ArcanaEnchantmentData> iterator = possibleEnchants.iterator();
         while (iterator.hasNext()) {
             if (!data.enchantment.isCompatibleWith(iterator.next().data.enchantment)) {
                 iterator.remove();
             }
         }
-
     }
 
     /**
@@ -128,7 +113,7 @@ public class ApothEnchantmentHelper {
      */
     public static List<EnchantmentInstance> getAvailableEnchantmentResults(int power, ItemStack stack, boolean allowTreasure, Set<Enchantment> blacklist) {
         List<EnchantmentInstance> list = new ArrayList<>();
-        IEnchantableItem item = (IEnchantableItem) stack.getItem();
+        EnchantableItem item = (EnchantableItem) stack.getItem();
         allowTreasure = item.isTreasureAllowed(stack, allowTreasure);
         for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
             EnchantmentInfo info = ApothicEnchanting.getEnchInfo(enchantment);
@@ -147,34 +132,27 @@ public class ApothEnchantmentHelper {
     }
 
     /**
-     * Generates a quanta factor, which is a value within the range [-1, 1] used to scale the final power.
+     * Generates a quanta factor, which is one plus the quanta value times a random number within the range [-1, 1].
      * <p>
-     * The initial value is normally distributed within [-1, 1] with mean = 0 and stdev = 0.33.
+     * For unstable enchanting tables, the random number is normally distributed between -1 and 1.
      * <p>
-     * This is done by using {@link RandomSource#nextGaussian()} which returns a normally distributed
-     * value with mean = 0 and stdev = 1, and dividing it by three (reducing the stdev to 0.33).<br>
-     * Any values outside the range [-1, 1] are clamped to fit the range.
-     * <p>
-     * Finally, values that would be blocked by rectification are uniformly distributed across the remaining space.<br>
-     * The resulting distribution is some weird frankenstein that is normal over [-1, 1] but approaches uniform over [0, 1]
-     * as rectification increases.
+     * For stable enchanting tables, the random number is uniformly distributed between 0 and 1.
      *
-     * @param rand          The pre-seeded enchanting random.
-     * @param quanta        The quanta value, in [0, 100].
-     * @param rectification The rectification value, in [0, 100].
-     * @return A quanta factor that should be multiplied with the base power to retrieve the final power.
+     * @param rand     The pre-seeded enchanting random.
+     * @param quanta   The quanta value, in [0, 100].
+     * @param isStable If the enchanting table has been stabilized by a bookshelf.
+     * @return A quanta factor that should be multiplied with the level to retrieve the power.
      */
-    public static float getQuantaFactor(RandomSource rand, float quanta, float rectification) {
-        float gaussian = (float) rand.nextGaussian();
-        float factor = Mth.clamp(gaussian / 3F, -1F, 1F);
-
-        float rectPercent = rectification / 100F;
-
-        if (factor < rectPercent - 1) {
-            factor = Mth.nextFloat(rand, rectPercent - 1, 1);
+    public static float getQuantaFactor(RandomSource rand, float quanta, boolean isStable) {
+        if (isStable) {
+            return 1 + quanta * rand.nextFloat();
         }
-
-        return quanta * factor / 100F;
+        else {
+            // Division by three yields a "good enough" normal distribution over [-1, 1].
+            float gaussian = (float) rand.nextGaussian();
+            float factor = Mth.clamp(gaussian / 3F, -1F, 1F);
+            return 1 + quanta * factor / 100F;
+        }
     }
 
     public static class ArcanaEnchantmentData extends IntrusiveBase {

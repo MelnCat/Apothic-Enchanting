@@ -3,7 +3,6 @@ package dev.shadowsoffire.apothic_enchanting;
 import java.math.BigDecimal;
 
 import dev.shadowsoffire.apothic_attributes.repack.evalex.Expression;
-import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import dev.shadowsoffire.placebo.config.Configuration;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -156,7 +155,7 @@ public class EnchantmentInfo {
     }
 
     public static PowerFunc defaultMax(Enchantment ench) {
-        return level -> (int) (EnchantingStatRegistry.getAbsoluteMaxEterna() * 4);
+        return level -> 200;
     }
 
     /**

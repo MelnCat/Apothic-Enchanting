@@ -4,12 +4,12 @@
 		"item": "apothic_enchanting:inert_trident"
 	},
 	"requirements": {
-		"eterna": 20,
+		"eterna": 40,
 		"quanta": 20,
 		"arcana": 35
 	},
 	"max_requirements": {
-		"eterna": 30,
+		"eterna": -1,
 		"quanta": 50,
 		"arcana": -1
 	},

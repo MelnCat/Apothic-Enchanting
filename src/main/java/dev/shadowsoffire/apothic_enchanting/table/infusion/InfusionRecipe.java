@@ -12,6 +12,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry.Stats;
+import net.minecraft.Util;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.Level;
 
 public class InfusionRecipe implements Recipe<Container> {
 
-    public static final Stats NO_MAX = new Stats(-1, -1, -1, -1, -1, -1);
+    public static final Stats NO_MAX = new Stats(-1, -1, -1, -1, -1);
 
     public static final Codec<InfusionRecipe> CODEC = RecordCodecBuilder.create(inst -> inst.group(
         ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(InfusionRecipe::getOutput),
@@ -123,8 +124,8 @@ public class InfusionRecipe implements Recipe<Container> {
     }
 
     protected static Pair<Stats, Stats> readStats(ResourceLocation id, JsonObject obj) {
-        Stats stats = Stats.CODEC.decode(JsonOps.INSTANCE, obj.get("requirements")).get().left().get().getFirst();
-        Stats maxStats = obj.has("max_requirements") ? Stats.CODEC.decode(JsonOps.INSTANCE, obj.get("max_requirements")).get().left().get().getFirst() : NO_MAX;
+        Stats stats = Util.getOrThrow(Stats.CODEC.parse(JsonOps.INSTANCE, obj.get("requirements")), JsonParseException::new);
+        Stats maxStats = obj.has("max_requirements") ? Util.getOrThrow(Stats.CODEC.parse(JsonOps.INSTANCE, obj.get("max_requirements")), JsonParseException::new) : NO_MAX;
         if (maxStats.eterna() != -1 && stats.eterna() > maxStats.eterna()) throw new JsonParseException("An enchanting recipe (" + id + ") has invalid min/max eterna bounds (min > max).");
         if (maxStats.quanta() != -1 && stats.quanta() > maxStats.quanta()) throw new JsonParseException("An enchanting recipe (" + id + ") has invalid min/max quanta bounds (min > max).");
         if (maxStats.arcana() != -1 && stats.arcana() > maxStats.arcana()) throw new JsonParseException("An enchanting recipe (" + id + ") has invalid min/max arcana bounds (min > max).");

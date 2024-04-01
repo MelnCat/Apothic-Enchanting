@@ -4,11 +4,10 @@
 		"item": "apothic_enchanting:hellshelf"
 	},
 	"requirements": {
-		"eterna": 22.5,
+		"eterna": 45,
 		"quanta": 30,
 		"arcana": 0
 	},
-	"display_level": 5,
 	"result": {
 		"item": "apothic_enchanting:infused_hellshelf",
 		"count": 1

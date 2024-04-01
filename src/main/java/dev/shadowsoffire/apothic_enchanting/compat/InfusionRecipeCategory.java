@@ -10,7 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
-import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry.Stats;
 import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
@@ -28,7 +28,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.EnchantmentNames;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -100,7 +99,7 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
         gfx.drawString(font, TooltipUtil.lang("gui", "enchant.eterna"), 16, 26, 0x3DB53D, false);
         gfx.drawString(font, TooltipUtil.lang("gui", "enchant.quanta"), 16, 36, 0xFC5454, false);
         gfx.drawString(font, TooltipUtil.lang("gui", "enchant.arcana"), 16, 46, 0xA800A8, false);
-        int level = (int) (stats.eterna() * 2);
+        int level = (int) stats.eterna();
 
         String s = "" + level;
         int width = 86 - font.width(s);
@@ -111,7 +110,7 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
         color = 8453920;
         gfx.drawString(font, s, 77 + width, 13, color);
 
-        int[] pos = { (int) (stats.eterna() / EnchantingStatRegistry.getAbsoluteMaxEterna() * 110), (int) (stats.quanta() / 100 * 110), (int) (stats.arcana() / 100 * 110) };
+        int[] pos = { getBarLength(stats.eterna()), getBarLength(stats.quanta()), getBarLength(stats.arcana()) };
         if (stats.eterna() > 0) {
             gfx.blit(TEXTURES, 56, 27, 0, 56, pos[0], 5, 256, 256);
         }
@@ -123,17 +122,15 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
         }
         RenderSystem.enableBlend();
         if (maxStats.eterna() > 0) {
-            gfx.blit(TEXTURES, 56 + pos[0], 27, pos[0], 90, (int) ((maxStats.eterna() - stats.eterna()) / EnchantingStatRegistry.getAbsoluteMaxEterna() * 110), 5, 256, 256);
+            gfx.blit(TEXTURES, 56 + pos[0], 27, pos[0], 90, getBarLength(maxStats.eterna() - stats.eterna()), 5, 256, 256);
         }
         if (maxStats.quanta() > 0) {
-            gfx.blit(TEXTURES, 56 + pos[1], 37, pos[1], 95, (int) ((maxStats.quanta() - stats.quanta()) / 100 * 110), 5, 256, 256);
+            gfx.blit(TEXTURES, 56 + pos[1], 37, pos[1], 95, getBarLength(maxStats.quanta() - stats.quanta()), 5, 256, 256);
         }
         if (maxStats.arcana() > 0) {
-            gfx.blit(TEXTURES, 56 + pos[2], 47, pos[2], 100, (int) ((maxStats.arcana() - stats.arcana()) / 100 * 110), 5, 256, 256);
+            gfx.blit(TEXTURES, 56 + pos[2], 47, pos[2], 100, getBarLength(maxStats.arcana() - stats.arcana()), 5, 256, 256);
         }
         RenderSystem.disableBlend();
-        Screen scn = Minecraft.getInstance().screen;
-        if (scn == null) return; // We need this to render tooltips, bail if its not there.
         if (hover) {
             List<Component> list = new ArrayList<>();
             list.add(Component.translatable("container.enchant.clue", Ench.Enchantments.INFUSION.get().getFullname(1).getString()).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
@@ -143,11 +140,11 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
             List<Component> list = new ArrayList<>();
             list.add(TooltipUtil.lang("gui", "enchant.eterna").withStyle(ChatFormatting.GREEN));
             if (maxStats.eterna() == stats.eterna()) {
-                list.add(TooltipUtil.lang("info", "eterna_exact", stats.eterna(), EnchantingStatRegistry.getAbsoluteMaxEterna()).withStyle(ChatFormatting.GRAY));
+                list.add(TooltipUtil.lang("info", "eterna_exact", stats.eterna(), 100).withStyle(ChatFormatting.GRAY));
             }
             else {
-                list.add(TooltipUtil.lang("info", "eterna_at_least", stats.eterna(), EnchantingStatRegistry.getAbsoluteMaxEterna()).withStyle(ChatFormatting.GRAY));
-                if (maxStats.eterna() > -1) list.add(TooltipUtil.lang("info", "eterna_at_most", maxStats.eterna(), EnchantingStatRegistry.getAbsoluteMaxEterna()).withStyle(ChatFormatting.GRAY));
+                list.add(TooltipUtil.lang("info", "eterna_at_least", stats.eterna(), 100).withStyle(ChatFormatting.GRAY));
+                if (maxStats.eterna() > -1) list.add(TooltipUtil.lang("info", "eterna_at_most", maxStats.eterna(), 100).withStyle(ChatFormatting.GRAY));
             }
             gfx.renderComponentTooltip(font, list, (int) mouseX, (int) mouseY);
         }
@@ -175,6 +172,10 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
             }
             gfx.renderComponentTooltip(font, list, (int) mouseX, (int) mouseY);
         }
+    }
+
+    public static int getBarLength(float stat) {
+        return ApothEnchantmentScreen.getBarLength(stat);
     }
 
     public static void drawWordWrap(Font font, FormattedText pText, int pX, int pY, int pMaxWidth, int pColor, GuiGraphics gfx) {

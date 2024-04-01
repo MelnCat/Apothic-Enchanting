@@ -169,13 +169,13 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, TEXTURES);
         if (this.eterna > 0) {
-            gfx.blit(TEXTURES, xCenter + 59, yCenter + 75, 0, 197, (int) (this.eterna / EnchantingStatRegistry.getAbsoluteMaxEterna() * 110), 5);
+            gfx.blit(TEXTURES, xCenter + 59, yCenter + 75, 0, 197, getBarLength(this.eterna), 5);
         }
         if (this.quanta > 0) {
-            gfx.blit(TEXTURES, xCenter + 59, yCenter + 85, 0, 202, (int) (this.quanta / 100 * 110), 5);
+            gfx.blit(TEXTURES, xCenter + 59, yCenter + 85, 0, 202, getBarLength(this.quanta), 5);
         }
         if (this.arcana > 0) {
-            gfx.blit(TEXTURES, xCenter + 59, yCenter + 95, 0, 207, (int) (this.arcana / 100 * 110), 5);
+            gfx.blit(TEXTURES, xCenter + 59, yCenter + 95, 0, 207, getBarLength(this.arcana), 5);
         }
 
         if (this.menu.getSlot(0).hasItem() && Arrays.stream(this.menu.enchantClue).boxed().map(Enchantment::byId).allMatch(Predicates.notNull())) {
@@ -196,7 +196,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
             int level = this.menu.costs[slot];
             Enchantment enchantment = Enchantment.byId(this.menu.enchantClue[slot]);
             int cost = slot + 1;
-            if (this.isHovering(60, 14 + 19 * slot, 108, 17, mouseX, mouseY) && level > 0) {
+            if (this.isHovering(60, 14 + 19 * slot, 108, 18, mouseX, mouseY) && level > 0) {
                 List<Component> list = Lists.newArrayList();
                 boolean isFailedInfusion = slot == 2 && enchantment == null && InfusionRecipe.findItemMatch(this.minecraft.level, this.menu.getSlot(0).getItem()) != null;
 
@@ -257,7 +257,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
             list.add(TooltipUtil.lang("gui", "enchant.eterna.desc2").withStyle(ChatFormatting.GRAY));
             if (this.menu.stats.eterna() > 0) {
                 list.add(Component.literal(""));
-                list.add(TooltipUtil.lang("gui", "enchant.eterna.desc3", f(this.menu.stats.eterna()), EnchantingStatRegistry.getAbsoluteMaxEterna()).withStyle(ChatFormatting.GRAY));
+                list.add(TooltipUtil.lang("gui", "enchant.eterna.desc3", f(this.menu.stats.eterna()), 100).withStyle(ChatFormatting.GRAY));
             }
             gfx.renderComponentTooltip(this.font, list, mouseX, mouseY);
         }
@@ -269,15 +269,14 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
             if (this.menu.stats.quanta() > 0) {
                 list.add(CommonComponents.EMPTY);
                 list.add(TooltipUtil.lang("gui", "enchant.quanta.desc4", f(this.menu.stats.quanta())).withStyle(ChatFormatting.GRAY));
-                list.add(TooltipUtil.lang("info", "gui_rectification", f(this.menu.stats.rectification())).withStyle(ChatFormatting.YELLOW));
+                // list.add(TooltipUtil.lang("info", "gui_rectification", f(this.menu.stats.rectification())).withStyle(ChatFormatting.YELLOW));
             }
             gfx.renderComponentTooltip(this.font, list, mouseX, mouseY);
             float quanta = this.menu.stats.quanta();
-            float rectification = this.menu.stats.rectification();
             if (quanta > 0) {
                 list.clear();
                 list.add(TooltipUtil.lang("info", "quanta_buff").withStyle(ChatFormatting.UNDERLINE, ChatFormatting.RED));
-                list.add(TooltipUtil.lang("info", "quanta_reduc", f(-quanta + quanta * rectification / 100F)).withStyle(ChatFormatting.DARK_RED));
+                // list.add(TooltipUtil.lang("info", "quanta_reduc", f(-quanta + quanta * rectification / 100F)).withStyle(ChatFormatting.DARK_RED));
                 list.add(TooltipUtil.lang("info", "quanta_growth", f(quanta)).withStyle(ChatFormatting.BLUE));
                 this.drawOnLeft(gfx, list, this.getGuiTop() + 29);
             }
@@ -327,7 +326,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
         ItemStack enchanting = this.menu.getSlot(0).getItem();
         if (!enchanting.isEmpty() && this.menu.costs[2] > 0) {
             for (int slot = 0; slot < 3; slot++) {
-                if (this.isHovering(60, 14 + 19 * slot, 108, 17, mouseX, mouseY)) {
+                if (this.isHovering(60, 14 + 19 * slot, 108, 18, mouseX, mouseY)) {
                     List<Component> list = new ArrayList<>();
                     int level = this.menu.costs[slot];
                     list.add(TooltipUtil.lang("info", "ench_at", level).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.GREEN));
@@ -336,9 +335,8 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
                     list.add(TooltipUtil.lang("info", "xp_cost", Component.literal("" + expCost).withStyle(ChatFormatting.GREEN),
                         Component.literal("" + EnchantmentUtils.getLevelForExperience(expCost)).withStyle(ChatFormatting.GREEN)));
                     float quanta = this.menu.stats.quanta() / 100F;
-                    float rectification = this.menu.stats.rectification() / 100F;
-                    int minPow = Math.round(Mth.clamp(level - level * (quanta - quanta * rectification), 1, EnchantingStatRegistry.getAbsoluteMaxPower()));
-                    int maxPow = Math.round(Mth.clamp(level + level * quanta, 1, EnchantingStatRegistry.getAbsoluteMaxPower()));
+                    int minPow = this.menu.stats.stable() ? level : Math.round(Mth.clamp(level - level * quanta, 1, 200));
+                    int maxPow = Math.round(Mth.clamp(level + level * quanta, 1, 200));
                     list.add(TooltipUtil.lang("info", "power_range", Component.literal("" + minPow).withStyle(ChatFormatting.DARK_RED), Component.literal("" + maxPow).withStyle(ChatFormatting.BLUE)));
                     list.add(TooltipUtil.lang("info", "item_ench", Component.literal("" + enchanting.getEnchantmentValue()).withStyle(ChatFormatting.GREEN)));
                     list.add(TooltipUtil.lang("info", "num_clues", Component.literal("" + (1 + this.menu.stats.clues())).withStyle(ChatFormatting.DARK_AQUA)));
@@ -357,6 +355,13 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
     public void acceptClues(int slot, List<EnchantmentInstance> clues, boolean all) {
         this.clues.put(slot, clues);
         this.hasAllClues[slot] = all;
+    }
+
+    /**
+     * Gets the pixel length of an enchanting stat bar based on the current value.
+     */
+    public static int getBarLength(float stat) {
+        return (int) (stat / 100 * 110);
     }
 
     private static MutableComponent eterna() {

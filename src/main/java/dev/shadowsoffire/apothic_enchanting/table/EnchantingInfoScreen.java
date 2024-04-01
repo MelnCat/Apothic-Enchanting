@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper.ArcanaEnchantmentData;
+import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -71,9 +71,8 @@ public class EnchantingInfoScreen extends Screen {
             if (clue != null) {
                 int level = this.costs[i];
                 float quanta = parent.getMenu().stats.quanta() / 100F;
-                float rectification = parent.getMenu().stats.rectification() / 100F;
-                int minPow = Math.round(Mth.clamp(level - level * (quanta - quanta * rectification), 1, EnchantingStatRegistry.getAbsoluteMaxPower()));
-                int maxPow = Math.round(Mth.clamp(level + level * quanta, 1, EnchantingStatRegistry.getAbsoluteMaxPower()));
+                int minPow = parent.getMenu().stats.stable() ? level : Math.round(Mth.clamp(level - level * quanta, 1, 200));
+                int maxPow = Math.round(Mth.clamp(level + level * quanta, 1, 200));
                 this.powers[i] = new int[] { minPow, maxPow };
                 this.selectedSlot = i;
             }

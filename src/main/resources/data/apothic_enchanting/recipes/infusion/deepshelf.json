@@ -4,7 +4,7 @@
 		"item": "apothic_enchanting:dormant_deepshelf"
 	},
 	"requirements": {
-		"eterna": 30,
+		"eterna": 60,
 		"quanta": 40,
 		"arcana": 40
 	},

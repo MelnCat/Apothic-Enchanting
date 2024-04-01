@@ -23,7 +23,7 @@ import net.neoforged.neoforge.common.extensions.IBlockExtension;
  * Flux: This stat controls how volatile the real level is. With the base flux, the table ranges from -15% to +30% of the original.
  * Enchantment Count: This controls the number of enchantments that can be placed on an item.
  */
-public interface IEnchantingBlock extends IBlockExtension {
+public interface EnchantmentStatBlock extends IBlockExtension {
 
     /**
      * Determines the maximum enchanting power (Eterna) that this block may contribute up to.
@@ -55,20 +55,6 @@ public interface IEnchantingBlock extends IBlockExtension {
      */
     @ApiStatus.OverrideOnly
     default float getArcanaBonus(BlockState state, LevelReader world, BlockPos pos) {
-        return 0;
-    }
-
-    /**
-     * Determines how much "Quanta Rectification" this block provides.
-     * 1F of Rectification reduces the negative threshold by 1%
-     * [-Q, +Q] -> [-(1-QR/100F)Q, +Q]
-     * At 100%, quanta only has a positive effect.
-     *
-     * @return The Quanta Rectification bonus from this block.
-     * @apiNote Call via {@link EnchantingStatRegistry#getQuantaRectification(BlockState, Level, BlockPos)}
-     */
-    @ApiStatus.OverrideOnly
-    default float getQuantaRectification(BlockState state, LevelReader world, BlockPos pos) {
         return 0;
     }
 
@@ -134,4 +120,12 @@ public interface IEnchantingBlock extends IBlockExtension {
         return false;
     }
 
+    /**
+     * A stable enchantment table is no longer able to roll negative quanta factors.
+     *
+     * @return If this block stabilizes the enchantment table.
+     */
+    default boolean providesStability(BlockState state, LevelReader world, BlockPos pos) {
+        return false;
+    }
 }

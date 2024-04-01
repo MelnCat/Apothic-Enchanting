@@ -3,7 +3,7 @@ package dev.shadowsoffire.apothic_enchanting.objects;
 import java.util.function.Supplier;
 
 import dev.shadowsoffire.apothic_enchanting.ApothEnchConfig;
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantmentStatBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvents;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class TypedShelfBlock extends Block implements IEnchantingBlock {
+public class TypedShelfBlock extends Block implements EnchantmentStatBlock {
 
     protected final Supplier<? extends ParticleOptions> particle;
 

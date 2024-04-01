@@ -115,9 +115,7 @@ public class ApothicEnchanting {
             LootSystem.defaultBlockTable(Ench.Blocks.MELONSHELF.get());
             LootSystem.defaultBlockTable(Ench.Blocks.STONESHELF.get());
             LootSystem.defaultBlockTable(Ench.Blocks.LIBRARY.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.RECTIFIER.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.RECTIFIER_T2.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.RECTIFIER_T3.get());
+            LootSystem.defaultBlockTable(Ench.Blocks.GEODE_SHELF.get());
             LootSystem.defaultBlockTable(Ench.Blocks.SIGHTSHELF.get());
             LootSystem.defaultBlockTable(Ench.Blocks.SIGHTSHELF_T2.get());
             LootSystem.defaultBlockTable(Ench.Blocks.ENDER_LIBRARY.get());
@@ -127,8 +125,8 @@ public class ApothicEnchanting {
 
             TabFillingRegistry.register(Ench.Tabs.ENCH.getKey(), Ench.Items.HELLSHELF, Ench.Items.INFUSED_HELLSHELF, Ench.Items.BLAZING_HELLSHELF, Ench.Items.GLOWING_HELLSHELF, Ench.Items.SEASHELF, Ench.Items.INFUSED_SEASHELF,
                 Ench.Items.CRYSTAL_SEASHELF, Ench.Items.HEART_SEASHELF, Ench.Items.DORMANT_DEEPSHELF, Ench.Items.DEEPSHELF, Ench.Items.ECHOING_DEEPSHELF, Ench.Items.SOUL_TOUCHED_DEEPSHELF, Ench.Items.ECHOING_SCULKSHELF,
-                Ench.Items.SOUL_TOUCHED_SCULKSHELF, Ench.Items.ENDSHELF, Ench.Items.PEARL_ENDSHELF, Ench.Items.DRACONIC_ENDSHELF, Ench.Items.BEESHELF, Ench.Items.MELONSHELF, Ench.Items.STONESHELF, Ench.Items.RECTIFIER,
-                Ench.Items.RECTIFIER_T2, Ench.Items.RECTIFIER_T3, Ench.Items.SIGHTSHELF, Ench.Items.SIGHTSHELF_T2, Ench.Items.FILTERING_SHELF, Ench.Items.TREASURE_SHELF, Ench.Items.LIBRARY, Ench.Items.ENDER_LIBRARY);
+                Ench.Items.SOUL_TOUCHED_SCULKSHELF, Ench.Items.ENDSHELF, Ench.Items.PEARL_ENDSHELF, Ench.Items.DRACONIC_ENDSHELF, Ench.Items.BEESHELF, Ench.Items.MELONSHELF, Ench.Items.STONESHELF, Ench.Items.SIGHTSHELF,
+                Ench.Items.SIGHTSHELF_T2, Ench.Items.FILTERING_SHELF, Ench.Items.TREASURE_SHELF, Ench.Items.GEODE_SHELF, Ench.Items.LIBRARY, Ench.Items.ENDER_LIBRARY);
 
             TabFillingRegistry.register(Ench.Tabs.ENCH.getKey(), Ench.Items.HELMET_TOME, Ench.Items.CHESTPLATE_TOME, Ench.Items.LEGGINGS_TOME, Ench.Items.BOOTS_TOME, Ench.Items.WEAPON_TOME, Ench.Items.BOW_TOME, Ench.Items.PICKAXE_TOME,
                 Ench.Items.FISHING_TOME, Ench.Items.OTHER_TOME, Ench.Items.SCRAP_TOME, Ench.Items.IMPROVED_SCRAP_TOME, Ench.Items.EXTRACTION_TOME);
@@ -228,7 +226,7 @@ public class ApothicEnchanting {
         int level = ench.getMaxLevel();
         if (level == 1) return 1;
         PowerFunc minFunc = EnchantmentInfo.defaultMin(ench);
-        int max = (int) (EnchantingStatRegistry.getAbsoluteMaxPower());
+        int max = 200;
         int minPower = minFunc.getPower(level);
         if (minPower >= max) return level;
         int lastPower = minPower;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantableItem;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantableItem;
 import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
 import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
@@ -119,7 +119,6 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
             float eterna = this.stats.eterna();
             float quanta = this.stats.quanta();
             float arcana = this.stats.arcana();
-            float rectification = this.stats.rectification();
             List<EnchantmentInstance> list = this.getEnchantmentList(toEnchant, slot, this.costs[slot]);
             if (!list.isEmpty()) {
                 EnchantmentUtils.chargeExperience(player, MiscUtil.getExpCostForSlot(level, slot));
@@ -129,7 +128,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
                     if (match != null) this.enchantSlots.setItem(0, match.assemble(toEnchant, eterna, quanta, arcana));
                     else return;
                 }
-                else this.enchantSlots.setItem(0, ((IEnchantableItem) toEnchant.getItem()).applyEnchantments(toEnchant, list));
+                else this.enchantSlots.setItem(0, ((EnchantableItem) toEnchant.getItem()).applyEnchantments(toEnchant, list));
 
                 if (!player.getAbilities().instabuild) {
                     lapis.shrink(cost);
@@ -235,7 +234,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
 
     private List<EnchantmentInstance> getEnchantmentList(ItemStack stack, int enchantSlot, int level) {
         this.random.setSeed(this.enchantmentSeed.get() + enchantSlot);
-        List<EnchantmentInstance> list = ApothEnchantmentHelper.selectEnchantment(this.random, stack, level, this.stats.quanta(), this.stats.arcana(), this.stats.rectification(), this.stats.treasure(), this.stats.blacklist());
+        List<EnchantmentInstance> list = ApothEnchantmentHelper.selectEnchantment(this.random, stack, level, this.stats);
         InfusionRecipe match = this.access.evaluate((world, pos) -> Optional.ofNullable(InfusionRecipe.findMatch(world, stack, this.stats.eterna(), this.stats.quanta(), this.stats.arcana()))).get().orElse(null);
         if (enchantSlot == 2 && match != null) {
             list.clear();

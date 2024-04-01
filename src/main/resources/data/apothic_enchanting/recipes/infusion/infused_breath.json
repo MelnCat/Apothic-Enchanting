@@ -4,13 +4,13 @@
 		"item": "minecraft:dragon_breath"
 	},
 	"requirements": {
-		"eterna": 40,
+		"eterna": 80,
 		"quanta": 15,
 		"arcana": 60
 	},
 	"max_requirements": {
 		"eterna": -1,
-		"quanta": 25,
+		"quanta": 30,
 		"arcana": -1
 	},
 	"result": {

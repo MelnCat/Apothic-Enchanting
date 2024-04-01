@@ -2,7 +2,6 @@ package dev.shadowsoffire.apothic_enchanting.table;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantmentStatBlock;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry.BlockStats;
 import dev.shadowsoffire.placebo.codec.CodecProvider;
 import dev.shadowsoffire.placebo.reload.DynamicRegistry;
@@ -34,8 +33,6 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static final EnchantingStatRegistry INSTANCE = new EnchantingStatRegistry();
     private final Map<Block, Stats> statsPerBlock = new HashMap<>();
-
-    private float absoluteMaxEterna = 100;
 
     protected EnchantingStatRegistry() {
         super(ApothicEnchanting.LOGGER, "enchanting_stats", true, false);
@@ -58,7 +55,6 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
         for (BlockStats bStats : this.registry.values()) {
             bStats.blocks.forEach(b -> this.statsPerBlock.put(b, bStats.stats));
         }
-        this.computeAbsoluteMaxEterna();
     }
 
     /**
@@ -74,84 +70,58 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
 
     /**
      * Retrieves the Max Eterna value for a specific block.
-     * This can be provided by a stat file, or {@link IEnchantingBlock#getMaxEnchantingPower}
+     * This can be provided by a stat file, or {@link EnchantmentStatBlock#getMaxEnchantingPower}
      * 1F of Eterna = 2 Levels in the enchanting table.
      */
     public static float getMaxEterna(BlockState state, Level world, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).maxEterna;
-        return ((IEnchantingBlock) block).getMaxEnchantingPower(state, world, pos);
+        return ((EnchantmentStatBlock) block).getMaxEnchantingPower(state, world, pos);
 
     }
 
     /**
      * Retrieves the Quanta value for a specific block.
-     * This can be provided by a stat file, or {@link IEnchantingBlock#getQuantaBonus}
+     * This can be provided by a stat file, or {@link EnchantmentStatBlock#getQuantaBonus}
      * 1F of Quanta = 1% of Quanta in the enchanting table.
      */
     public static float getQuanta(BlockState state, Level world, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).quanta;
-        return ((IEnchantingBlock) block).getQuantaBonus(state, world, pos);
+        return ((EnchantmentStatBlock) block).getQuantaBonus(state, world, pos);
     }
 
     /**
      * Retrieves the Arcana value for a specific block.
-     * This can be provided by a stat file, or {@link IEnchantingBlock#getArcanaBonus}
+     * This can be provided by a stat file, or {@link EnchantmentStatBlock#getArcanaBonus}
      * 1F of Arcana = 1% of Arcana in the enchanting table.
      */
     public static float getArcana(BlockState state, Level world, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).arcana;
-        return ((IEnchantingBlock) block).getArcanaBonus(state, world, pos);
-    }
-
-    /**
-     * Retrieves the Quanta Rectification value for a specific block.
-     * See {@link IEnchantingBlock#getQuantaRectification}
-     */
-    public static float getQuantaRectification(BlockState state, Level world, BlockPos pos) {
-        Block block = state.getBlock();
-        if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).rectification;
-        return ((IEnchantingBlock) block).getQuantaRectification(state, world, pos);
+        return ((EnchantmentStatBlock) block).getArcanaBonus(state, world, pos);
     }
 
     /**
      * Retrieves the number of bonus clues this block provides.
-     * See {@link IEnchantingBlock#getBonusClues}
+     * See {@link EnchantmentStatBlock#getBonusClues}
      */
     public static int getBonusClues(BlockState state, Level world, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).clues;
-        return ((IEnchantingBlock) block).getBonusClues(state, world, pos);
+        return ((EnchantmentStatBlock) block).getBonusClues(state, world, pos);
     }
 
     /**
-     * Returns the highest possible eterna value, based on the definitions for all stat providers.
+     * Data-backed enchanting stats. Objects may provide stats via this or by overriding methods in {@link EnchantmentStatBlock}.
+     * 
+     * @Param maxEterna The max value of eterna that may be contributed to. Uses a step-ladder system.
+     * @param eterna The amount of eterna provided.
+     * @param quanta The amount of quanta provided.
+     * @param arcana The amount of arcana provided.
+     * @param clues  The number of enchanting clues provided.
      */
-    public static float getAbsoluteMaxEterna() {
-        return INSTANCE.absoluteMaxEterna;
-    }
-
-    /**
-     * Returns the highest possible power (effective level) value, based on the absolute max eterna.
-     */
-    public static int getAbsoluteMaxPower() {
-        return (int) (getAbsoluteMaxEterna() * 2);
-    }
-
-    private void computeAbsoluteMaxEterna() {
-        this.absoluteMaxEterna = this.registry.values().stream().max(Comparator.comparingDouble(s -> s.stats.maxEterna)).get().stats.maxEterna;
-    }
-
-    /**
-     * Enchanting Stats.
-     * Max Eterna is the highest amount of eterna this object may contribute to.
-     * Eterna is the eterna provided (1F == 2 levels)
-     * Quanta is the quanta provided (1F == 1%)
-     * Arcana is the arcana provided (1F == 1%)
-     */
-    public static record Stats(float maxEterna, float eterna, float quanta, float arcana, float rectification, int clues) {
+    public static record Stats(float maxEterna, float eterna, float quanta, float arcana, int clues) {
 
         public static Codec<Stats> CODEC = RecordCodecBuilder.create(inst -> inst
             .group(
@@ -159,7 +129,6 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
                 ExtraCodecs.strictOptionalField(Codec.FLOAT, "eterna", 0F).forGetter(Stats::eterna),
                 ExtraCodecs.strictOptionalField(Codec.FLOAT, "quanta", 0F).forGetter(Stats::quanta),
                 ExtraCodecs.strictOptionalField(Codec.FLOAT, "arcana", 0F).forGetter(Stats::arcana),
-                ExtraCodecs.strictOptionalField(Codec.FLOAT, "rectification", 0F).forGetter(Stats::rectification),
                 ExtraCodecs.strictOptionalField(Codec.INT, "clues", 0).forGetter(Stats::clues))
             .apply(inst, Stats::new));
 
@@ -168,12 +137,11 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
             buf.writeFloat(this.eterna);
             buf.writeFloat(this.quanta);
             buf.writeFloat(this.arcana);
-            buf.writeFloat(this.rectification);
             buf.writeByte(this.clues);
         }
 
         public static Stats read(FriendlyByteBuf buf) {
-            return new Stats(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readByte());
+            return new Stats(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readByte());
         }
     }
 
@@ -192,9 +160,15 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
 
         public BlockStats(List<Block> blocks, Optional<TagKey<Block>> tag, Optional<Block> block, Stats stats) {
             this.blocks = new ArrayList<>();
-            if (!blocks.isEmpty()) this.blocks.addAll(blocks);
-            if (tag.isPresent()) this.blocks.addAll(EnchantingStatRegistry.INSTANCE.getContext().getTag(tag.get()).stream().map(Holder::value).toList());
-            if (block.isPresent()) this.blocks.add(block.get());
+            if (!blocks.isEmpty()) {
+                this.blocks.addAll(blocks);
+            }
+            if (tag.isPresent()) {
+                this.blocks.addAll(EnchantingStatRegistry.INSTANCE.getContext().getTag(tag.get()).stream().map(Holder::value).toList());
+            }
+            if (block.isPresent()) {
+                this.blocks.add(block.get());
+            }
             this.stats = stats;
         }
 

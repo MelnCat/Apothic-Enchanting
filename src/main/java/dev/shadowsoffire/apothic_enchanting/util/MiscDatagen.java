@@ -80,6 +80,7 @@ public class MiscDatagen implements DataProvider {
         addShaped(Ench.Blocks.DRACONIC_ENDSHELF.get(), 3, 3, null, Items.DRAGON_HEAD, null, Items.ENDER_PEARL, Ench.Blocks.ENDSHELF.get(), Items.ENDER_PEARL, Items.ENDER_PEARL, Items.ENDER_PEARL, Items.ENDER_PEARL);
         addShaped(Ench.Blocks.BEESHELF.get(), 3, 3, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB, Items.HONEY_BLOCK, "forge:bookshelves", Items.HONEY_BLOCK, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB);
         addShaped(Ench.Blocks.MELONSHELF.get(), 3, 3, Items.MELON, Items.MELON, Items.MELON, Items.GLISTERING_MELON_SLICE, "forge:bookshelves", Items.GLISTERING_MELON_SLICE, Items.MELON, Items.MELON, Items.MELON);
+        addShaped(Ench.Blocks.GEODE_SHELF.get(), 3, 3, Items.CALCITE, Items.CALCITE, Items.CALCITE, Items.CALCITE, "forge:bookshelves", Items.CALCITE, Items.CALCITE, Items.BUDDING_AMETHYST, Items.CALCITE);
     }
 
     public static ItemStack makeStack(Object thing) {

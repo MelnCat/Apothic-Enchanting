@@ -4,12 +4,12 @@
 		"item": "apothic_enchanting:library"
 	},
 	"requirements": {
-		"eterna": 50,
+		"eterna": 100,
 		"quanta": 45,
 		"arcana": 100
 	},
 	"max_requirements": {
-		"eterna": 50,
+		"eterna": 100,
 		"quanta": 50,
 		"arcana": 100
 	},

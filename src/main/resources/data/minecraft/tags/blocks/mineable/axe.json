@@ -1,0 +1,11 @@
+{
+    "replace": false,
+    "values": [
+        {
+            "id": "apothic_enchanting:beeshelf"
+        },
+        {
+            "id": "apothic_enchanting:melonshelf"
+        }
+    ]
+}

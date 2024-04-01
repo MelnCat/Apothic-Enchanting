@@ -2,7 +2,7 @@ package dev.shadowsoffire.apothic_enchanting.table;
 
 import javax.annotation.Nullable;
 
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantmentStatBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -55,7 +55,7 @@ public class ApothEnchantmentTableBlock extends EnchantmentTableBlock {
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand) {
         for (BlockPos offset : BOOKSHELF_OFFSETS) {
             BlockState shelfState = level.getBlockState(pos.offset(offset));
-            ((IEnchantingBlock) shelfState.getBlock()).spawnTableParticle(shelfState, level, rand, pos, offset);
+            ((EnchantmentStatBlock) shelfState.getBlock()).spawnTableParticle(shelfState, level, rand, pos, offset);
         }
     }
 

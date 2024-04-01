@@ -31,12 +31,9 @@
     "block.apothic_enchanting.sightshelf": "Hellshelf of Sight",
     "block.apothic_enchanting.sightshelf_t2": "Hellshelf of Masterful Sight",
     
-    "block.apothic_enchanting.rectifier": "Shelf of Seabound Rectification",
-    "block.apothic_enchanting.rectifier_t2": "Shelf of Hellbound Rectification",
-    "block.apothic_enchanting.rectifier_t3": "Shelf of End-Fused Rectification",
-    
     "block.apothic_enchanting.filtering_shelf": "Seashelf of Aquatic Filtration",
     "block.apothic_enchanting.treasure_shelf": "Deepshelf of Arcane Treasures",
+    "block.apothic_enchanting.geode_shelf": "Geode-Encased Bookshelf of Stability",
 
     "block.apothic_enchanting.library": "Enchantment Library",
     "block.apothic_enchanting.ender_library": "Library of Alexandria",
@@ -58,6 +55,7 @@
     "info.apothic_enchanting.rectification": " - Rectification: %s%%",
     "info.apothic_enchanting.clues": " - Enchanting Clues: %s",
     "info.apothic_enchanting.allows_treasure": " - Allows Treasure Enchantments",
+    "info.apothic_enchanting.provides_stability": " - Provides Quantic Stability",
     "info.apothic_enchanting.filter": "Enchantment Filter:",
     "info.apothic_enchanting.eterna.p": " - Eterna: +%s (Max %s)",
     "info.apothic_enchanting.quanta.p": " - Quanta: +%s%%",

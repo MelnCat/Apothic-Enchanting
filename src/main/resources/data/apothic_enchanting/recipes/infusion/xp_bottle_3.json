@@ -4,7 +4,7 @@
 		"item": "minecraft:honey_bottle"
 	},
 	"requirements": {
-		"eterna": 50,
+		"eterna": 100,
 		"quanta": 25,
 		"arcana": 25
 	},

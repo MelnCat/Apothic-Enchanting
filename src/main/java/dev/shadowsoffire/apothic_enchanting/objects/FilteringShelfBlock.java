@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
+import dev.shadowsoffire.apothic_enchanting.api.EnchantmentStatBlock;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.network.VanillaPacketDispatcher;
 import net.minecraft.ChatFormatting;
@@ -40,7 +40,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 
-public class FilteringShelfBlock extends ChiseledBookShelfBlock implements IEnchantingBlock {
+public class FilteringShelfBlock extends ChiseledBookShelfBlock implements EnchantmentStatBlock {
 
     public FilteringShelfBlock(Properties pProperties) {
         super(pProperties);

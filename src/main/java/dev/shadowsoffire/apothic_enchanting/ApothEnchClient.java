@@ -2,14 +2,11 @@ package dev.shadowsoffire.apothic_enchanting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import dev.shadowsoffire.apothic_enchanting.Ench.Particles;
-import dev.shadowsoffire.apothic_enchanting.api.IEnchantingBlock;
 import dev.shadowsoffire.apothic_enchanting.client.DrawsOnLeft;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryScreen;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
-import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
 import net.minecraft.ChatFormatting;
@@ -20,7 +17,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
@@ -28,7 +24,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -85,60 +80,25 @@ public class ApothEnchClient {
                 if (world == null || Minecraft.getInstance().player == null) return;
                 BlockPlaceContext ctx = new BlockPlaceContext(world, Minecraft.getInstance().player, InteractionHand.MAIN_HAND, e.getItemStack(), MISS);
                 BlockState state = null;
+
                 try {
                     state = block.getStateForPlacement(ctx);
                 }
                 catch (Exception ex) {
-                    ApothicEnchanting.LOGGER.debug(ex.getMessage());
+                    ApothicEnchanting.LOGGER.trace(ex.getMessage());
                     StackTraceElement[] trace = ex.getStackTrace();
                     for (StackTraceElement traceElement : trace)
-                        ApothicEnchanting.LOGGER.debug("\tat " + traceElement);
+                        ApothicEnchanting.LOGGER.trace("\tat " + traceElement);
                 }
 
-                if (state == null) state = block.defaultBlockState();
-                float maxEterna = EnchantingStatRegistry.getMaxEterna(state, world, BlockPos.ZERO);
-                float eterna = EnchantingStatRegistry.getEterna(state, world, BlockPos.ZERO);
-                float quanta = EnchantingStatRegistry.getQuanta(state, world, BlockPos.ZERO);
-                float arcana = EnchantingStatRegistry.getArcana(state, world, BlockPos.ZERO);
-                float rectification = EnchantingStatRegistry.getQuantaRectification(state, world, BlockPos.ZERO);
-                int clues = EnchantingStatRegistry.getBonusClues(state, world, BlockPos.ZERO);
-                boolean treasure = ((IEnchantingBlock) state.getBlock()).allowsTreasure(state, world, BlockPos.ZERO);
-                if (eterna != 0 || quanta != 0 || arcana != 0 || rectification != 0 || clues != 0) {
-                    tooltip.add(TooltipUtil.lang("info", "ench_stats").withStyle(ChatFormatting.GOLD));
+                if (state == null) {
+                    state = block.defaultBlockState();
                 }
-                if (eterna != 0) {
-                    if (eterna > 0) {
-                        tooltip.add(TooltipUtil.lang("info", "eterna.p", String.format("%.2f", eterna), String.format("%.2f", maxEterna)).withStyle(ChatFormatting.GREEN));
-                    }
-                    else tooltip.add(TooltipUtil.lang("info", "eterna", String.format("%.2f", eterna)).withStyle(ChatFormatting.GREEN));
-                }
-                if (quanta != 0) {
-                    tooltip.add(TooltipUtil.lang("info", "quanta" + (quanta > 0 ? ".p" : ""), String.format("%.2f", quanta)).withStyle(ChatFormatting.RED));
-                }
-                if (arcana != 0) {
-                    tooltip.add(TooltipUtil.lang("info", "arcana" + (arcana > 0 ? ".p" : ""), String.format("%.2f", arcana)).withStyle(ChatFormatting.DARK_PURPLE));
-                }
-                if (rectification != 0) {
-                    tooltip.add(TooltipUtil.lang("info", "rectification" + (rectification > 0 ? ".p" : ""), String.format("%.2f", rectification)).withStyle(ChatFormatting.YELLOW));
-                }
-                if (clues != 0) {
-                    tooltip.add(TooltipUtil.lang("info", "clues" + (clues > 0 ? ".p" : ""), String.format("%d", clues)).withStyle(ChatFormatting.DARK_AQUA));
-                }
-                if (treasure) {
-                    tooltip.add(TooltipUtil.lang("info", "allows_treasure").withStyle(ChatFormatting.GOLD));
-                }
-                Set<Enchantment> blacklist = ((IEnchantingBlock) state.getBlock()).getBlacklistedEnchantments(state, world, BlockPos.ZERO);
-                if (blacklist.size() > 0) {
-                    tooltip.add(TooltipUtil.lang("info", "filter").withStyle(s -> s.withColor(0x58B0CC)));
-                    for (Enchantment ench : blacklist) {
-                        MutableComponent name = (MutableComponent) ench.getFullname(1);
-                        name.getSiblings().clear();
-                        name.withStyle(s -> s.withColor(0x5878AA));
-                        tooltip.add(Component.literal(" - ").append(name).withStyle(s -> s.withColor(0x5878AA)));
-                    }
-                }
+
+                TooltipUtil.appendBlockStats(world, state, BlockPos.ZERO, tooltip::add);
             }
             else if (i == Items.ENCHANTED_BOOK) {
+                // TODO: Adjust this. Too much noise that should be condensable.
                 ItemStack stack = e.getItemStack();
                 var enchMap = EnchantmentHelper.getEnchantments(stack);
                 if (enchMap.size() == 1) {

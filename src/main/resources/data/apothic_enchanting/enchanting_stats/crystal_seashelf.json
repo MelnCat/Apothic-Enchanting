@@ -2,8 +2,8 @@
 	"block": "apothic_enchanting:crystal_seashelf",
 	"stats": {
 		"maxEterna": 60,
-		"eterna": 4,
-		"quanta": 4,
-		"arcana": 2
+		"eterna": 5,
+		"quanta": 3,
+		"arcana": 5
 	}
 }

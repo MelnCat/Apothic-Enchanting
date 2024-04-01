@@ -32,6 +32,7 @@ import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile.EnderLibrary
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.FilteringShelfBlock;
 import dev.shadowsoffire.apothic_enchanting.objects.FilteringShelfBlock.FilteringShelfTile;
+import dev.shadowsoffire.apothic_enchanting.objects.GeodeShelfBlock;
 import dev.shadowsoffire.apothic_enchanting.objects.GlowyBlockItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
@@ -118,12 +119,6 @@ public class Ench {
 
         public static final Supplier<Block> PEARL_ENDSHELF = stoneShelf("pearl_endshelf", MapColor.SAND, 4.5F, Particles.ENCHANT_END);
 
-        public static final Supplier<Block> RECTIFIER = stoneShelf("rectifier", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
-
-        public static final Supplier<Block> RECTIFIER_T2 = stoneShelf("rectifier_t2", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
-
-        public static final Supplier<Block> RECTIFIER_T3 = stoneShelf("rectifier_t3", MapColor.SAND, 1.5F, Particles.ENCHANT_END);
-
         public static final Supplier<Block> SEASHELF = stoneShelf("seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
 
         public static final Supplier<Block> SIGHTSHELF = stoneShelf("sightshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
@@ -141,6 +136,9 @@ public class Ench {
 
         public static final Supplier<Block> TREASURE_SHELF = R.block("treasure_shelf",
             () -> new TreasureShelfBlock(Block.Properties.of().mapColor(MapColor.COLOR_BLACK).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops()));
+
+        public static final Supplier<Block> GEODE_SHELF = R.block("geode_shelf",
+            () -> new GeodeShelfBlock(Block.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops()));
 
         private static void bootstrap() {}
 
@@ -222,12 +220,6 @@ public class Ench {
 
         public static final Supplier<Item> PRISMATIC_WEB = R.item("prismatic_web", () -> new Item(new Item.Properties()));
 
-        public static final Supplier<BlockItem> RECTIFIER = R.item("rectifier", () -> new BlockItem(Ench.Blocks.RECTIFIER.get(), new Item.Properties()));
-
-        public static final Supplier<BlockItem> RECTIFIER_T2 = R.item("rectifier_t2", () -> new BlockItem(Ench.Blocks.RECTIFIER_T2.get(), new Item.Properties()));
-
-        public static final Supplier<BlockItem> RECTIFIER_T3 = R.item("rectifier_t3", () -> new BlockItem(Ench.Blocks.RECTIFIER_T3.get(), new Item.Properties()));
-
         public static final Supplier<ScrappingTomeItem> SCRAP_TOME = R.item("scrap_tome", ScrappingTomeItem::new);
 
         public static final Supplier<BlockItem> SEASHELF = R.item("seashelf", () -> new BlockItem(Ench.Blocks.SEASHELF.get(), new Item.Properties()));
@@ -249,6 +241,8 @@ public class Ench {
         public static final Supplier<BlockItem> FILTERING_SHELF = R.item("filtering_shelf", () -> new BlockItem(Ench.Blocks.FILTERING_SHELF.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
 
         public static final Supplier<BlockItem> TREASURE_SHELF = R.item("treasure_shelf", () -> new BlockItem(Ench.Blocks.TREASURE_SHELF.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+
+        public static final Supplier<BlockItem> GEODE_SHELF = R.item("geode_shelf", () -> new BlockItem(Ench.Blocks.GEODE_SHELF.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
 
         private static void bootstrap() {}
 
