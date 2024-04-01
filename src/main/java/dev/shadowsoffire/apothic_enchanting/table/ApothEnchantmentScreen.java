@@ -217,7 +217,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
                 }
                 else {
                     list.add(Component.translatable("container.enchant.clue", "").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-                    Collections.addAll(list, Component.literal(""), Component.translatable("forge.container.enchant.limitedEnchantability").withStyle(ChatFormatting.RED));
+                    Collections.addAll(list, Component.literal(""), Component.translatable("neoforge.container.enchant.limitedEnchantability").withStyle(ChatFormatting.RED));
                 }
 
                 if (enchantment != null && !creative) {

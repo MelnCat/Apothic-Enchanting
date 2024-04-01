@@ -115,7 +115,6 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
         if (this.costs[slot] <= 0 || toEnchant.isEmpty() || (player.experienceLevel < cost || player.experienceLevel < this.costs[slot]) && !player.getAbilities().instabuild) return false;
 
         this.access.execute((world, pos) -> {
-            ItemStack enchanted = toEnchant;
             float eterna = this.stats.eterna();
             float quanta = this.stats.quanta();
             float arcana = this.stats.arcana();
