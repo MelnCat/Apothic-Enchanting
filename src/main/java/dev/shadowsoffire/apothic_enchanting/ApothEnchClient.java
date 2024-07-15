@@ -85,6 +85,7 @@ public class ApothEnchClient {
                     state = block.getStateForPlacement(ctx);
                 }
                 catch (Exception ex) {
+                    // Since we're calling with an invalid context, this may fail, and we need to handle that quietly.
                     ApothicEnchanting.LOGGER.trace(ex.getMessage());
                     StackTraceElement[] trace = ex.getStackTrace();
                     for (StackTraceElement traceElement : trace)
