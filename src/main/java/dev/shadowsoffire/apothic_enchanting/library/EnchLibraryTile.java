@@ -1,7 +1,7 @@
 package dev.shadowsoffire.apothic_enchanting.library;
 
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import dev.shadowsoffire.apothic_enchanting.Ench.Tiles;
@@ -10,15 +10,20 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.RegistryLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,8 +31,8 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public abstract class EnchLibraryTile extends BlockEntity {
 
-    protected final Object2IntMap<Enchantment> points = new Object2IntOpenHashMap<>();
-    protected final Object2IntMap<Enchantment> maxLevels = new Object2IntOpenHashMap<>();
+    protected final Object2IntMap<Holder<Enchantment>> points = new Object2IntOpenHashMap<>();
+    protected final Object2IntMap<Holder<Enchantment>> maxLevels = new Object2IntOpenHashMap<>();
     protected final Set<EnchLibraryContainer> activeContainers = new HashSet<>();
     protected final IItemHandler itemHandler = new EnchLibItemHandler();
     protected final int maxLevel;
@@ -48,15 +53,19 @@ public abstract class EnchLibraryTile extends BlockEntity {
      */
     public void depositBook(ItemStack book) {
         if (book.getItem() != Items.ENCHANTED_BOOK) return;
-        Map<Enchantment, Integer> enchs = EnchantmentHelper.getEnchantments(book);
-        for (Map.Entry<Enchantment, Integer> e : enchs.entrySet()) {
-            if (e.getKey() == null || e.getValue() == null) continue;
-            int newPoints = Math.min(this.maxPoints, this.points.getInt(e.getKey()) + levelToPoints(e.getValue()));
+        ItemEnchantments enchs = EnchantmentHelper.getEnchantmentsForCrafting(book);
+
+        for (Object2IntMap.Entry<Holder<Enchantment>> e : enchs.entrySet()) {
+            int newPoints = Math.min(this.maxPoints, this.points.getInt(e.getKey()) + levelToPoints(e.getIntValue()));
             if (newPoints < 0) newPoints = this.maxPoints;
             this.points.put(e.getKey(), newPoints);
-            this.maxLevels.put(e.getKey(), Math.min(this.maxLevel, Math.max(this.maxLevels.getInt(e.getKey()), e.getValue())));
+            this.maxLevels.put(e.getKey(), Math.min(this.maxLevel, Math.max(this.maxLevels.getInt(e.getKey()), e.getIntValue())));
         }
-        if (enchs.size() > 0) VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
+
+        if (enchs.size() > 0) {
+            VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
+        }
+
         this.setChanged();
     }
 
@@ -65,14 +74,18 @@ public abstract class EnchLibraryTile extends BlockEntity {
      * Does nothing if the operation is impossible.
      * Decrements point values equal to the amount of points required to jump between the current level and the requested level.
      */
-    public void extractEnchant(ItemStack stack, Enchantment ench, int level) {
-        int curLvl = EnchantmentHelper.getEnchantments(stack).getOrDefault(ench, 0);
+    public void extractEnchant(ItemStack stack, Holder<Enchantment> ench, int level) {
+        int curLvl = EnchantmentHelper.getEnchantmentsForCrafting(stack).getLevel(ench);
         if (stack.isEmpty() || !this.canExtract(ench, level, curLvl) || level == curLvl) return;
-        Map<Enchantment, Integer> enchs = EnchantmentHelper.getEnchantments(stack);
-        enchs.put(ench, level);
-        EnchantmentHelper.setEnchantments(enchs, stack);
+        ItemEnchantments.Mutable enchs = new ItemEnchantments.Mutable(EnchantmentHelper.getEnchantmentsForCrafting(stack));
+        enchs.set(ench, level);
+        EnchantmentHelper.setEnchantments(stack, enchs.toImmutable());
         this.points.put(ench, Math.max(0, this.points.getInt(ench) - levelToPoints(level) + levelToPoints(curLvl))); // Safety, should never be below zero anyway.
-        if (!this.level.isClientSide()) VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
+
+        if (!this.level.isClientSide()) {
+            VanillaPacketDispatcher.dispatchTEToNearbyPlayers(this);
+        }
+
         this.setChanged();
     }
 
@@ -84,7 +97,7 @@ public abstract class EnchLibraryTile extends BlockEntity {
      * @param currentLevel The current level of this enchantment on the item being applied to.
      * @return If this level of this enchantment can be extracted.
      */
-    public boolean canExtract(Enchantment ench, int level, int currentLevel) {
+    public boolean canExtract(Holder<Enchantment> ench, int level, int currentLevel) {
         return this.maxLevels.getInt(ench) >= level && this.points.getInt(ench) >= levelToPoints(level) - levelToPoints(currentLevel);
     }
 
@@ -100,55 +113,63 @@ public abstract class EnchLibraryTile extends BlockEntity {
 
     public void saveEnchData(CompoundTag tag) {
         CompoundTag points = new CompoundTag();
-        for (Object2IntMap.Entry<Enchantment> e : this.points.object2IntEntrySet()) {
-            points.putInt(BuiltInRegistries.ENCHANTMENT.getKey(e.getKey()).toString(), e.getIntValue());
+        for (Object2IntMap.Entry<Holder<Enchantment>> e : this.points.object2IntEntrySet()) {
+            points.putInt(e.getKey().getKey().location().toString(), e.getIntValue());
         }
         tag.put("points", points);
+
         CompoundTag levels = new CompoundTag();
-        for (Object2IntMap.Entry<Enchantment> e : this.maxLevels.object2IntEntrySet()) {
-            levels.putInt(BuiltInRegistries.ENCHANTMENT.getKey(e.getKey()).toString(), e.getIntValue());
+        for (Object2IntMap.Entry<Holder<Enchantment>> e : this.maxLevels.object2IntEntrySet()) {
+            levels.putInt(e.getKey().getKey().location().toString(), e.getIntValue());
         }
         tag.put("levels", levels);
     }
 
-    public void loadEnchData(CompoundTag tag) {
+    public void loadEnchData(CompoundTag tag, RegistryLookup<Enchantment> lookup) {
         CompoundTag points = tag.getCompound("points");
         for (String s : points.getAllKeys()) {
-            Enchantment ench = BuiltInRegistries.ENCHANTMENT.get(new ResourceLocation(s));
-            if (ench == null) continue;
-            this.points.put(ench, points.getInt(s));
+            Optional<Holder.Reference<Enchantment>> ench = lookup.get(ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.tryParse(s)));
+            if (ench.isEmpty()) {
+                continue;
+            }
+
+            this.points.put(ench.get(), points.getInt(s));
         }
+
         CompoundTag levels = tag.getCompound("levels");
         for (String s : levels.getAllKeys()) {
-            Enchantment ench = BuiltInRegistries.ENCHANTMENT.get(new ResourceLocation(s));
-            if (ench == null) continue;
-            this.maxLevels.put(ench, levels.getInt(s));
+            Optional<Holder.Reference<Enchantment>> ench = lookup.get(ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.tryParse(s)));
+            if (ench.isEmpty()) {
+                continue;
+            }
+
+            this.maxLevels.put(ench.get(), levels.getInt(s));
         }
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag) {
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider regs) {
+        super.saveAdditional(tag, regs);
         saveEnchData(tag);
-        super.saveAdditional(tag);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        loadEnchData(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider regs) {
+        super.loadAdditional(tag, regs);
+        loadEnchData(tag, regs.lookupOrThrow(Registries.ENCHANTMENT));
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
         saveEnchData(tag);
         return tag;
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
         CompoundTag tag = pkt.getTag();
-        loadEnchData(tag);
+        loadEnchData(tag, registries.lookupOrThrow(Registries.ENCHANTMENT));
         this.activeContainers.forEach(EnchLibraryContainer::onChanged);
     }
 
@@ -157,11 +178,11 @@ public abstract class EnchLibraryTile extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    public Object2IntMap<Enchantment> getPointsMap() {
+    public Object2IntMap<Holder<Enchantment>> getPointsMap() {
         return this.points;
     }
 
-    public Object2IntMap<Enchantment> getLevelsMap() {
+    public Object2IntMap<Holder<Enchantment>> getLevelsMap() {
         return this.maxLevels;
     }
 

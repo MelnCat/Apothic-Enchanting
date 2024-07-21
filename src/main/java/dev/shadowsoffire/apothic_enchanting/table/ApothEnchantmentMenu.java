@@ -127,7 +127,9 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
                     if (match != null) this.enchantSlots.setItem(0, match.assemble(toEnchant, eterna, quanta, arcana));
                     else return;
                 }
-                else this.enchantSlots.setItem(0, ((EnchantableItem) toEnchant.getItem()).applyEnchantments(toEnchant, list));
+                else {
+                    this.enchantSlots.setItem(0, ((EnchantableItem) toEnchant.getItem()).applyEnchantments(toEnchant, list));
+                }
 
                 if (!player.getAbilities().instabuild) {
                     lapis.shrink(cost);

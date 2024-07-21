@@ -196,7 +196,7 @@ public class Ench {
 
         public static final Supplier<TomeItem> HELMET_TOME = R.item("helmet_tome", () -> new TomeItem(net.minecraft.world.item.Items.DIAMOND_HELMET, EnchantmentCategory.ARMOR_HEAD));
 
-        public static final Supplier<ImprovedScrappingTomeItem> IMPROVED_SCRAP_TOME = R.item("improved_scrap_tome", ImprovedScrappingTomeItem::new);
+        public static final Supplier<ImprovedScrappingTomeItem> IMPROVED_SCRAP_TOME = R.item("improved_scrap_tome", () -> new ImprovedScrappingTomeItem(new Item.Properties().rarity(Rarity.RARE)));
 
         public static final Supplier<Item> INERT_TRIDENT = R.item("inert_trident", () -> new Item(new Item.Properties().stacksTo(1)));
 
@@ -220,7 +220,7 @@ public class Ench {
 
         public static final Supplier<Item> PRISMATIC_WEB = R.item("prismatic_web", () -> new Item(new Item.Properties()));
 
-        public static final Supplier<ScrappingTomeItem> SCRAP_TOME = R.item("scrap_tome", ScrappingTomeItem::new);
+        public static final Supplier<ScrappingTomeItem> SCRAP_TOME = R.item("scrap_tome", () -> new ScrappingTomeItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
 
         public static final Supplier<BlockItem> SEASHELF = R.item("seashelf", () -> new BlockItem(Ench.Blocks.SEASHELF.get(), new Item.Properties()));
 

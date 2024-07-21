@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
@@ -14,31 +13,31 @@ import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.network.VanillaPacketDispatcher;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec2;
 
 public class FilteringShelfBlock extends ChiseledBookShelfBlock implements EnchantmentStatBlock {
 
@@ -47,14 +46,17 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
     }
 
     @Override
-    public Set<Enchantment> getBlacklistedEnchantments(BlockState state, LevelReader world, BlockPos pos) {
+    public Set<Holder<Enchantment>> getBlacklistedEnchantments(BlockState state, LevelReader world, BlockPos pos) {
         BlockEntity be = world.getBlockEntity(pos);
         if (be instanceof FilteringShelfTile shelf) {
-            Set<Enchantment> blacklist = new HashSet<>();
+            Set<Holder<Enchantment>> blacklist = new HashSet<>();
             for (ItemStack s : shelf.getBooks()) {
-                Map<Enchantment, Integer> enchants = EnchantmentHelper.getEnchantments(s);
-                if (enchants.size() != 1) continue; // Only books with one enchantment are legal.
-                Enchantment ench = enchants.keySet().stream().findFirst().orElse(null);
+                ItemEnchantments enchants = EnchantmentHelper.getEnchantmentsForCrafting(s);
+                if (enchants.size() != 1) {
+                    continue; // Only books with one enchantment are legal.
+                }
+
+                Holder<Enchantment> ench = enchants.keySet().stream().findFirst().orElse(null);
                 if (ench != null) {
                     blacklist.add(ench);
                 }
@@ -93,34 +95,27 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
     }
 
     @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        BlockEntity be = pLevel.getBlockEntity(pPos);
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof ChiseledBookShelfBlockEntity shelf) {
-            Optional<Vec2> hitResult = getRelativeHitCoordinatesForBlockFace(pHit, pState.getValue(HorizontalDirectionalBlock.FACING));
-            if (hitResult.isEmpty()) {
-                return InteractionResult.PASS;
+            if (!canInsert(stack)) {
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            }
+
+            OptionalInt slot = this.getHitSlot(hitResult, state);
+            if (slot.isEmpty()) {
+                return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+            }
+            else if (state.getValue(SLOT_OCCUPIED_PROPERTIES.get(slot.getAsInt()))) {
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             }
             else {
-                int slot = getHitSlot(hitResult.get());
-                if (pState.getValue(SLOT_OCCUPIED_PROPERTIES.get(slot))) {
-                    removeBook(pLevel, pPos, pPlayer, shelf, slot);
-                    return InteractionResult.sidedSuccess(pLevel.isClientSide);
-                }
-                else {
-                    ItemStack stack = pPlayer.getItemInHand(pHand);
-                    if (canInsert(stack)) {
-                        addBook(pLevel, pPos, pPlayer, shelf, stack, slot);
-                        return InteractionResult.sidedSuccess(pLevel.isClientSide);
-                    }
-                    else {
-                        return InteractionResult.CONSUME;
-                    }
-                }
+                addBook(level, pos, player, shelf, stack, slot.getAsInt());
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
         }
-        else {
-            return InteractionResult.PASS;
-        }
+
+        return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -129,12 +124,12 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, BlockGetter level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
         tooltip.add(TooltipUtil.lang("info", "filtering_shelf").withStyle(ChatFormatting.GRAY));
     }
 
     public static boolean canInsert(ItemStack stack) {
-        return stack.is(Items.ENCHANTED_BOOK) && EnchantedBookItem.getEnchantments(stack).size() == 1;
+        return stack.is(Items.ENCHANTED_BOOK) && EnchantmentHelper.getEnchantmentsForCrafting(stack).size() == 1;
     }
 
     public static class FilteringShelfTile extends ChiseledBookShelfBlockEntity {
@@ -163,15 +158,15 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
         }
 
         @Override
-        public CompoundTag getUpdateTag() {
+        public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
             CompoundTag tag = new CompoundTag();
-            this.saveAdditional(tag);
+            this.saveAdditional(tag, registries);
             return tag;
         }
 
         @Override
-        public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-            this.load(pkt.getTag());
+        public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
+            this.loadAdditional(pkt.getTag(), registries);
         }
 
         @Override

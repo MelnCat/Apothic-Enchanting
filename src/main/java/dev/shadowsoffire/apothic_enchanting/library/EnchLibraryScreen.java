@@ -26,6 +26,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -95,9 +96,9 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
         if (libSlot != null) {
             List<FormattedText> list = new ArrayList<>();
 
-            MutableComponent name = Component.translatable(libSlot.ench.getDescriptionId()).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xFFFF80)).withUnderlined(true));
+            MutableComponent name = libSlot.ench.value().description().copy().setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xFFFF80)).withUnderlined(true));
             if (ApothicAttributes.getTooltipFlag().isAdvanced()) {
-                name = name.append(Component.literal(" [" + BuiltInRegistries.ENCHANTMENT.getKey(libSlot.ench) + "]").withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withUnderlined(false)));
+                name = name.append(Component.literal(" [" + libSlot.ench.getKey().location() + "]").withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withUnderlined(false)));
             }
             list.add(name);
 
@@ -267,7 +268,7 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
         return 0x40FFFFFF;
     }
 
-    private static record LibrarySlot(Enchantment ench, int points, int maxLvl) {}
+    private static record LibrarySlot(Holder<Enchantment> ench, int points, int maxLvl) {}
 
     private static DecimalFormat f = new DecimalFormat("##.#");
 

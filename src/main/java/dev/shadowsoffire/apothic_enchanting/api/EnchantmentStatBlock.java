@@ -7,6 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
@@ -74,7 +75,7 @@ public interface EnchantmentStatBlock extends IBlockExtension {
      *
      * @return A list of all enchantments that are blacklisted by the presence of this block.
      */
-    default Set<Enchantment> getBlacklistedEnchantments(BlockState state, LevelReader world, BlockPos pos) {
+    default Set<Holder<Enchantment>> getBlacklistedEnchantments(BlockState state, LevelReader world, BlockPos pos) {
         return Collections.emptySet();
     }
 

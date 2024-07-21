@@ -11,23 +11,38 @@ import dev.shadowsoffire.apothic_enchanting.api.EnchantmentStatBlock;
 import it.unimi.dsi.fastutil.floats.Float2FloatMap;
 import it.unimi.dsi.fastutil.floats.Float2FloatOpenHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.EnchantmentTableBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
 /**
  * Holder for the computed stat values of an enchantment table.
  */
-public record EnchantmentTableStats(float eterna, float quanta, float arcana, int clues, Set<Enchantment> blacklist, boolean treasure, boolean stable) {
+public record EnchantmentTableStats(float eterna, float quanta, float arcana, int clues, Set<Holder<Enchantment>> blacklist, boolean treasure, boolean stable) {
 
     public static final EnchantmentTableStats INVALID = new EnchantmentTableStats(0, 0, 0, 0, Collections.emptySet(), false, false);
 
-    public EnchantmentTableStats(float eterna, float quanta, float arcana, int clues, Set<Enchantment> blacklist, boolean treasure, boolean stable) {
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnchantmentTableStats> STREAM_CODEC = NeoForgeStreamCodecs
+        .<RegistryFriendlyByteBuf, EnchantmentTableStats, Float, Float, Float, Integer, Set<Holder<Enchantment>>, Boolean, Boolean>composite(
+            ByteBufCodecs.FLOAT, EnchantmentTableStats::eterna,
+            ByteBufCodecs.FLOAT, EnchantmentTableStats::quanta,
+            ByteBufCodecs.FLOAT, EnchantmentTableStats::arcana,
+            ByteBufCodecs.INT, EnchantmentTableStats::clues,
+            ByteBufCodecs.collection(HashSet::new, ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT)), EnchantmentTableStats::blacklist,
+            ByteBufCodecs.BOOL, EnchantmentTableStats::treasure,
+            ByteBufCodecs.BOOL, EnchantmentTableStats::stable,
+            EnchantmentTableStats::new);
+
+    public EnchantmentTableStats(float eterna, float quanta, float arcana, int clues, Set<Holder<Enchantment>> blacklist, boolean treasure, boolean stable) {
         this.eterna = Mth.clamp(eterna, 0, 100);
         this.quanta = Mth.clamp(quanta, 0, 100);
         this.arcana = Mth.clamp(arcana, 0, 100);
@@ -35,34 +50,6 @@ public record EnchantmentTableStats(float eterna, float quanta, float arcana, in
         this.blacklist = Collections.unmodifiableSet(blacklist);
         this.treasure = treasure;
         this.stable = stable;
-    }
-
-    public void write(FriendlyByteBuf buf) {
-        buf.writeFloat(this.eterna);
-        buf.writeFloat(this.quanta);
-        buf.writeFloat(this.arcana);
-        buf.writeByte(this.clues);
-        buf.writeShort(this.blacklist.size());
-        for (Enchantment e : this.blacklist) {
-            buf.writeVarInt(BuiltInRegistries.ENCHANTMENT.getId(e));
-        }
-        buf.writeBoolean(this.treasure);
-        buf.writeBoolean(this.stable);
-    }
-
-    public static EnchantmentTableStats read(FriendlyByteBuf buf) {
-        float eterna = buf.readFloat();
-        float quanta = buf.readFloat();
-        float arcana = buf.readFloat();
-        int clues = buf.readByte();
-        int size = buf.readShort();
-        Set<Enchantment> blacklist = new HashSet<>(size);
-        for (int i = 0; i < size; i++) {
-            blacklist.add(BuiltInRegistries.ENCHANTMENT.byId(buf.readVarInt()));
-        }
-        boolean treasure = buf.readBoolean();
-        boolean stable = buf.readBoolean();
-        return new EnchantmentTableStats(eterna, quanta, arcana, clues, blacklist, treasure, stable);
     }
 
     /**
@@ -83,7 +70,7 @@ public record EnchantmentTableStats(float eterna, float quanta, float arcana, in
      */
     public static EnchantmentTableStats gatherStats(Level level, BlockPos pos, int itemEnch) {
         EnchantmentTableStats.Builder builder = new EnchantmentTableStats.Builder(itemEnch);
-        for (BlockPos offset : EnchantmentTableBlock.BOOKSHELF_OFFSETS) {
+        for (BlockPos offset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
             if (canReadStatsFrom(level, pos, offset)) {
                 gatherStats(builder, level, pos.offset(offset));
             }
@@ -139,7 +126,7 @@ public record EnchantmentTableStats(float eterna, float quanta, float arcana, in
     public static class Builder {
 
         private final Float2FloatMap eternaMap = new Float2FloatOpenHashMap();
-        private final Set<Enchantment> blacklist = new HashSet<>();
+        private final Set<Holder<Enchantment>> blacklist = new HashSet<>();
 
         private float eterna = 0;
         private float quanta = 0;
@@ -170,7 +157,7 @@ public record EnchantmentTableStats(float eterna, float quanta, float arcana, in
             this.clues += clues;
         }
 
-        public void blacklistEnchant(Enchantment ench) {
+        public void blacklistEnchant(Holder<Enchantment> ench) {
             this.blacklist.add(ench);
         }
 

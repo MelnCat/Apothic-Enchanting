@@ -142,7 +142,7 @@ public class MiscDatagen implements DataProvider {
             path = BuiltInRegistries.ITEM.getKey(nbt.getItems()[0].getItem()).getPath();
         }
         else {
-            Value v = ing.values[0];
+            Value v = ing.getValues()[0];
             if (v instanceof TagValue t) {
                 path = t.tag().location().getPath();
             }
@@ -208,8 +208,8 @@ public class MiscDatagen implements DataProvider {
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof IngredientKey key) {
-                Value[] ours = this.ing.values;
-                Value[] theirs = key.ing.values;
+                Value[] ours = this.ing.getValues();
+                Value[] theirs = key.ing.getValues();
                 if (ours.length != theirs.length) return false;
                 for (int i = 0; i < ours.length; i++) {
                     if (!ours[i].equals(theirs[i])) return false;

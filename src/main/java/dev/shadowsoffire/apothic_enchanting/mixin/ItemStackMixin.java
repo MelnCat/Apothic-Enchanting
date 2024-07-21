@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import dev.shadowsoffire.apothic_enchanting.asm.EnchHooks;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,12 +27,13 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 @Mixin(value = ItemStack.class, priority = 500, remap = false)
 public class ItemStackMixin {
 
-    private static void appendModifiedEnchTooltip(List<Component> tooltip, Enchantment ench, int realLevel, int nbtLevel) {
-        MutableComponent mc = ench.getFullname(realLevel).copy();
+    @Unique
+    private static void appendModifiedEnchTooltip(List<Component> tooltip, Holder<Enchantment> ench, int realLevel, int nbtLevel) {
+        MutableComponent mc = Enchantment.getFullname(ench, realLevel).copy();
         mc.getSiblings().clear();
         Component nbtLevelComp = Component.translatable("enchantment.level." + nbtLevel);
         Component realLevelComp = Component.translatable("enchantment.level." + realLevel);
-        if (realLevel != 1 || EnchHooks.getMaxLevel(ench) != 1) mc.append(CommonComponents.SPACE).append(realLevelComp);
+        if (realLevel != 1 || EnchHooks.getMaxLevel(ench.value()) != 1) mc.append(CommonComponents.SPACE).append(realLevelComp);
 
         int diff = realLevel - nbtLevel;
         char sign = diff > 0 ? '+' : '-';

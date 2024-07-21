@@ -4,12 +4,9 @@ import java.util.List;
 
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
 public interface EnchantableItem {
@@ -23,24 +20,14 @@ public interface EnchantableItem {
      * @return The newly-enchanted itemstack.
      */
     default ItemStack applyEnchantments(ItemStack stack, List<EnchantmentInstance> enchantments) {
-        boolean isBook = stack.is(Items.BOOK);
-        if (isBook) {
-            ItemStack enchBook = new ItemStack(Items.ENCHANTED_BOOK);
-            CompoundTag tag = stack.getTag();
-            if (tag != null) {
-                stack.setTag(tag.copy());
-            }
-            stack = enchBook;
+        if (stack.is(Items.BOOK)) {
+            stack = stack.transmuteCopy(Items.ENCHANTED_BOOK);
         }
 
         for (EnchantmentInstance inst : enchantments) {
-            if (isBook) {
-                EnchantedBookItem.addEnchantment(stack, inst);
-            }
-            else {
-                stack.enchant(inst.enchantment, inst.level);
-            }
+            stack.enchant(inst.enchantment, inst.level);
         }
+
         return stack;
     }
 
@@ -59,18 +46,6 @@ public interface EnchantableItem {
      */
     default List<EnchantmentInstance> selectEnchantments(List<EnchantmentInstance> builtList, RandomSource rand, ItemStack stack, int level, EnchantmentTableStats stats) {
         return builtList;
-    }
-
-    /**
-     * Normally, the {@link Enchantment} has final say in if it can be applied to an item.
-     * This allows an item to opt-in to always being able to receive specific enchantments.
-     *
-     * @param stack       The item being enchanted.
-     * @param enchantment The enchantment being queried against.
-     * @return If the enchantment is allowed on this itemstack, overriding standard rules.
-     */
-    default boolean forciblyAllowsTableEnchantment(ItemStack stack, Enchantment enchantment) {
-        return stack.is(Items.BOOK) && enchantment.isAllowedOnBooks();
     }
 
     /**

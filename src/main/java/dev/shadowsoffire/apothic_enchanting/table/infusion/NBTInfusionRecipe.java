@@ -15,7 +15,7 @@ public class NBTInfusionRecipe extends InfusionRecipe {
         ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(InfusionRecipe::getOutput),
         Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(InfusionRecipe::getInput),
         Stats.CODEC.fieldOf("requirements").forGetter(InfusionRecipe::getRequirements),
-        ExtraCodecs.strictOptionalField(Stats.CODEC, "max_requirements", NO_MAX).forGetter(InfusionRecipe::getMaxRequirements))
+        Stats.CODEC.optionalFieldOf("max_requirements", NO_MAX).forGetter(InfusionRecipe::getMaxRequirements))
         .apply(inst, NBTInfusionRecipe::new));
 
     public static final Serializer SERIALIZER = new Serializer();

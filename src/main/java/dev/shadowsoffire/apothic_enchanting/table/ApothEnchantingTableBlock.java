@@ -14,15 +14,15 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EnchantmentTableBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
+import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
 
-public class ApothEnchantmentTableBlock extends EnchantmentTableBlock {
+public class ApothEnchantingTableBlock extends EnchantingTableBlock {
 
-    public ApothEnchantmentTableBlock(Block.Properties props) {
+    public ApothEnchantingTableBlock(Block.Properties props) {
         super(props);
     }
 
@@ -30,7 +30,7 @@ public class ApothEnchantmentTableBlock extends EnchantmentTableBlock {
     @Nullable
     public MenuProvider getMenuProvider(BlockState state, Level world, BlockPos pos) {
         BlockEntity tileentity = world.getBlockEntity(pos);
-        if (tileentity instanceof EnchantmentTableBlockEntity) {
+        if (tileentity instanceof EnchantingTableBlockEntity) {
             Component itextcomponent = ((Nameable) tileentity).getDisplayName();
             return new SimpleMenuProvider((id, inventory, player) -> new ApothEnchantmentMenu(id, inventory, ContainerLevelAccess.create(world, pos), tileentity.getData(EnchantmentTableItemHandler.TYPE)), itextcomponent);
         }
@@ -43,7 +43,7 @@ public class ApothEnchantmentTableBlock extends EnchantmentTableBlock {
     public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity tileentity = world.getBlockEntity(pos);
-            if (tileentity instanceof EnchantmentTableBlockEntity) {
+            if (tileentity instanceof EnchantingTableBlockEntity) {
                 ItemStack fuel = tileentity.getData(EnchantmentTableItemHandler.TYPE).getStackInSlot(0);
                 Block.popResource(world, pos, fuel);
                 world.removeBlockEntity(pos);
@@ -59,7 +59,7 @@ public class ApothEnchantmentTableBlock extends EnchantmentTableBlock {
         }
     }
 
-    public static IItemHandler getItemHandler(EnchantmentTableBlockEntity be, Direction dir) {
+    public static IItemHandler getItemHandler(EnchantingTableBlockEntity be, Direction dir) {
         return be.getData(EnchantmentTableItemHandler.TYPE);
     }
 

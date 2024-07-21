@@ -1,19 +1,19 @@
 package dev.shadowsoffire.apothic_enchanting;
 
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.Tags;
@@ -21,6 +21,7 @@ import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 import net.neoforged.neoforge.event.entity.living.LootingLevelEvent;
 import net.neoforged.neoforge.event.entity.living.ShieldBlockEvent;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
@@ -32,34 +33,30 @@ public class ApothEnchEvents {
 
     @SubscribeEvent
     public void anvilEvent(AnvilUpdateEvent e) {
-        if (e.getLeft().isEnchanted()) {
-            if (e.getRight().getItem() == Items.COBWEB) {
-                ItemStack stack = e.getLeft().copy();
-                EnchantmentHelper.setEnchantments(EnchantmentHelper.getEnchantments(stack).entrySet().stream().filter(ent -> ent.getKey().isCurse()).collect(Collectors.toMap(Entry::getKey, Entry::getValue)), stack);
-                e.setCost(1);
-                e.setMaterialCost(1);
-                e.setOutput(stack);
-            }
-            else if (e.getRight().getItem() == dev.shadowsoffire.apothic_enchanting.Ench.Items.PRISMATIC_WEB.get()) {
-                ItemStack stack = e.getLeft().copy();
-                EnchantmentHelper.setEnchantments(EnchantmentHelper.getEnchantments(stack).entrySet().stream().filter(ent -> !ent.getKey().isCurse()).collect(Collectors.toMap(Entry::getKey, Entry::getValue)), stack);
-                e.setCost(30);
-                e.setMaterialCost(1);
-                e.setOutput(stack);
-                return;
-            }
+        ItemStack left = e.getLeft();
+
+        if (left.isEnchanted() && e.getRight().getItem() == Ench.Items.PRISMATIC_WEB.get()) {
+            ItemStack stack = left.copy();
+            ItemEnchantments.Mutable enchants = new ItemEnchantments.Mutable(EnchantmentHelper.getEnchantmentsForCrafting(stack));
+
+            enchants.removeIf(h -> h.is(EnchantmentTags.CURSE));
+            EnchantmentHelper.setEnchantments(stack, enchants.toImmutable());
+
+            e.setCost(30);
+            e.setMaterialCost(1);
+            e.setOutput(stack);
+            return;
         }
-        if ((e.getLeft().getItem() == Items.CHIPPED_ANVIL || e.getLeft().getItem() == Items.DAMAGED_ANVIL) && e.getRight().is(Tags.Items.STORAGE_BLOCKS_IRON)) {
-            if (e.getLeft().getCount() != 1) return;
-            int dmg = e.getLeft().getItem() == Items.DAMAGED_ANVIL ? 2 : 1;
-            ItemStack out = new ItemStack(dmg == 1 ? Items.ANVIL : Items.CHIPPED_ANVIL);
-            EnchantmentHelper.setEnchantments(EnchantmentHelper.getEnchantments(e.getLeft()), out);
-            out.setCount(1);
+
+        if (left.getCount() == 1 && (left.getItem() == Items.CHIPPED_ANVIL || left.getItem() == Items.DAMAGED_ANVIL) && e.getRight().is(Tags.Items.STORAGE_BLOCKS_IRON)) {
+            Item target = left.getItem() == Items.CHIPPED_ANVIL ? Items.DAMAGED_ANVIL : Items.ANVIL; // Repair the anvil, chipped -> damaged, damaged -> normal
+            ItemStack out = left.transmuteCopy(target);
             e.setOutput(out);
-            e.setCost(5 + e.getLeft().getAllEnchantments().entrySet().stream().mapToInt(ent -> ent.getValue() * (ent.getKey().getRarity().ordinal() + 1)).sum());
+            e.setCost(5);
             e.setMaterialCost(1);
             return;
         }
+
         if (ScrappingTomeItem.updateAnvil(e)) return;
         if (ImprovedScrappingTomeItem.updateAnvil(e)) return;
         if (ExtractionTomeItem.updateAnvil(e)) return;
@@ -95,7 +92,7 @@ public class ApothEnchEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public void block(ShieldBlockEvent e) {
+    public void block(LivingShieldBlockEvent e) {
         Ench.Enchantments.REFLECTIVE.get().reflect(e);
     }
 

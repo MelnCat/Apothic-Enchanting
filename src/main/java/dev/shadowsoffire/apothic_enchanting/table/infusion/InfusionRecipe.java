@@ -34,7 +34,7 @@ public class InfusionRecipe implements Recipe<Container> {
         ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(InfusionRecipe::getOutput),
         Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(InfusionRecipe::getInput),
         Stats.CODEC.fieldOf("requirements").forGetter(InfusionRecipe::getRequirements),
-        ExtraCodecs.strictOptionalField(Stats.CODEC, "max_requirements", NO_MAX).forGetter(InfusionRecipe::getMaxRequirements))
+        Stats.CODEC.optionalFieldOf("max_requirements", NO_MAX).forGetter(InfusionRecipe::getMaxRequirements))
         .apply(inst, InfusionRecipe::new));
 
     public static final Serializer SERIALIZER = new Serializer();

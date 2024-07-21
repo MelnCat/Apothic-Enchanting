@@ -23,7 +23,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -125,11 +124,11 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
 
         public static Codec<Stats> CODEC = RecordCodecBuilder.create(inst -> inst
             .group(
-                ExtraCodecs.strictOptionalField(Codec.FLOAT, "maxEterna", 15F).forGetter(Stats::maxEterna),
-                ExtraCodecs.strictOptionalField(Codec.FLOAT, "eterna", 0F).forGetter(Stats::eterna),
-                ExtraCodecs.strictOptionalField(Codec.FLOAT, "quanta", 0F).forGetter(Stats::quanta),
-                ExtraCodecs.strictOptionalField(Codec.FLOAT, "arcana", 0F).forGetter(Stats::arcana),
-                ExtraCodecs.strictOptionalField(Codec.INT, "clues", 0).forGetter(Stats::clues))
+                Codec.FLOAT.optionalFieldOf("maxEterna", 15F).forGetter(Stats::maxEterna),
+                Codec.FLOAT.optionalFieldOf("eterna", 0F).forGetter(Stats::eterna),
+                Codec.FLOAT.optionalFieldOf("quanta", 0F).forGetter(Stats::quanta),
+                Codec.FLOAT.optionalFieldOf("arcana", 0F).forGetter(Stats::arcana),
+                Codec.INT.optionalFieldOf("clues", 0).forGetter(Stats::clues))
             .apply(inst, Stats::new));
 
         public void write(FriendlyByteBuf buf) {
@@ -149,9 +148,9 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
 
         public static Codec<BlockStats> CODEC = RecordCodecBuilder.create(inst -> inst
             .group(
-                ExtraCodecs.strictOptionalField(Codec.list(BuiltInRegistries.BLOCK.byNameCodec()), "blocks", Collections.emptyList()).forGetter(bs -> bs.blocks),
-                ExtraCodecs.strictOptionalField(TagKey.codec(Registries.BLOCK), "tag").forGetter(bs -> Optional.empty()),
-                ExtraCodecs.strictOptionalField(BuiltInRegistries.BLOCK.byNameCodec(), "block").forGetter(bs -> Optional.empty()),
+                Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).optionalFieldOf("blocks", Collections.emptyList()).forGetter(bs -> bs.blocks),
+                TagKey.codec(Registries.BLOCK).optionalFieldOf("tag").forGetter(bs -> Optional.empty()),
+                BuiltInRegistries.BLOCK.byNameCodec().optionalFieldOf("block").forGetter(bs -> Optional.empty()),
                 Stats.CODEC.fieldOf("stats").forGetter(bs -> bs.stats))
             .apply(inst, BlockStats::new));
 

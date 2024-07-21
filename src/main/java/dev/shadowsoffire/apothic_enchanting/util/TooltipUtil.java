@@ -9,6 +9,7 @@ import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -59,11 +60,11 @@ public class TooltipUtil {
             tooltip.accept(TooltipUtil.lang("info", "provides_stability").withStyle(ChatFormatting.GOLD));
         }
 
-        Set<Enchantment> blacklist = enchBlock.getBlacklistedEnchantments(state, world, pos);
+        Set<Holder<Enchantment>> blacklist = enchBlock.getBlacklistedEnchantments(state, world, pos);
         if (blacklist.size() > 0) {
             tooltip.accept(TooltipUtil.lang("info", "filter").withStyle(s -> s.withColor(0x58B0CC)));
-            for (Enchantment e : blacklist) {
-                MutableComponent name = (MutableComponent) e.getFullname(1);
+            for (Holder<Enchantment> e : blacklist) {
+                MutableComponent name = (MutableComponent) Enchantment.getFullname(e, 1);
                 name.getSiblings().clear();
                 name.withStyle(s -> s.withColor(0x5878AA));
                 tooltip.accept(Component.literal(" - ").append(name).withStyle(s -> s.withColor(0x5878AA)));
