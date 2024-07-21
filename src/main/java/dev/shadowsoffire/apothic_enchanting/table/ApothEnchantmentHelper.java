@@ -7,20 +7,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.mutable.MutableFloat;
+import org.apache.commons.lang3.mutable.MutableObject;
+
+import com.mojang.datafixers.util.Pair;
+
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.EnchantmentInfo;
 import dev.shadowsoffire.apothic_enchanting.api.EnchantableItem;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import net.minecraft.Util;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedEntry.IntrusiveBase;
 import net.minecraft.util.random.WeightedRandom;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.ConditionalEffect;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 public class ApothEnchantmentHelper {
 
@@ -153,6 +165,36 @@ public class ApothEnchantmentHelper {
             float factor = Mth.clamp(gaussian / 3F, -1F, 1F);
             return 1 + quanta * factor / 100F;
         }
+    }
+
+    @Nullable
+    public static <T> Pair<T, Integer> getHighestEquippedLevel(DataComponentType<T> effectComp, LivingEntity entity) {
+        MutableObject<Pair<T, Integer>> result = new MutableObject<>();
+
+        EnchantmentHelper.runIterationOnEquipment(entity, (ench, level, slot) -> {
+            T data = ench.value().effects().get(effectComp);
+            if (data != null && (result.getValue() == null || result.getValue().getSecond() < level)) {
+                result.setValue(Pair.of(data, level));
+            }
+        });
+
+        return result.getValue();
+    }
+
+    public static float processValue(List<ConditionalEffect<EnchantmentValueEffect>> effects, LootContext ctx, int level, float initial) {
+        MutableFloat f = new MutableFloat(initial);
+        Enchantment.applyEffects(effects, ctx, valueEffect -> {
+            f.setValue(valueEffect.process(level, ctx.getRandom(), f.getValue()));
+        });
+        return f.getValue();
+    }
+
+    public static float processValue(List<EnchantmentValueEffect> effects, RandomSource rand, int level, float initial) {
+        MutableFloat f = new MutableFloat(initial);
+        effects.forEach(valueEffect -> {
+            f.setValue(valueEffect.process(level, rand, f.getValue()));
+        });
+        return f.getValue();
     }
 
     public static class ArcanaEnchantmentData extends IntrusiveBase {

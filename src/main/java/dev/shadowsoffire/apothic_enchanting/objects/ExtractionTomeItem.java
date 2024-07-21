@@ -13,7 +13,6 @@ import net.minecraft.world.item.BookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -22,8 +21,8 @@ import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 
 public class ExtractionTomeItem extends BookItem {
 
-    public ExtractionTomeItem() {
-        super(new Item.Properties());
+    public ExtractionTomeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override
@@ -38,11 +37,6 @@ public class ExtractionTomeItem extends BookItem {
         }
         tooltip.add(TooltipUtil.lang("info", "extraction_tome").withStyle(ChatFormatting.GRAY));
         tooltip.add(TooltipUtil.lang("info", "extraction_tome2").withStyle(ChatFormatting.GRAY));
-    }
-
-    @Override
-    public Rarity getRarity(ItemStack stack) {
-        return Rarity.EPIC;
     }
 
     @Override

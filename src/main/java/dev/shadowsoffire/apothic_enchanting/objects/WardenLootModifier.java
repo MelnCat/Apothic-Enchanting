@@ -35,7 +35,7 @@ public class WardenLootModifier extends LootModifier {
             if (ctx.getRandom().nextFloat() <= 0.10F + ctx.getParam(LootContextParams.TOOL).getEnchantmentLevel(ctx.getLevel().holderOrThrow(Enchantments.LOOTING)) * 0.10F) {
                 amount++;
             }
-            loot.add(new ItemStack(Ench.Items.WARDEN_TENDRIL.get(), amount));
+            loot.add(new ItemStack(Ench.Items.WARDEN_TENDRIL.value(), amount));
         }
         return loot;
     }

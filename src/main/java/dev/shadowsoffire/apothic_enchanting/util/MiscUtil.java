@@ -73,16 +73,16 @@ public class MiscUtil {
     /**
      * Checks if the affix is still on cooldown, if a cooldown was set via {@link #startCooldown(ResourceLocation, int, LivingEntity)}
      */
-    public static boolean isOnCooldown(ResourceLocation id, int cooldown, LivingEntity entity) {
-        long lastApplied = entity.getPersistentData().getLong("apothic_enchanting.cooldown." + id.toString());
-        return lastApplied != 0 && lastApplied + cooldown >= entity.level().getGameTime();
+    public static boolean isOnCooldown(ResourceLocation id, LivingEntity entity) {
+        long cooldownEndTime = entity.getPersistentData().getLong("apothic_enchanting.cooldown." + id.toString());
+        return cooldownEndTime <= entity.level().getGameTime();
     }
 
     /**
      * Records the current time as a cooldown tracker. Used in conjunction with {@link #isOnCooldown(ResourceLocation, int, LivingEntity)}
      */
-    public static void startCooldown(ResourceLocation id, LivingEntity entity) {
-        entity.getPersistentData().putLong("apothic_enchanting.cooldown." + id.toString(), entity.level().getGameTime());
+    public static void startCooldown(ResourceLocation id, LivingEntity entity, int cooldown) {
+        entity.getPersistentData().putLong("apothic_enchanting.cooldown." + id.toString(), entity.level().getGameTime() + cooldown);
     }
 
     /**

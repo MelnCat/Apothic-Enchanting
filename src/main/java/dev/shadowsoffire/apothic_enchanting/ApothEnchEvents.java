@@ -1,5 +1,7 @@
 package dev.shadowsoffire.apothic_enchanting;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
@@ -23,7 +25,6 @@ import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 import net.neoforged.neoforge.event.entity.living.LootingLevelEvent;
-import net.neoforged.neoforge.event.entity.living.ShieldBlockEvent;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -110,7 +111,18 @@ public class ApothEnchEvents {
      */
     @SubscribeEvent
     public void breakSpeed(PlayerEvent.BreakSpeed e) {
-        Ench.Enchantments.STABLE_FOOTING.get().breakSpeed(e);
+        Player p = e.getEntity();
+        if (!p.onGround() && e.getOriginalSpeed() < e.getNewSpeed() * 5) {
+
+            MutableBoolean flag = new MutableBoolean(false);
+            EnchantmentHelper.runIterationOnEquipment(p, (ench, level, item) -> {
+                if (level > 0) flag.setTrue();
+            });
+
+            if (flag.getValue()) {
+                e.setNewSpeed(e.getNewSpeed() * 5F);
+            }
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
