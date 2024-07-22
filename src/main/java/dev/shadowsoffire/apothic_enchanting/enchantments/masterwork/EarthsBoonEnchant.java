@@ -1,20 +1,12 @@
 package dev.shadowsoffire.apothic_enchanting.enchantments.masterwork;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.Ench;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.event.level.BlockEvent.BreakEvent;
 
 public class EarthsBoonEnchant extends Enchantment {
 
@@ -42,14 +34,4 @@ public class EarthsBoonEnchant extends Enchantment {
         return ((MutableComponent) super.getFullname(level)).withStyle(ChatFormatting.DARK_GREEN);
     }
 
-    public void provideBenefits(BreakEvent e) {
-        Player player = e.getPlayer();
-        ItemStack stack = player.getMainHandItem();
-        int level = stack.getEnchantmentLevel(this);
-        if (player.level().isClientSide) return;
-        if (e.getState().is(Tags.Blocks.STONE) && level > 0 && player.getRandom().nextFloat() <= 0.01F * level) {
-            ItemStack newDrop = new ItemStack(BuiltInRegistries.ITEM.getTag(Ench.Tags.BOON_DROPS).flatMap(set -> set.getRandomElement(player.getRandom())).map(Holder::value).orElse(Items.AIR));
-            Block.popResource(player.level(), e.getPos(), newDrop);
-        }
-    }
 }

@@ -35,7 +35,7 @@ public record BerserkingComponent(List<ConditionalEffect<EnchantmentValueEffect>
     /**
      * Handles the application of Berserker's Fury.
      */
-    public static void livingHurt(LivingDamageEvent.Post e) {
+    public static void attemptToGoBerserk(LivingDamageEvent.Post e) {
         LivingEntity target = e.getEntity();
         if (e.getSource().getEntity() != null && !MiscUtil.isOnCooldown(Ench.EnchantEffects.BERSERKING.getId(), target)) {
             Pair<BerserkingComponent, Integer> data = ApothEnchantmentHelper.getHighestEquippedLevel(Ench.EnchantEffects.BERSERKING.get(), target);
@@ -78,6 +78,9 @@ public record BerserkingComponent(List<ConditionalEffect<EnchantmentValueEffect>
             return new MobEffectInstance(effect, duration, amplifier, ambient, visible, showIcon.orElse(visible));
         }
 
+        
+        
+        
     }
 
 }

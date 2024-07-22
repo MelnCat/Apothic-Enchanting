@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
+import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryBlock;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryContainer;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile.BasicLibraryTile;
@@ -311,6 +312,11 @@ public class Ench {
          */
         public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>> CRESCENDO = R.enchantmentEffect("crescendo",
             b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
+
+        /**
+         * The boon component allows a chance at dropping a random item from a tag when any block from a target tag is broken.
+         */
+        public static final Supplier<DataComponentType<BoonComponent>> EARTHS_BOON = R.enchantmentEffect("earths_boon", b -> b.persistent(BoonComponent.CODEC));
 
         private static void bootstrap() {}
     }

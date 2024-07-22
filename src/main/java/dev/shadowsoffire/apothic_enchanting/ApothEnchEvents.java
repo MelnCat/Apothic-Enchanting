@@ -2,6 +2,9 @@ package dev.shadowsoffire.apothic_enchanting;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import dev.shadowsoffire.apothic_enchanting.enchantments.ChainsawTask;
+import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
+import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
@@ -20,14 +23,15 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 import net.neoforged.neoforge.event.entity.living.LootingLevelEvent;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
 public class ApothEnchEvents {
@@ -135,8 +139,12 @@ public class ApothEnchEvents {
      */
     @SubscribeEvent(priority = EventPriority.LOW)
     public void breakSpeed(BlockEvent.BreakEvent e) {
-        Ench.Enchantments.EARTHS_BOON.get().provideBenefits(e);
-        Ench.Enchantments.CHAINSAW.get().chainsaw(e);
+        ChainsawTask.attemptChainsaw(e);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public void blockDrops(BlockDropsEvent e) {
+        BoonComponent.provideBenefits(e);
     }
 
     /**
@@ -147,9 +155,9 @@ public class ApothEnchEvents {
         Ench.Enchantments.NATURES_BLESSING.get().rightClick(e);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public void livingHurt(LivingHurtEvent e) {
-        Ench.Enchantments.BERSERKERS_FURY.get().livingHurt(e);
+    @SubscribeEvent
+    public void livingHurt(LivingDamageEvent.Post e) {
+        BerserkingComponent.attemptToGoBerserk(e);
     }
 
 }
