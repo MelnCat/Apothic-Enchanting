@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import dev.shadowsoffire.apothic_enchanting.enchantments.masterwork.CrescendoEnchant;
+import dev.shadowsoffire.apothic_enchanting.enchantments.CrescendoHooks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -22,18 +22,18 @@ public class CrossbowItemMixin {
     @Inject(method = "tryLoadProjectiles", at = @At(value = "RETURN"))
     private static void apoth_setupCrescendoShots(LivingEntity shooter, ItemStack crossbow, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValueZ() && !shooter.level().isClientSide()) {
-            CrescendoEnchant.prepareCrescendoShots(shooter, crossbow);
+            CrescendoHooks.prepareCrescendoShots(shooter, crossbow);
         }
     }
 
     @Inject(method = "use", at = @At(value = "RETURN", ordinal = 0))
     public void apoth_addCharges(Level pLevel, Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> ci) {
-        CrescendoEnchant.onArrowFired((ServerLevel) pPlayer.level(), pPlayer.getItemInHand(pHand));
+        CrescendoHooks.reloadFromCrescendoCharge((ServerLevel) pPlayer.level(), pPlayer.getItemInHand(pHand));
     }
 
     @Inject(method = "getArrow", at = @At(value = "RETURN"))
     private static void apoth_markArrows(Level pLevel, LivingEntity pLivingEntity, ItemStack pCrossbowStack, ItemStack pAmmoStack, CallbackInfoReturnable<AbstractArrow> ci) {
-        CrescendoEnchant.markGeneratedArrows(ci.getReturnValue(), pCrossbowStack);
+        CrescendoHooks.markGeneratedArrows(ci.getReturnValue(), pCrossbowStack);
     }
 
 }

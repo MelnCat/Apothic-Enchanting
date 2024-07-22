@@ -1,52 +1,21 @@
-package dev.shadowsoffire.apothic_enchanting.enchantments.masterwork;
+package dev.shadowsoffire.apothic_enchanting.enchantments;
 
 import org.apache.commons.lang3.mutable.MutableFloat;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.Ench.EnchantEffects;
 import dev.shadowsoffire.apothic_enchanting.mixin.CrossbowItemMixin;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
-public class CrescendoEnchant extends Enchantment {
-
-    public CrescendoEnchant() {
-        super(Rarity.VERY_RARE, EnchantmentCategory.CROSSBOW, new EquipmentSlot[] { EquipmentSlot.MAINHAND });
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 5;
-    }
-
-    @Override
-    public int getMinCost(int level) {
-        return 55 + (level - 1) * 30; // 50/80/110/140/170
-    }
-
-    @Override
-    public int getMaxCost(int level) {
-        return 200;
-    }
-
-    @Override
-    public Component getFullname(int level) {
-        return ((MutableComponent) super.getFullname(level)).withStyle(ChatFormatting.DARK_GREEN);
-    }
+public class CrescendoHooks {
 
     /**
      * Called when projectiles are loaded into a crossbow from {@link CrossbowItem#tryLoadProjectiles}
@@ -74,7 +43,7 @@ public class CrescendoEnchant extends Enchantment {
      * Called from {@link CrossbowItem#use}, before the first return.
      * Injected by {@link CrossbowItemMixin}
      */
-    public static void onArrowFired(ServerLevel serverLevel, ItemStack crossbow) {
+    public static void reloadFromCrescendoCharge(ServerLevel serverLevel, ItemStack crossbow) {
         int shots = crossbow.getOrDefault(Ench.Components.CRESCENDO_SHOTS, 0);
         if (shots > 0) {
             ChargedProjectiles projectiles = crossbow.get(Ench.Components.CRESCENDO_PROJECTILES);
@@ -100,4 +69,5 @@ public class CrescendoEnchant extends Enchantment {
             arr.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
         }
     }
+
 }

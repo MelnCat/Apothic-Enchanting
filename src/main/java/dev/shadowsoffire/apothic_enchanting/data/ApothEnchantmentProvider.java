@@ -7,6 +7,7 @@ import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent.VariableMobEffect;
+import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.values.ExponentialLevelBasedValue;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
@@ -131,6 +132,35 @@ public class ApothEnchantmentProvider {
                     EnchantmentTarget.ATTACKER,
                     EnchantmentTarget.ATTACKER,
                     new DamageItem(new LevelBasedValue.Clamped(LevelBasedValue.perLevel(20, -2), 1, 1024))));
+
+        register(context, EARTHS_BOON,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.PICKAXES),
+                    1, // weight
+                    3, // max level
+                    Enchantment.dynamicCost(60, 20),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.MAINHAND))
+                .withSpecialEffect(Ench.EnchantEffects.EARTHS_BOON.get(),
+                    new BoonComponent(
+                        Tags.Blocks.STONES,
+                        Ench.Tags.BOON_DROPS,
+                        List.of(noCondition(new AddValue(LevelBasedValue.perLevel(0.01F)))))));
+
+        register(context, CRESCENDO_OF_BOLTS,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.CROSSBOW_ENCHANTABLE),
+                    1, // weight
+                    5, // max level
+                    Enchantment.dynamicCost(55, 30),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.HAND))
+                .withEffect(Ench.EnchantEffects.CRESCENDO.get(), new AddValue(LevelBasedValue.perLevel(1))));
+
     }
 
     private static void register(BootstrapContext<Enchantment> context, ResourceKey<Enchantment> key, Enchantment.Builder builder) {

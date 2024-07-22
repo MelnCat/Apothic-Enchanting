@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import dev.shadowsoffire.apothic_enchanting.enchantments.CrescendoHooks;
 import dev.shadowsoffire.apothic_enchanting.enchantments.masterwork.CrescendoEnchant;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -36,7 +37,7 @@ public class SpellCrossbowMixin extends CrossbowItem {
 
     @Inject(method = "getArrow", at = @At(value = "RETURN"), remap = false)
     private void apoth_markArrows(Level pLevel, LivingEntity pLivingEntity, ItemStack pCrossbowStack, ItemStack pAmmoStack, CallbackInfoReturnable<AbstractArrow> ci) {
-        CrescendoEnchant.markGeneratedArrows(ci.getReturnValue(), pCrossbowStack);
+        CrescendoHooks.markGeneratedArrows(ci.getReturnValue(), pCrossbowStack);
     }
 
 }
