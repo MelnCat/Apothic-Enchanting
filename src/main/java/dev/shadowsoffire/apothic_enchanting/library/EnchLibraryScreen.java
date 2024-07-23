@@ -3,6 +3,7 @@ package dev.shadowsoffire.apothic_enchanting.library;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,10 +17,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.shadowsoffire.apothic_attributes.ApothicAttributes;
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.placebo.network.PacketDistro;
-import dev.shadowsoffire.placebo.packets.ButtonClickMessage;
+import dev.shadowsoffire.placebo.payloads.ButtonClickPayload;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -27,7 +28,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
@@ -40,6 +41,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContainer> {
 
@@ -102,8 +104,10 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
             }
             list.add(name);
 
-            if (I18n.exists(libSlot.ench.getDescriptionId() + ".desc") || ApothicAttributes.getTooltipFlag().isAdvanced()) {
-                Component txt = Component.translatable(libSlot.ench.getDescriptionId() + ".desc").setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true));
+            String descKey = libSlot.ench.getKey().location().toLanguageKey("enchantment") + ".desc";
+
+            if (I18n.exists(descKey) || ApothicAttributes.getTooltipFlag().isAdvanced()) {
+                Component txt = Component.translatable(descKey).setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true));
                 list.addAll(this.font.getSplitter().splitLines(txt, this.getGuiLeft() - 16, txt.getStyle()));
                 list.add(Component.literal(""));
             }
@@ -112,7 +116,7 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
             list.add(Component.translatable("tooltip.enchlib.points", format(libSlot.points), format(this.menu.getPointCap())).withStyle(ChatFormatting.GRAY));
             list.add(Component.literal(""));
             ItemStack outSlot = this.menu.ioInv.getItem(1);
-            int current = EnchantmentHelper.getEnchantments(outSlot).getOrDefault(libSlot.ench, 0);
+            int current = EnchantmentHelper.getEnchantmentsForCrafting(outSlot).getLevel(libSlot.ench);
             boolean shift = Screen.hasShiftDown();
             int targetLevel = shift ? Math.min(libSlot.maxLvl, 1 + (int) (Math.log(libSlot.points + EnchLibraryTile.levelToPoints(current)) / Math.log(2))) : current + 1;
             if (targetLevel == current) targetLevel++;
@@ -148,7 +152,7 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
         gfx.blit(TEXTURES, x + 3, y + 14, 197, 42, progress, 3, 307, 256);
         PoseStack stack = gfx.pose();
         stack.pushPose();
-        Component txt = Component.translatable(data.ench.getDescriptionId());
+        Component txt = data.ench().value().description();
         float scale = 1;
         if (this.font.width(txt) > ENTRY_WIDTH - 6) {
             scale = 60F / this.font.width(txt);
@@ -169,10 +173,10 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
 
         LibrarySlot libSlot = this.getHoveredSlot((int) pMouseX, (int) pMouseY);
         if (libSlot != null) {
-            int id = BuiltInRegistries.ENCHANTMENT.getId(libSlot.ench);
+            int id = Minecraft.getInstance().level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getId(libSlot.ench.value());
             if (Screen.hasShiftDown()) id |= 0x80000000;
             this.menu.onButtonClick(id);
-            PacketDistro.sendToServer(new ButtonClickMessage(id));
+            PacketDistributor.sendToServer(new ButtonClickPayload(id));
             this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
             return true;
         }
@@ -221,8 +225,8 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
 
     private void containerChanged() {
         this.data.clear();
-        List<Entry<Enchantment>> entries = this.filter(this.menu.getPointsForDisplay());
-        for (Entry<Enchantment> e : entries) {
+        List<Entry<Holder<Enchantment>>> entries = this.filter(this.menu.getPointsForDisplay());
+        for (Entry<Holder<Enchantment>> e : entries) {
             this.data.add(new LibrarySlot(e.getKey(), e.getIntValue(), this.menu.getMaxLevel(e.getKey())));
         }
 
@@ -230,20 +234,20 @@ public class EnchLibraryScreen extends AbstractContainerScreen<EnchLibraryContai
             this.scrollOffs = 0.0F;
             this.startIndex = 0;
         }
-        Collections.sort(this.data, (a, b) -> I18n.get(a.ench.getDescriptionId()).compareTo(I18n.get(b.ench.getDescriptionId())));
+        Collections.sort(this.data, Comparator.comparing(slot -> slot.ench.value().description().getString()));
     }
 
-    private List<Entry<Enchantment>> filter(List<Entry<Enchantment>> list) {
+    private List<Entry<Holder<Enchantment>>> filter(List<Entry<Holder<Enchantment>>> list) {
         return list.stream().filter(this::isAllowedByItem).filter(this::isAllowedBySearch).toList();
     }
 
-    private boolean isAllowedByItem(Entry<Enchantment> e) {
+    private boolean isAllowedByItem(Entry<Holder<Enchantment>> e) {
         ItemStack stack = this.menu.ioInv.getItem(2);
-        return stack.isEmpty() || e.getKey().canEnchant(stack);
+        return stack.isEmpty() || e.getKey().value().canEnchant(stack);
     }
 
-    private boolean isAllowedBySearch(Entry<Enchantment> e) {
-        String name = I18n.get(e.getKey().getDescriptionId()).toLowerCase(Locale.ROOT);
+    private boolean isAllowedBySearch(Entry<Holder<Enchantment>> e) {
+        String name = e.getKey().value().description().getString().toLowerCase(Locale.ROOT);
         String search = this.filter == null ? "" : this.filter.getValue().trim().toLowerCase(Locale.ROOT);
         return Strings.isNullOrEmpty(search) || ChatFormatting.stripFormatting(name).contains(search);
     }

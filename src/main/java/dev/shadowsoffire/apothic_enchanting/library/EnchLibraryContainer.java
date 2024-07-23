@@ -4,10 +4,11 @@ import java.util.List;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.placebo.menu.BlockEntityMenu;
-import dev.shadowsoffire.placebo.packets.ButtonClickMessage.IButtonContainer;
+import dev.shadowsoffire.placebo.payloads.ButtonClickPayload.IButtonContainer;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleContainer;
@@ -105,11 +106,11 @@ public class EnchLibraryContainer extends BlockEntityMenu<EnchLibraryTile> imple
         return (int) this.tile.getPointsMap().values().intStream().filter(s -> s > 0).count();
     }
 
-    public List<Object2IntMap.Entry<Enchantment>> getPointsForDisplay() {
+    public List<Object2IntMap.Entry<Holder<Enchantment>>> getPointsForDisplay() {
         return this.tile.getPointsMap().object2IntEntrySet().stream().filter(s -> s.getIntValue() > 0).toList();
     }
 
-    public int getMaxLevel(Enchantment enchant) {
+    public int getMaxLevel(Holder<Enchantment> enchant) {
         return this.tile.getMax(enchant);
     }
 
@@ -129,9 +130,10 @@ public class EnchLibraryContainer extends BlockEntityMenu<EnchLibraryTile> imple
     public void onButtonClick(int id) {
         boolean shift = (id & 0x80000000) == 0x80000000;
         if (shift) id = id & 0x7FFFFFFF; // Look, if this ever breaks, it's not my fault someone has 2 billion enchantments.
-        Enchantment ench = BuiltInRegistries.ENCHANTMENT.byId(id);
+        Holder<Enchantment> ench = this.level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(id).orElse(null);
+        if (ench == null) return;
         ItemStack outSlot = this.ioInv.getItem(1);
-        int curLvl = EnchantmentHelper.getEnchantments(outSlot).getOrDefault(ench, 0);
+        int curLvl = EnchantmentHelper.getEnchantmentsForCrafting(outSlot).getLevel(ench);
         int targetLevel = shift ? Math.min(this.tile.getMax(ench), 1 + (int) (Math.log(this.tile.getPointsMap().getInt(ench) + EnchLibraryTile.levelToPoints(curLvl)) / Math.log(2))) : curLvl + 1;
         if (!this.tile.canExtract(ench, targetLevel, curLvl)) return;
         if (outSlot.isEmpty()) outSlot = new ItemStack(Items.ENCHANTED_BOOK);

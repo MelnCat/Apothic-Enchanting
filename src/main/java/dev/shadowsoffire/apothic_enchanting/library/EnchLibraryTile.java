@@ -194,7 +194,7 @@ public abstract class EnchLibraryTile extends BlockEntity {
         this.activeContainers.remove(ctr);
     }
 
-    public int getMax(Enchantment ench) {
+    public int getMax(Holder<Enchantment> ench) {
         return Math.min(this.maxLevel, this.maxLevels.getInt(ench));
     }
 
