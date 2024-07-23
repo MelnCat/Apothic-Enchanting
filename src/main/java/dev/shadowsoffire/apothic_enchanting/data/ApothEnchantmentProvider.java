@@ -11,6 +11,7 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponen
 import dev.shadowsoffire.apothic_enchanting.enchantments.values.ExponentialLevelBasedValue;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
@@ -25,9 +26,11 @@ import net.minecraft.world.item.enchantment.ConditionalEffect;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentTarget;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.AddValue;
 import net.minecraft.world.item.enchantment.effects.DamageItem;
+import net.minecraft.world.item.enchantment.effects.SetValue;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
 
@@ -71,7 +74,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.CHEST))
-                .withSpecialEffect(Ench.EnchantEffects.BERSERKING.get(),
+                .withSpecialEffect(Ench.EnchantEffects.BERSERKING,
                     new BerserkingComponent(
                         List.of(noCondition(new AddValue(new ExponentialLevelBasedValue(2.5F)))),
                         List.of(
@@ -90,7 +93,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
-                .withEffect(Ench.EnchantEffects.CHAINSAW.get()));
+                .withEffect(Ench.EnchantEffects.CHAINSAW));
 
         register(context, TEMPTING,
             Enchantment.enchantment(
@@ -102,7 +105,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     1, // anvil cost
                     EquipmentSlotGroup.HAND))
-                .withEffect(Ench.EnchantEffects.TEMPTING.get()));
+                .withEffect(Ench.EnchantEffects.TEMPTING));
 
         register(context, STABLE_FOOTING,
             Enchantment.enchantment(
@@ -114,7 +117,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     1, // anvil cost
                     EquipmentSlotGroup.FEET))
-                .withEffect(Ench.EnchantEffects.STABLE_FOOTING.get()));
+                .withEffect(Ench.EnchantEffects.STABLE_FOOTING));
 
         register(context, SHIELD_BASH,
             Enchantment.enchantment(
@@ -143,7 +146,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
-                .withSpecialEffect(Ench.EnchantEffects.EARTHS_BOON.get(),
+                .withSpecialEffect(Ench.EnchantEffects.EARTHS_BOON,
                     new BoonComponent(
                         Tags.Blocks.STONES,
                         Ench.Tags.BOON_DROPS,
@@ -159,7 +162,33 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.HAND))
-                .withEffect(Ench.EnchantEffects.CRESCENDO.get(), new AddValue(LevelBasedValue.perLevel(1))));
+                .withEffect(Ench.EnchantEffects.CRESCENDO, new AddValue(LevelBasedValue.perLevel(1))));
+
+        register(context, ENDLESS_QUIVER,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.BOW_ENCHANTABLE),
+                    1, // weight
+                    5, // max level
+                    Enchantment.constantCost(60),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.HAND))
+                .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.INFINITY)))
+                .withEffect(EnchantmentEffectComponents.AMMO_USE, new SetValue(LevelBasedValue.constant(0))));
+
+        register(context, LIFE_MENDING,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE),
+                    1, // weight
+                    3, // max level
+                    Enchantment.dynamicCost(65, 35),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.ANY))
+                .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.MENDING)))
+                .withEffect(Ench.EnchantEffects.REPAIR_WITH_HP, new AddValue(new ExponentialLevelBasedValue(2, LevelBasedValue.perLevel(0, 1)))));
 
     }
 

@@ -12,6 +12,7 @@ import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper;
 import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
@@ -37,8 +38,9 @@ public record BerserkingComponent(List<ConditionalEffect<EnchantmentValueEffect>
      */
     public static void attemptToGoBerserk(LivingDamageEvent.Post e) {
         LivingEntity target = e.getEntity();
-        if (e.getSource().getEntity() != null && !MiscUtil.isOnCooldown(Ench.EnchantEffects.BERSERKING.getId(), target)) {
-            Pair<BerserkingComponent, Integer> data = ApothEnchantmentHelper.getHighestEquippedLevel(Ench.EnchantEffects.BERSERKING.get(), target);
+        ResourceLocation key = BuiltInRegistries.ENCHANTMENT_EFFECT_COMPONENT_TYPE.getKey(Ench.EnchantEffects.BERSERKING);
+        if (e.getSource().getEntity() != null && !MiscUtil.isOnCooldown(key, target)) {
+            Pair<BerserkingComponent, Integer> data = ApothEnchantmentHelper.getHighestEquippedLevel(Ench.EnchantEffects.BERSERKING, target);
             if (data != null) {
                 BerserkingComponent comp = data.getFirst();
                 int level = data.getSecond();
@@ -52,7 +54,7 @@ public record BerserkingComponent(List<ConditionalEffect<EnchantmentValueEffect>
                     target.addEffect(variableEffect.createEffectInstance(level, ctx.getRandom()));
                 });
 
-                MiscUtil.startCooldown(Ench.EnchantEffects.BERSERKING.getId(), target, (int) ApothEnchantmentHelper.processValue(comp.cooldown(), ctx, level, 0));
+                MiscUtil.startCooldown(key, target, (int) ApothEnchantmentHelper.processValue(comp.cooldown(), ctx, level, 0));
             }
         }
     }
@@ -78,9 +80,6 @@ public record BerserkingComponent(List<ConditionalEffect<EnchantmentValueEffect>
             return new MobEffectInstance(effect, duration, amplifier, ambient, visible, showIcon.orElse(visible));
         }
 
-        
-        
-        
     }
 
 }

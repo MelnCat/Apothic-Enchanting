@@ -290,33 +290,43 @@ public class Ench {
         /**
          * The tempting effect causes animals to follow the item that has the effect.
          */
-        public static final Supplier<DataComponentType<Unit>> TEMPTING = R.enchantmentEffect("tempting", b -> b.persistent(Unit.CODEC));
+        public static final DataComponentType<Unit> TEMPTING = R.enchantmentEffect("tempting", b -> b.persistent(Unit.CODEC));
 
         /**
          * The stable footing effect causes the break speed penalty for flying to be ignored.
          */
-        public static final Supplier<DataComponentType<Unit>> STABLE_FOOTING = R.enchantmentEffect("stable_footing", b -> b.persistent(Unit.CODEC));
+        public static final DataComponentType<Unit> STABLE_FOOTING = R.enchantmentEffect("stable_footing", b -> b.persistent(Unit.CODEC));
 
         /**
          * Component used by Berserker's Fury. Allows configuring the mob effects, health cost, and cooldown.
          */
-        public static final DeferredHolder<DataComponentType<?>, DataComponentType<BerserkingComponent>> BERSERKING = R.enchantmentEffect("berserking", b -> b.persistent(BerserkingComponent.CODEC));
+        public static final DataComponentType<BerserkingComponent> BERSERKING = R.enchantmentEffect("berserking", b -> b.persistent(BerserkingComponent.CODEC));
 
         /**
          * The chainsaw effect causes whole trees to break when a log is broken.
          */
-        public static final Supplier<DataComponentType<Unit>> CHAINSAW = R.enchantmentEffect("chainsaw", b -> b.persistent(Unit.CODEC));
+        public static final DataComponentType<Unit> CHAINSAW = R.enchantmentEffect("chainsaw", b -> b.persistent(Unit.CODEC));
 
         /**
          * The crescendo effect causes the crossbow to have an additional number of shots per consumed ammunition, without having to reload between them.
          */
-        public static final Supplier<DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>> CRESCENDO = R.enchantmentEffect("crescendo",
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> CRESCENDO = R.enchantmentEffect("crescendo",
             b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
 
         /**
          * The boon component allows a chance at dropping a random item from a tag when any block from a target tag is broken.
          */
-        public static final Supplier<DataComponentType<BoonComponent>> EARTHS_BOON = R.enchantmentEffect("earths_boon", b -> b.persistent(BoonComponent.CODEC));
+        public static final DataComponentType<BoonComponent> EARTHS_BOON = R.enchantmentEffect("earths_boon", b -> b.persistent(BoonComponent.CODEC));
+
+        /**
+         * The repair with hp effect causes incoming healing to be converted into durability. The final value of the effect is the amount of durability restored per
+         * full point of hp.
+         * <p>
+         * If the amount of durability per hp is more than one, fractional units of hp may be
+         * consumed to restore integer durability values (i.e. at 4 / hp, 0.25 hp can repair 1 durability).
+         */
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> REPAIR_WITH_HP = R.enchantmentEffect("repair_with_hp",
+            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
 
         private static void bootstrap() {}
     }
@@ -368,7 +378,7 @@ public class Ench {
     }
 
     public static class RecipeTypes {
-        public static final Supplier<RecipeType<InfusionRecipe>> INFUSION = R.recipe("infusion");
+        public static final RecipeType<InfusionRecipe> INFUSION = R.recipe("infusion");
 
         private static void bootstrap() {}
     }
@@ -378,12 +388,12 @@ public class Ench {
         /**
          * Used when Crescendo of Bolts is active to track the number of remaining bonus shots.
          */
-        public static final Supplier<DataComponentType<Integer>> CRESCENDO_SHOTS = R.component("crescendo_shots", b -> b.persistent(Codec.intRange(1, 1024)).networkSynchronized(ByteBufCodecs.VAR_INT));
+        public static final DataComponentType<Integer> CRESCENDO_SHOTS = R.component("crescendo_shots", b -> b.persistent(Codec.intRange(1, 1024)).networkSynchronized(ByteBufCodecs.VAR_INT));
 
         /**
          * Keeps a copy of the original {@link ChargedProjectiles} when crescendo is present, so they can be re-charged after firing.
          */
-        public static final Supplier<DataComponentType<ChargedProjectiles>> CRESCENDO_PROJECTILES = R.component("crescendo_projectiles",
+        public static final DataComponentType<ChargedProjectiles> CRESCENDO_PROJECTILES = R.component("crescendo_projectiles",
             b -> b.persistent(ChargedProjectiles.CODEC).networkSynchronized(ChargedProjectiles.STREAM_CODEC).cacheEncoding());
 
         private static void bootstrap() {}

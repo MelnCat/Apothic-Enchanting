@@ -40,7 +40,7 @@ public record BoonComponent(TagKey<Block> target, TagKey<Item> drops, List<Condi
         ItemStack stack = e.getTool();
 
         EnchantmentHelper.runIterationOnItem(stack, (ench, level) -> {
-            BoonComponent comp = ench.value().effects().get(Ench.EnchantEffects.EARTHS_BOON.get());
+            BoonComponent comp = ench.value().effects().get(Ench.EnchantEffects.EARTHS_BOON);
             if (comp != null && e.getState().is(comp.target)) {
                 LootContext ctx = Enchantment.blockHitContext(e.getLevel(), level, e.getBreaker(), Vec3.atCenterOf(e.getPos()), e.getState());
                 float chance = ApothEnchantmentHelper.processValue(comp.dropChance, ctx, level, 0);

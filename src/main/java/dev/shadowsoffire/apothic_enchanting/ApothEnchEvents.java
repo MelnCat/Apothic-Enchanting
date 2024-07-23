@@ -1,6 +1,7 @@
 package dev.shadowsoffire.apothic_enchanting;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableFloat;
 
 import dev.shadowsoffire.apothic_enchanting.enchantments.ChainsawTask;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
@@ -8,7 +9,9 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponen
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +43,7 @@ public class ApothEnchEvents {
     public void anvilEvent(AnvilUpdateEvent e) {
         ItemStack left = e.getLeft();
 
-        if (left.isEnchanted() && e.getRight().getItem() == Ench.Items.PRISMATIC_WEB.get()) {
+        if (left.isEnchanted() && e.getRight().getItem() == Ench.Items.PRISMATIC_WEB.value()) {
             ItemStack stack = left.copy();
             ItemEnchantments.Mutable enchants = new ItemEnchantments.Mutable(EnchantmentHelper.getEnchantmentsForCrafting(stack));
 
@@ -79,7 +82,6 @@ public class ApothEnchEvents {
     public void drops(LivingDropsEvent e) throws Throwable {
         if (e.getSource().getEntity() instanceof Player p) {
             Ench.Enchantments.SCAVENGER.get().drops(p, e);
-            Ench.Enchantments.SPEARFISHING.get().addFishes(e);
         }
     }
 
@@ -93,7 +95,25 @@ public class ApothEnchEvents {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void healing(LivingHealEvent e) {
         if (e.getEntity().getType() == EntityType.ARMOR_STAND) return; // https://github.com/Shadows-of-Fire/Apotheosis/issues/636
-        Ench.Enchantments.LIFE_MENDING.get().lifeMend(e);
+        if (e.getEntity().level().isClientSide) return;
+        if (e.getAmount() <= 0F) return;
+
+        EnchantmentHelper.getRandomItemWith(Ench.EnchantEffects.REPAIR_WITH_HP, e.getEntity(), s -> s.isDamaged()).ifPresent(itemInUse -> {
+            ItemStack stack = itemInUse.itemStack();
+            MutableFloat duraPerHp = new MutableFloat();
+            EnchantmentHelper.runIterationOnItem(stack, (ench, level) -> {
+                ench.value().modifyItemFilteredCount(Ench.EnchantEffects.REPAIR_WITH_HP, (ServerLevel) e.getEntity().level(), level, stack, duraPerHp);
+            });
+            if (duraPerHp.floatValue() > 0) {
+                float cost = 1F / duraPerHp.floatValue();
+                int maxRestore = Math.min(Mth.floor(e.getAmount() / cost), stack.getDamageValue());
+                e.setAmount(e.getAmount() - maxRestore * cost);
+                stack.setDamageValue(stack.getDamageValue() - maxRestore);
+                if (itemInUse.inSlot() != null && itemInUse.owner() != null) {
+                    itemInUse.owner().setItemSlot(itemInUse.inSlot(), stack);
+                }
+            }
+        });
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
