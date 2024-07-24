@@ -30,38 +30,6 @@ public class EnchHooks {
     }
 
     /**
-     * Replaces the call to {@link Enchantment#isTreasureOnly()} in various classes.
-     * Injected by coremods/ench/ench_info_redirector.js
-     */
-    public static boolean isTreasureOnly(Enchantment ench) {
-        return ApothicEnchanting.getEnchInfo(ench).isTreasure();
-    }
-
-    /**
-     * Replaces the call to {@link Enchantment#isDiscoverable()} in various classes.
-     * Injected by coremods/ench/ench_info_redirector.js
-     */
-    public static boolean isDiscoverable(Enchantment ench) {
-        return ApothicEnchanting.getEnchInfo(ench).isDiscoverable();
-    }
-
-    /**
-     * Replaces the call to {@link Enchantment#isDiscoverable()} in loot-only classes.
-     * Injected by coremods/ench/ench_info_loot_redirector.js
-     */
-    public static boolean isLootable(Enchantment ench) {
-        return ApothicEnchanting.getEnchInfo(ench).isLootable();
-    }
-
-    /**
-     * Replaces the call to {@link Enchantment#isTradeable()} in various classes.
-     * Injected by coremods/ench/ench_info_redirector.js
-     */
-    public static boolean isTradeable(Enchantment ench) {
-        return ApothicEnchanting.getEnchInfo(ench).isTradeable();
-    }
-
-    /**
      * Calculates the delay for catching a fish. Ensures that the value never returns <= 0, so that it doesn't get infinitely locked.
      * Called at the end of {@link FishingBobberEntity#catchingFish(BlockPos)}
      * Injected by coremods/ench/fishing_hook.js

@@ -1,7 +1,5 @@
 package dev.shadowsoffire.apothic_enchanting.data;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.Nullable;
@@ -9,9 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.EnchantmentTagsProvider;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.EnchantmentTags;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 public class EnchTagsProvider extends EnchantmentTagsProvider {
@@ -26,7 +22,7 @@ public class EnchTagsProvider extends EnchantmentTagsProvider {
             ApothEnchantmentProvider.BERSERKERS_FURY,
             ApothEnchantmentProvider.LIFE_MENDING);
 
-        spawnsRandomly(
+        this.tag(EnchantmentTags.NON_TREASURE).add(
             ApothEnchantmentProvider.BERSERKERS_FURY,
             ApothEnchantmentProvider.LIFE_MENDING,
             ApothEnchantmentProvider.CHAINSAW,
@@ -43,14 +39,6 @@ public class EnchTagsProvider extends EnchantmentTagsProvider {
             ApothEnchantmentProvider.SCAVENGER,
             ApothEnchantmentProvider.SHIELD_BASH,
             ApothEnchantmentProvider.STABLE_FOOTING);
-    }
-
-    @SafeVarargs
-    private void spawnsRandomly(ResourceKey<Enchantment>... keyArray) {
-        List<ResourceKey<Enchantment>> keys = Arrays.asList(keyArray);
-        this.tag(EnchantmentTags.ON_MOB_SPAWN_EQUIPMENT).addAll(keys);
-        this.tag(EnchantmentTags.ON_TRADED_EQUIPMENT).addAll(keys);
-        this.tag(EnchantmentTags.ON_RANDOM_LOOT).addAll(keys);
     }
 
 }

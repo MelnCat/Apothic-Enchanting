@@ -4,19 +4,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 
-import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
+import dev.shadowsoffire.apothic_enchanting.Ench;
 import net.minecraft.Util;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 
-public class ChromaticEnchant extends Enchantment {
+public class ShearsEnchantments {
 
     private static final Map<DyeColor, ItemLike> ITEM_BY_DYE = Util.make(Maps.newEnumMap(DyeColor.class), map -> {
         map.put(DyeColor.WHITE, Blocks.WHITE_WOOL);
@@ -37,17 +37,8 @@ public class ChromaticEnchant extends Enchantment {
         map.put(DyeColor.BLACK, Blocks.BLACK_WOOL);
     });
 
-    public ChromaticEnchant() {
-        super(Rarity.UNCOMMON, ApothicEnchanting.SHEARS, new EquipmentSlot[] { EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND });
-    }
-
-    @Override
-    public int getMinCost(int pLevel) {
-        return 40;
-    }
-
-    public List<ItemStack> molestSheepItems(Sheep sheep, ItemStack shears, List<ItemStack> items) {
-        if (shears.getEnchantmentLevel(this) > 0) {
+    public static List<ItemStack> applyChromatic(Sheep sheep, ItemStack shears, List<ItemStack> items) {
+        if (EnchantmentHelper.has(shears, Ench.EnchantEffects.CHROMATIC)) {
             for (int i = 0; i < items.size(); i++) {
                 if (items.get(i).is(ItemTags.WOOL)) {
                     items.set(i, new ItemStack(ITEM_BY_DYE.get(DyeColor.byId(sheep.getRandom().nextInt(16)))));
@@ -55,6 +46,23 @@ public class ChromaticEnchant extends Enchantment {
             }
         }
         return items;
+    }
+
+    public static List<ItemStack> applyExploitation(Sheep sheep, ItemStack shears, List<ItemStack> items) {
+        if (EnchantmentHelper.has(shears, Ench.EnchantEffects.EXPLOITATION)) {
+            if (items.size() > 0) {
+                items.addAll(items.stream().map(ItemStack::copy).toList());
+                sheep.hurt(sheep.level().damageSources().generic(), 2);
+            }
+        }
+        return items;
+    }
+
+    public static void applyGrowthSerum(Sheep sheep, ItemStack shears) {
+        Pair<Float, Integer> serumLevel = EnchantmentHelper.getHighestLevel(shears, Ench.EnchantEffects.GROWTH_SERUM);
+        if (serumLevel != null && sheep.getRandom().nextFloat() <= serumLevel.getFirst()) {
+            sheep.setSheared(false);
+        }
     }
 
 }

@@ -288,6 +288,11 @@ public class Ench {
     public static class EnchantEffects {
 
         /**
+         * The chromatic effect causes shears to randomize the color of all sheared wool.
+         */
+        public static final DataComponentType<Unit> CHROMATIC = R.enchantmentEffect("chromatic", b -> b.persistent(Unit.CODEC));
+
+        /**
          * The tempting effect causes animals to follow the item that has the effect.
          */
         public static final DataComponentType<Unit> TEMPTING = R.enchantmentEffect("tempting", b -> b.persistent(Unit.CODEC));
@@ -319,6 +324,11 @@ public class Ench {
         public static final DataComponentType<BoonComponent> EARTHS_BOON = R.enchantmentEffect("earths_boon", b -> b.persistent(BoonComponent.CODEC));
 
         /**
+         * The exploitation effect doubles all dropped wool, but deals two damage to sheared sheep.
+         */
+        public static final DataComponentType<Unit> EXPLOITATION = R.enchantmentEffect("exploitation", b -> b.persistent(Unit.CODEC));
+
+        /**
          * The repair with hp effect causes incoming healing to be converted into durability. The final value of the effect is the amount of durability restored per
          * full point of hp.
          * <p>
@@ -327,6 +337,11 @@ public class Ench {
          */
         public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> REPAIR_WITH_HP = R.enchantmentEffect("repair_with_hp",
             b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
+
+        /**
+         * The growth serum effect has a chance (equal to the value) to make a sheared sheep immediately regrow its wool.
+         */
+        public static final DataComponentType<Float> GROWTH_SERUM = R.enchantmentEffect("growth_serum", b -> b.persistent(Codec.floatRange(0.001F, 1)));
 
         private static void bootstrap() {}
     }

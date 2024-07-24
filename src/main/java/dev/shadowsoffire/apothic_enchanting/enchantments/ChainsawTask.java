@@ -74,7 +74,7 @@ public class ChainsawTask implements PlaceboTaskQueue.Task {
         Player player = e.getPlayer();
         Level level = player.level();
         ItemStack stack = player.getMainHandItem();
-        boolean hasChainsaw = EnchantmentHelper.has(stack, Ench.EnchantEffects.CHAINSAW.get());
+        boolean hasChainsaw = EnchantmentHelper.has(stack, Ench.EnchantEffects.CHAINSAW);
         if (player.getClass() == ServerPlayer.class && hasChainsaw && !level.isClientSide && isTree(level, e.getPos(), e.getState())) {
             if (!player.getAbilities().instabuild) PlaceboTaskQueue.submitTask(ApothicEnchanting.loc("chainsaw_task"), new ChainsawTask(player.getUUID(), stack, level, e.getPos()));
         }

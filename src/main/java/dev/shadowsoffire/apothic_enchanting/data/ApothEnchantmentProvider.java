@@ -95,6 +95,42 @@ public class ApothEnchantmentProvider {
                     EquipmentSlotGroup.MAINHAND))
                 .withEffect(Ench.EnchantEffects.CHAINSAW));
 
+        register(context, CHROMATIC,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(Tags.Items.TOOLS_SHEAR),
+                    5, // weight
+                    1, // max level
+                    Enchantment.constantCost(25),
+                    Enchantment.constantCost(200),
+                    2, // anvil cost
+                    EquipmentSlotGroup.HAND))
+                .withEffect(Ench.EnchantEffects.CHROMATIC));
+
+        register(context, WORKER_EXPLOITATION,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(Tags.Items.TOOLS_SHEAR),
+                    2, // weight
+                    1, // max level
+                    Enchantment.constantCost(30),
+                    Enchantment.constantCost(200),
+                    5, // anvil cost
+                    EquipmentSlotGroup.HAND))
+                .withEffect(Ench.EnchantEffects.EXPLOITATION));
+
+        register(context, GROWTH_SERUM,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(Tags.Items.TOOLS_SHEAR),
+                    1, // weight
+                    1, // max level
+                    Enchantment.constantCost(40),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.HAND))
+                .withSpecialEffect(Ench.EnchantEffects.GROWTH_SERUM, 0.5F));
+
         register(context, TEMPTING,
             Enchantment.enchantment(
                 Enchantment.definition(
