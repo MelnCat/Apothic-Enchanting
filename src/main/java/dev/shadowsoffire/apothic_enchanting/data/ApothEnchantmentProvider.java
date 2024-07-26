@@ -226,6 +226,19 @@ public class ApothEnchantmentProvider {
                 .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.MENDING)))
                 .withEffect(Ench.EnchantEffects.REPAIR_WITH_HP, new AddValue(new ExponentialLevelBasedValue(2, LevelBasedValue.perLevel(0, 1)))));
 
+        register(context, MINERS_FERVOR,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.MINING_ENCHANTABLE),
+                    2, // weight
+                    5, // max level
+                    Enchantment.dynamicCost(45, 30),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.MAINHAND))
+                .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.EFFICIENCY)))
+                .withSpecialEffect(Ench.EnchantEffects.MINERS_FERVOR, LevelBasedValue.perLevel(12, 4.5F)));
+
     }
 
     private static void register(BootstrapContext<Enchantment> context, ResourceKey<Enchantment> key, Enchantment.Builder builder) {

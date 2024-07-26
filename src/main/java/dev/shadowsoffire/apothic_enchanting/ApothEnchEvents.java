@@ -3,12 +3,15 @@ package dev.shadowsoffire.apothic_enchanting;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
+import com.mojang.datafixers.util.Pair;
+
 import dev.shadowsoffire.apothic_enchanting.enchantments.ChainsawTask;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
@@ -22,6 +25,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.Tags;
@@ -140,7 +144,9 @@ public class ApothEnchEvents {
 
             MutableBoolean flag = new MutableBoolean(false);
             EnchantmentHelper.runIterationOnEquipment(p, (ench, level, item) -> {
-                if (level > 0) flag.setTrue();
+                if (ench.value().effects().has(Ench.EnchantEffects.STABLE_FOOTING)) {
+                    flag.setTrue();
+                }
             });
 
             if (flag.getValue()) {
@@ -151,7 +157,19 @@ public class ApothEnchEvents {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public void breakSpeedLow(PlayerEvent.BreakSpeed e) {
-        Ench.Enchantments.MINERS_FERVOR.get().breakSpeed(e);
+        Player p = e.getEntity();
+        ItemStack stack = p.getMainHandItem();
+        if (stack.isEmpty()) {
+            return;
+        }
+
+        Pair<LevelBasedValue, Integer> fervor = EnchantmentHelper.getHighestLevel(stack, Ench.EnchantEffects.MINERS_FERVOR);
+        if (fervor != null) {
+            if (stack.getDestroySpeed(e.getState()) > 1.0F) {
+                float hardness = e.getState().getDestroySpeed(p.level(), e.getPosition().orElse(BlockPos.ZERO));
+                e.setNewSpeed(Math.min(29.9999F, fervor.getFirst().calculate(fervor.getSecond())) * hardness);
+            }
+        }
     }
 
     /**

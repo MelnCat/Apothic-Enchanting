@@ -52,6 +52,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
+import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -342,6 +343,14 @@ public class Ench {
          * The growth serum effect has a chance (equal to the value) to make a sheared sheep immediately regrow its wool.
          */
         public static final DataComponentType<Float> GROWTH_SERUM = R.enchantmentEffect("growth_serum", b -> b.persistent(Codec.floatRange(0.001F, 1)));
+
+        /**
+         * The miner's fervor effect is a version of efficiency that scales faster but has a cap on the max bonus.
+         * The value of the component is the scaling, the cap is hardcoded.
+         * <p>
+         * Since this has to be evaluated on the client, we can't use {@link ConditionalEffect}.
+         */
+        public static final DataComponentType<LevelBasedValue> MINERS_FERVOR = R.enchantmentEffect("miners_fervor", b -> b.persistent(LevelBasedValue.CODEC));
 
         private static void bootstrap() {}
     }
