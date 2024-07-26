@@ -352,6 +352,13 @@ public class Ench {
          */
         public static final DataComponentType<LevelBasedValue> MINERS_FERVOR = R.enchantmentEffect("miners_fervor", b -> b.persistent(LevelBasedValue.CODEC));
 
+        /**
+         * The drops to xp effect, if present on a weapon, causes all items dropped by slain mobs to be converted to experience.
+         * The amount of experience, per item, is equal to the value of the component.
+         */
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> DROPS_TO_XP = R.enchantmentEffect("drops_to_xp",
+            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
+
         private static void bootstrap() {}
     }
 

@@ -239,6 +239,18 @@ public class ApothEnchantmentProvider {
                 .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.EFFICIENCY)))
                 .withSpecialEffect(Ench.EnchantEffects.MINERS_FERVOR, LevelBasedValue.perLevel(12, 4.5F)));
 
+        register(context, KNOWLEDGE_OF_THE_AGES,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.SHARP_WEAPON_ENCHANTABLE),
+                    items.getOrThrow(ItemTags.SWORD_ENCHANTABLE),
+                    2, // weight
+                    3, // max level
+                    Enchantment.dynamicCost(55, 45),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.MAINHAND))
+                .withEffect(Ench.EnchantEffects.DROPS_TO_XP, new AddValue(LevelBasedValue.perLevel(25))));
     }
 
     private static void register(BootstrapContext<Enchantment> context, ResourceKey<Enchantment> key, Enchantment.Builder builder) {

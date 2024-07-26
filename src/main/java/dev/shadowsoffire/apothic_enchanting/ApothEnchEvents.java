@@ -16,7 +16,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.Item;
@@ -91,8 +94,27 @@ public class ApothEnchEvents {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void dropsLowest(LivingDropsEvent e) {
-        if (e.getSource().getEntity() instanceof Player p) {
-            Ench.Enchantments.KNOWLEDGE.get().drops(p, e);
+        if (!(e.getEntity() instanceof Player) && e.getSource().getEntity() instanceof Player p && !p.level().isClientSide()) {
+            ItemStack stack = p.getWeaponItem();
+            MutableFloat knowledge = new MutableFloat();
+            EnchantmentHelper.runIterationOnItem(stack, (ench, level) -> {
+                ench.value().modifyItemFilteredCount(Ench.EnchantEffects.DROPS_TO_XP, (ServerLevel) p.level(), level, stack, knowledge);
+            });
+
+            if (knowledge.floatValue() > 0) {
+                int totalXp = 0;
+                for (ItemEntity i : e.getDrops()) {
+                    totalXp += i.getItem().getCount() * knowledge.floatValue();
+                }
+                e.getDrops().clear();
+
+                Entity ded = e.getEntity();
+                while (totalXp > 0) {
+                    int i = ExperienceOrb.getExperienceValue(totalXp);
+                    totalXp -= i;
+                    p.level().addFreshEntity(new ExperienceOrb(p.level(), ded.getX(), ded.getY(), ded.getZ(), i));
+                }
+            }
         }
     }
 
