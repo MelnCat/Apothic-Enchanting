@@ -251,6 +251,19 @@ public class ApothEnchantmentProvider {
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
                 .withEffect(Ench.EnchantEffects.DROPS_TO_XP, new AddValue(LevelBasedValue.perLevel(25))));
+
+        register(context, SCAVENGER,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.SHARP_WEAPON_ENCHANTABLE),
+                    items.getOrThrow(ItemTags.SWORD_ENCHANTABLE),
+                    1, // weight
+                    3, // max level
+                    Enchantment.dynamicCost(55, 50),
+                    Enchantment.constantCost(200),
+                    10, // anvil cost
+                    EquipmentSlotGroup.MAINHAND))
+                .withEffect(Ench.EnchantEffects.EXTRA_LOOT_ROLL, new AddValue(LevelBasedValue.perLevel(0.025F))));
     }
 
     private static void register(BootstrapContext<Enchantment> context, ResourceKey<Enchantment> key, Enchantment.Builder builder) {

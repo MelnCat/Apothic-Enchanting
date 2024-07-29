@@ -24,10 +24,10 @@ public class CrescendoHooks {
      * crossbow for later usage.
      */
     public static void prepareCrescendoShots(LivingEntity shooter, ItemStack crossbow) {
-        if (EnchantmentHelper.has(crossbow, Ench.EnchantEffects.CRESCENDO.get())) {
+        if (EnchantmentHelper.has(crossbow, Ench.EnchantEffects.CRESCENDO)) {
             MutableFloat f = new MutableFloat();
             EnchantmentHelper.runIterationOnItem(crossbow, (ench, level) -> {
-                ench.value().modifyItemFilteredCount(Ench.EnchantEffects.CRESCENDO.get(), (ServerLevel) shooter.level(), level, crossbow, f);
+                ench.value().modifyItemFilteredCount(Ench.EnchantEffects.CRESCENDO, (ServerLevel) shooter.level(), level, crossbow, f);
             });
 
             if (f.intValue() > 0) {

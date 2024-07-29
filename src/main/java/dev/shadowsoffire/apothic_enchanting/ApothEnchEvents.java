@@ -1,5 +1,10 @@
 package dev.shadowsoffire.apothic_enchanting;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
@@ -19,6 +24,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownTrident;
@@ -31,6 +37,7 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -45,6 +52,18 @@ import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
 public class ApothEnchEvents {
+
+    private static final MethodHandle dropFromLootTable;
+    static {
+        Method m = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "dropFromLootTable", DamageSource.class, boolean.class);
+        try {
+            m.setAccessible(true);
+            dropFromLootTable = MethodHandles.lookup().unreflect(m);
+        }
+        catch (IllegalAccessException e) {
+            throw new RuntimeException("LivingEntity#dropFromLootTable not located!");
+        }
+    }
 
     @SubscribeEvent
     public void anvilEvent(AnvilUpdateEvent e) {
@@ -87,8 +106,22 @@ public class ApothEnchEvents {
      */
     @SubscribeEvent(priority = EventPriority.LOW)
     public void drops(LivingDropsEvent e) throws Throwable {
-        if (e.getSource().getEntity() instanceof Player p) {
-            Ench.Enchantments.SCAVENGER.get().drops(p, e);
+        if (e.getSource().getEntity() instanceof Player p && !p.level().isClientSide()) {
+            try {
+                MutableFloat dropChance = new MutableFloat();
+                EnchantmentHelper.runIterationOnItem(p.getWeaponItem(), (ench, level) -> {
+                    ench.value().modifyDamageFilteredValue(Ench.EnchantEffects.EXTRA_LOOT_ROLL, (ServerLevel) p.level(), level, p.getWeaponItem(), p, e.getSource(), dropChance);
+                });
+
+                if (dropChance.floatValue() > 0 && p.level().random.nextFloat() <= dropChance.floatValue()) {
+                    e.getEntity().captureDrops(new ArrayList<>());
+                    dropFromLootTable.invoke(e.getEntity(), e.getSource(), true);
+                    e.getDrops().addAll(e.getEntity().captureDrops(null));
+                }
+            }
+            catch (Throwable t) {
+                ApothicEnchanting.LOGGER.catching(t);
+            }
         }
     }
 

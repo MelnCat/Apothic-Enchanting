@@ -359,6 +359,12 @@ public class Ench {
         public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> DROPS_TO_XP = R.enchantmentEffect("drops_to_xp",
             b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
 
+        /**
+         * The extra loot roll effect, if present on a weapon, gives a chance to roll and drop an additional copy of the slain mob's loot.
+         */
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> EXTRA_LOOT_ROLL = R.enchantmentEffect("extra_loot_roll",
+            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_DAMAGE).listOf()));
+
         private static void bootstrap() {}
     }
 
