@@ -6,6 +6,8 @@ import java.util.List;
 import dev.shadowsoffire.apothic_enchanting.Ench.Particles;
 import dev.shadowsoffire.apothic_enchanting.client.DrawsOnLeft;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryScreen;
+import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
+import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
@@ -58,6 +60,18 @@ public class ApothEnchClient {
         e.registerSpriteSet(Particles.ENCHANT_WATER.get(), FlyTowardsPositionParticle.EnchantProvider::new);
         e.registerSpriteSet(Particles.ENCHANT_SCULK.get(), FlyTowardsPositionParticle.EnchantProvider::new);
         e.registerSpriteSet(Particles.ENCHANT_END.get(), FlyTowardsPositionParticle.EnchantProvider::new);
+    }
+
+    public static void handleCluePayload(CluePayload msg) {
+        if (Minecraft.getInstance().screen instanceof ApothEnchantmentScreen es) {
+            es.acceptClues(msg.slot(), msg.clues(), msg.all());
+        }
+    }
+
+    public static void handleStatsPayload(StatsPayload msg) {
+        if (Minecraft.getInstance().screen instanceof ApothEnchantmentScreen es) {
+            es.getMenu().setStats(msg.stats());
+        }
     }
 
     public static class ForgeBusEvents {

@@ -22,6 +22,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -131,17 +133,13 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
                 Codec.INT.optionalFieldOf("clues", 0).forGetter(Stats::clues))
             .apply(inst, Stats::new));
 
-        public void write(FriendlyByteBuf buf) {
-            buf.writeFloat(this.maxEterna);
-            buf.writeFloat(this.eterna);
-            buf.writeFloat(this.quanta);
-            buf.writeFloat(this.arcana);
-            buf.writeByte(this.clues);
-        }
-
-        public static Stats read(FriendlyByteBuf buf) {
-            return new Stats(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readByte());
-        }
+        public static StreamCodec<FriendlyByteBuf, Stats> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.FLOAT, Stats::maxEterna,
+            ByteBufCodecs.FLOAT, Stats::eterna,
+            ByteBufCodecs.FLOAT, Stats::quanta,
+            ByteBufCodecs.FLOAT, Stats::arcana,
+            ByteBufCodecs.VAR_INT, Stats::clues,
+            Stats::new);
     }
 
     public static class BlockStats implements CodecProvider<BlockStats> {

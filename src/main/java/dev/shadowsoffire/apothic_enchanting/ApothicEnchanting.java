@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +30,7 @@ import dev.shadowsoffire.placebo.tabs.TabFillingRegistry;
 import dev.shadowsoffire.placebo.util.PlaceboUtil;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -122,9 +122,10 @@ public class ApothicEnchanting {
 
             TabFillingRegistry.register(Ench.Tabs.ENCH.getKey(), Ench.Items.PRISMATIC_WEB, Ench.Items.INERT_TRIDENT, Ench.Items.WARDEN_TENDRIL, Ench.Items.INFUSED_BREATH);
 
-            fill(Ench.Tabs.ENCH.getKey(), Enchantments.BERSERKERS_FURY, Enchantments.CHAINSAW, Enchantments.CHROMATIC, Enchantments.CRESCENDO, Enchantments.EARTHS_BOON, Enchantments.ENDLESS_QUIVER, Enchantments.EXPLOITATION,
-                Enchantments.GROWTH_SERUM, Enchantments.ICY_THORNS, Enchantments.KNOWLEDGE, Enchantments.LIFE_MENDING, Enchantments.MINERS_FERVOR, Enchantments.NATURES_BLESSING, Enchantments.REBOUNDING,
-                Enchantments.REFLECTIVE, Enchantments.SCAVENGER, Enchantments.SHIELD_BASH, Enchantments.SPEARFISHING, Enchantments.STABLE_FOOTING, Enchantments.TEMPTING);
+            fill(Ench.Tabs.ENCH.getKey(), Ench.Enchantments.BERSERKERS_FURY, Ench.Enchantments.CHAINSAW, Ench.Enchantments.CHROMATIC, Ench.Enchantments.CRESCENDO_OF_BOLTS, Ench.Enchantments.EARTHS_BOON,
+                Ench.Enchantments.ENDLESS_QUIVER, Ench.Enchantments.WORKER_EXPLOITATION, Ench.Enchantments.GROWTH_SERUM, Ench.Enchantments.ICY_THORNS, Ench.Enchantments.KNOWLEDGE_OF_THE_AGES, Ench.Enchantments.LIFE_MENDING,
+                Ench.Enchantments.MINERS_FERVOR, Ench.Enchantments.NATURES_BLESSING, Ench.Enchantments.REBOUNDING, Ench.Enchantments.REFLECTIVE_DEFENSES, Ench.Enchantments.SCAVENGER, Ench.Enchantments.SHIELD_BASH,
+                Ench.Enchantments.STABLE_FOOTING, Ench.Enchantments.TEMPTING);
 
             PlaceboUtil.registerCustomColor(Ench.Colors.LIGHT_BLUE_FLASH);
         });
@@ -235,17 +236,21 @@ public class ApothicEnchanting {
     }
 
     @SafeVarargs
-    public static void fill(ResourceKey<CreativeModeTab> tab, Supplier<? extends Enchantment>... enchants) {
+    public static void fill(ResourceKey<CreativeModeTab> tab, ResourceKey<Enchantment>... enchants) {
         Arrays.stream(enchants).map(ApothicEnchanting::enchFiller).forEach(filler -> TabFillingRegistry.register(filler, tab));
     }
 
-    public static ITabFiller enchFiller(Supplier<? extends Enchantment> e) {
-        return (tab, output) -> {
-            Enchantment ench = e.get();
-            int maxLevel = EnchHooks.getMaxLevel(ench);
-            output.accept(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, maxLevel)), TabVisibility.PARENT_TAB_ONLY);
+    public static ITabFiller enchFiller(ResourceKey<Enchantment> e) {
+        return (tab, event) -> {
+            Holder<Enchantment> ench = event.getParameters().holders().lookupOrThrow(Registries.ENCHANTMENT).get(e).orElse(null);
+            if (ench == null) {
+                return;
+            }
+
+            int maxLevel = EnchHooks.getMaxLevel(ench.value());
+            event.accept(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, maxLevel)), TabVisibility.PARENT_TAB_ONLY);
             for (int level = 1; level <= maxLevel; level++) {
-                output.accept(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, level)), TabVisibility.SEARCH_TAB_ONLY);
+                event.accept(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, level)), TabVisibility.SEARCH_TAB_ONLY);
             }
         };
     }
@@ -272,6 +277,6 @@ public class ApothicEnchanting {
     }
 
     public static ResourceLocation loc(String path) {
-        return new ResourceLocation(MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 }

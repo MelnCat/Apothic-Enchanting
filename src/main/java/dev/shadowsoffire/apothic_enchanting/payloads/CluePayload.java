@@ -1,86 +1,63 @@
 package dev.shadowsoffire.apothic_enchanting.payloads;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import dev.shadowsoffire.apothic_enchanting.ApothEnchClient;
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
-import dev.shadowsoffire.placebo.network.PayloadHelper;
 import dev.shadowsoffire.placebo.network.PayloadProvider;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class CluePayload implements CustomPacketPayload {
+/**
+ * Sends a clue message to the client.
+ *
+ * @param slot
+ * @param clues The clues.
+ * @param all   If this is all of the enchantments being received.
+ */
+public record CluePayload(int slot, List<EnchantmentInstance> clues, boolean all) implements CustomPacketPayload {
 
-    public static final ResourceLocation ID = ApothicEnchanting.loc("clue");
+    public static final Type<CluePayload> TYPE = new Type<>(ApothicEnchanting.loc("clue"));
 
-    protected final int slot;
-    protected final List<EnchantmentInstance> clues;
-    protected final boolean all;
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnchantmentInstance> ENCH_INST_STREAM_CODEC = StreamCodec.composite(
+        ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT), i -> i.enchantment,
+        ByteBufCodecs.VAR_INT, i -> i.level,
+        EnchantmentInstance::new);
 
-    /**
-     * Sends a clue message to the client.
-     *
-     * @param slot
-     * @param clues The clues.
-     * @param all   If this is all of the enchantments being received.
-     */
-    public CluePayload(int slot, List<EnchantmentInstance> clues, boolean all) {
-        this.slot = slot;
-        this.clues = clues;
-        this.all = all;
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeByte(this.clues.size());
-        for (EnchantmentInstance e : this.clues) {
-            buf.writeShort(BuiltInRegistries.ENCHANTMENT.getId(e.enchantment));
-            buf.writeByte(e.level);
-        }
-        buf.writeByte(this.slot);
-        buf.writeBoolean(this.all);
-    }
+    public static final StreamCodec<RegistryFriendlyByteBuf, CluePayload> CODEC = StreamCodec.composite(
+        ByteBufCodecs.INT, CluePayload::slot,
+        ENCH_INST_STREAM_CODEC.apply(ByteBufCodecs.list()), CluePayload::clues,
+        ByteBufCodecs.BOOL, CluePayload::all,
+        CluePayload::new);
 
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
-    public static class Provider implements PayloadProvider<CluePayload, PlayPayloadContext> {
+    public static class Provider implements PayloadProvider<CluePayload> {
 
         @Override
-        public ResourceLocation id() {
-            return ID;
+        public Type<CluePayload> getType() {
+            return TYPE;
         }
 
         @Override
-        public CluePayload read(FriendlyByteBuf buf) {
-            int size = buf.readByte();
-            List<EnchantmentInstance> clues = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                Enchantment ench = BuiltInRegistries.ENCHANTMENT.byIdOrThrow(buf.readShort());
-                clues.add(new EnchantmentInstance(ench, buf.readByte()));
-            }
-            return new CluePayload(buf.readByte(), clues, buf.readBoolean());
+        public StreamCodec<? super RegistryFriendlyByteBuf, CluePayload> getCodec() {
+            return CODEC;
         }
 
         @Override
-        public void handle(CluePayload msg, PlayPayloadContext ctx) {
-            PayloadHelper.handle(() -> {
-                if (Minecraft.getInstance().screen instanceof ApothEnchantmentScreen es) {
-                    es.acceptClues(msg.slot, msg.clues, msg.all);
-                }
-            }, ctx);
+        public void handle(CluePayload msg, IPayloadContext ctx) {
+            ApothEnchClient.handleCluePayload(msg);
         }
 
         @Override
@@ -92,6 +69,12 @@ public class CluePayload implements CustomPacketPayload {
         public Optional<PacketFlow> getFlow() {
             return Optional.of(PacketFlow.CLIENTBOUND);
         }
+
+        @Override
+        public String getVersion() {
+            return "1";
+        }
+
     }
 
 }

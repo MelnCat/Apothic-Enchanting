@@ -2,21 +2,14 @@ package dev.shadowsoffire.apothic_enchanting.table.infusion;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry.Stats;
-import net.minecraft.Util;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -29,13 +22,6 @@ import net.minecraft.world.level.Level;
 public class InfusionRecipe implements Recipe<RecipeInput> {
 
     public static final Stats NO_MAX = new Stats(-1, -1, -1, -1, -1);
-
-    public static final Codec<InfusionRecipe> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-        ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(InfusionRecipe::getOutput),
-        Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(InfusionRecipe::getInput),
-        Stats.CODEC.fieldOf("requirements").forGetter(InfusionRecipe::getRequirements),
-        Stats.CODEC.optionalFieldOf("max_requirements", NO_MAX).forGetter(InfusionRecipe::getMaxRequirements))
-        .apply(inst, InfusionRecipe::new));
 
     public static final Serializer SERIALIZER = new Serializer();
 
@@ -85,30 +71,6 @@ public class InfusionRecipe implements Recipe<RecipeInput> {
         return this.output;
     }
 
-    @Override
-    @Deprecated
-    public boolean matches(Container pContainer, Level pLevel) {
-        return false;
-    }
-
-    @Override
-    @Deprecated
-    public ItemStack assemble(Container pContainer, RegistryAccess regs) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    @Deprecated
-    public boolean canCraftInDimensions(int pWidth, int pHeight) {
-        return false;
-    }
-
-    @Override
-    @Deprecated
-    public ItemStack getResultItem(RegistryAccess regs) {
-        return this.output;
-    }
-
     public ItemStack assemble(ItemStack input, float eterna, float quanta, float arcana) {
         return this.output.copy();
     }
@@ -120,50 +82,40 @@ public class InfusionRecipe implements Recipe<RecipeInput> {
 
     @Override
     public RecipeType<?> getType() {
-        return Ench.RecipeTypes.INFUSION.get();
-    }
-
-    protected static Pair<Stats, Stats> readStats(ResourceLocation id, JsonObject obj) {
-        Stats stats = Util.getOrThrow(Stats.CODEC.parse(JsonOps.INSTANCE, obj.get("requirements")), JsonParseException::new);
-        Stats maxStats = obj.has("max_requirements") ? Util.getOrThrow(Stats.CODEC.parse(JsonOps.INSTANCE, obj.get("max_requirements")), JsonParseException::new) : NO_MAX;
-        if (maxStats.eterna() != -1 && stats.eterna() > maxStats.eterna()) throw new JsonParseException("An enchanting recipe (" + id + ") has invalid min/max eterna bounds (min > max).");
-        if (maxStats.quanta() != -1 && stats.quanta() > maxStats.quanta()) throw new JsonParseException("An enchanting recipe (" + id + ") has invalid min/max quanta bounds (min > max).");
-        if (maxStats.arcana() != -1 && stats.arcana() > maxStats.arcana()) throw new JsonParseException("An enchanting recipe (" + id + ") has invalid min/max arcana bounds (min > max).");
-        return Pair.of(stats, maxStats);
+        return Ench.RecipeTypes.INFUSION;
     }
 
     public static class Serializer implements RecipeSerializer<InfusionRecipe> {
 
+        public static final MapCodec<InfusionRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+            ItemStack.CODEC.fieldOf("result").forGetter(InfusionRecipe::getOutput),
+            Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(InfusionRecipe::getInput),
+            Stats.CODEC.fieldOf("requirements").forGetter(InfusionRecipe::getRequirements),
+            Stats.CODEC.optionalFieldOf("max_requirements", NO_MAX).forGetter(InfusionRecipe::getMaxRequirements))
+            .apply(inst, InfusionRecipe::new));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, InfusionRecipe> STREAM_CODEC = StreamCodec.composite(
+            ItemStack.STREAM_CODEC, InfusionRecipe::getOutput,
+            Ingredient.CONTENTS_STREAM_CODEC, InfusionRecipe::getInput,
+            Stats.STREAM_CODEC, InfusionRecipe::getRequirements,
+            Stats.STREAM_CODEC, InfusionRecipe::getMaxRequirements,
+            InfusionRecipe::new);
+
         @Override
-        public Codec<InfusionRecipe> codec() {
+        public MapCodec<InfusionRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        public InfusionRecipe fromNetwork(FriendlyByteBuf buf) {
-            ItemStack output = buf.readItem();
-            Ingredient input = Ingredient.fromNetwork(buf);
-            Stats stats = Stats.read(buf);
-            Stats maxStats = buf.readBoolean() ? Stats.read(buf) : NO_MAX;
-            return new InfusionRecipe(output, input, stats, maxStats);
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buf, InfusionRecipe recipe) {
-            buf.writeItem(recipe.output);
-            recipe.input.toNetwork(buf);
-            recipe.requirements.write(buf);
-            buf.writeBoolean(recipe.maxRequirements != NO_MAX);
-            if (recipe.maxRequirements != NO_MAX) {
-                recipe.maxRequirements.write(buf);
-            }
+        public StreamCodec<RegistryFriendlyByteBuf, InfusionRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
 
     }
 
     @Nullable
     public static InfusionRecipe findMatch(Level level, ItemStack input, float eterna, float quanta, float arcana) {
-        return level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION.get()).stream()
+        return level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION).stream()
             .map(RecipeHolder::value)
             .sorted((r1, r2) -> -Float.compare(r1.requirements.eterna(), r2.requirements.eterna()))
             .filter(r -> r.matches(input, eterna, quanta, arcana))
@@ -172,10 +124,34 @@ public class InfusionRecipe implements Recipe<RecipeInput> {
 
     @Nullable
     public static InfusionRecipe findItemMatch(Level level, ItemStack toEnchant) {
-        return level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION.get()).stream()
+        return level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION).stream()
             .map(RecipeHolder::value)
             .filter(r -> r.getInput().test(toEnchant))
             .findFirst().orElse(null);
+    }
+
+    @Override
+    @Deprecated
+    public boolean matches(RecipeInput pContainer, Level pLevel) {
+        return false;
+    }
+
+    @Override
+    @Deprecated
+    public ItemStack assemble(RecipeInput pContainer, HolderLookup.Provider regs) {
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    @Deprecated
+    public boolean canCraftInDimensions(int pWidth, int pHeight) {
+        return false;
+    }
+
+    @Override
+    @Deprecated
+    public ItemStack getResultItem(HolderLookup.Provider regs) {
+        return this.output;
     }
 
 }

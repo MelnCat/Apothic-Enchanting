@@ -3,58 +3,43 @@ package dev.shadowsoffire.apothic_enchanting.payloads;
 import java.util.List;
 import java.util.Optional;
 
+import dev.shadowsoffire.apothic_enchanting.ApothEnchClient;
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
-import dev.shadowsoffire.placebo.network.PayloadHelper;
 import dev.shadowsoffire.placebo.network.PayloadProvider;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class StatsPayload implements CustomPacketPayload {
+public record StatsPayload(EnchantmentTableStats stats) implements CustomPacketPayload {
 
-    public static final ResourceLocation ID = ApothicEnchanting.loc("stats");
+    public static final Type<StatsPayload> TYPE = new Type<>(ApothicEnchanting.loc("stats"));
 
-    protected final EnchantmentTableStats stats;
-
-    public StatsPayload(EnchantmentTableStats stats) {
-        this.stats = stats;
-    }
+    public static final StreamCodec<RegistryFriendlyByteBuf, StatsPayload> CODEC = EnchantmentTableStats.STREAM_CODEC.map(StatsPayload::new, StatsPayload::stats);
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        this.stats.write(buf);
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
-    @Override
-    public ResourceLocation id() {
-        return ID;
-    }
-
-    public static class Provider implements PayloadProvider<StatsPayload, PlayPayloadContext> {
+    public static class Provider implements PayloadProvider<StatsPayload> {
 
         @Override
-        public ResourceLocation id() {
-            return ID;
+        public Type<StatsPayload> getType() {
+            return TYPE;
         }
 
         @Override
-        public StatsPayload read(FriendlyByteBuf buf) {
-            return new StatsPayload(EnchantmentTableStats.read(buf));
+        public StreamCodec<? super RegistryFriendlyByteBuf, StatsPayload> getCodec() {
+            return CODEC;
         }
 
         @Override
-        public void handle(StatsPayload msg, PlayPayloadContext ctx) {
-            PayloadHelper.handle(() -> {
-                if (Minecraft.getInstance().screen instanceof ApothEnchantmentScreen es) {
-                    es.getMenu().setStats(msg.stats);
-                }
-            }, ctx);
+        public void handle(StatsPayload msg, IPayloadContext ctx) {
+            ApothEnchClient.handleStatsPayload(msg);
         }
 
         @Override
@@ -65,6 +50,11 @@ public class StatsPayload implements CustomPacketPayload {
         @Override
         public Optional<PacketFlow> getFlow() {
             return Optional.of(PacketFlow.CLIENTBOUND);
+        }
+
+        @Override
+        public String getVersion() {
+            return "1";
         }
 
     }

@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 
+import dev.shadowsoffire.apothic_enchanting.data.ApothEnchantmentProvider;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryBlock;
@@ -27,7 +28,7 @@ import dev.shadowsoffire.apothic_enchanting.objects.WardenLootModifier;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableItemHandler;
 import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
-import dev.shadowsoffire.apothic_enchanting.table.infusion.NBTInfusionRecipe;
+import dev.shadowsoffire.apothic_enchanting.table.infusion.KeepNBTInfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.color.GradientColor;
@@ -52,6 +53,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
 import net.minecraft.world.level.block.Block;
@@ -61,7 +63,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
@@ -238,53 +239,33 @@ public class Ench {
 
     }
 
-    // public static final class Enchantments {
-    //
-    // public static final Supplier<BerserkersFuryEnchant> BERSERKERS_FURY = R.enchant("berserkers_fury", BerserkersFuryEnchant::new);
-    //
-    // public static final Supplier<ChainsawEnchant> CHAINSAW = R.enchant("chainsaw", ChainsawEnchant::new);
-    //
-    // public static final Supplier<ChromaticEnchant> CHROMATIC = R.enchant("chromatic", ChromaticEnchant::new);
-    //
-    // public static final Supplier<CrescendoEnchant> CRESCENDO = R.enchant("crescendo", CrescendoEnchant::new);
-    //
-    // public static final Supplier<EarthsBoonEnchant> EARTHS_BOON = R.enchant("earths_boon", EarthsBoonEnchant::new);
-    //
-    // public static final Supplier<EndlessQuiverEnchant> ENDLESS_QUIVER = R.enchant("endless_quiver", EndlessQuiverEnchant::new);
-    //
-    // public static final Supplier<ExploitationEnchant> EXPLOITATION = R.enchant("exploitation", ExploitationEnchant::new);
-    //
-    // public static final Supplier<GrowthSerumEnchant> GROWTH_SERUM = R.enchant("growth_serum", GrowthSerumEnchant::new);
-    //
-    // public static final Supplier<IcyThornsEnchant> ICY_THORNS = R.enchant("icy_thorns", IcyThornsEnchant::new);
-    //
-    // public static final Supplier<InertEnchantment> INFUSION = R.enchant("infusion", InertEnchantment::new);
-    //
-    // public static final Supplier<KnowledgeEnchant> KNOWLEDGE = R.enchant("knowledge", KnowledgeEnchant::new);
-    //
-    // public static final Supplier<LifeMendingEnchant> LIFE_MENDING = R.enchant("life_mending", LifeMendingEnchant::new);
-    //
-    // public static final Supplier<MinersFervorEnchant> MINERS_FERVOR = R.enchant("miners_fervor", MinersFervorEnchant::new);
-    //
-    // public static final Supplier<NaturesBlessingEnchant> NATURES_BLESSING = R.enchant("natures_blessing", NaturesBlessingEnchant::new);
-    //
-    // public static final Supplier<ReboundingEnchant> REBOUNDING = R.enchant("rebounding", ReboundingEnchant::new);
-    //
-    // public static final Supplier<ReflectiveEnchant> REFLECTIVE = R.enchant("reflective", ReflectiveEnchant::new);
-    //
-    // public static final Supplier<ScavengerEnchant> SCAVENGER = R.enchant("scavenger", ScavengerEnchant::new);
-    //
-    // public static final Supplier<ShieldBashEnchant> SHIELD_BASH = R.enchant("shield_bash", ShieldBashEnchant::new);
-    //
-    // public static final Supplier<SpearfishingEnchant> SPEARFISHING = R.enchant("spearfishing", SpearfishingEnchant::new);
-    //
-    // public static final Supplier<StableFootingEnchant> STABLE_FOOTING = R.enchant("stable_footing", StableFootingEnchant::new);
-    //
-    // public static final Supplier<TemptingEnchant> TEMPTING = R.enchant("tempting", TemptingEnchant::new);
-    //
-    // private static void bootstrap() {}
-    //
-    // }
+    public static final class Enchantments {
+
+        public static final ResourceKey<Enchantment> BERSERKERS_FURY = key("berserkers_fury");
+        public static final ResourceKey<Enchantment> CHAINSAW = key("chainsaw");
+        public static final ResourceKey<Enchantment> CHROMATIC = key("chromatic");
+        public static final ResourceKey<Enchantment> CRESCENDO_OF_BOLTS = key("crescendo_of_bolts");
+        public static final ResourceKey<Enchantment> EARTHS_BOON = key("earths_boon");
+        public static final ResourceKey<Enchantment> ENDLESS_QUIVER = key("endless_quiver");
+        public static final ResourceKey<Enchantment> WORKER_EXPLOITATION = key("worker_exploitation");
+        public static final ResourceKey<Enchantment> GROWTH_SERUM = key("growth_serum");
+        public static final ResourceKey<Enchantment> ICY_THORNS = key("icy_thorns");
+        public static final ResourceKey<Enchantment> INFUSION = key("infusion");
+        public static final ResourceKey<Enchantment> KNOWLEDGE_OF_THE_AGES = key("knowledge_of_the_ages");
+        public static final ResourceKey<Enchantment> LIFE_MENDING = key("life_mending");
+        public static final ResourceKey<Enchantment> MINERS_FERVOR = key("miners_fervor");
+        public static final ResourceKey<Enchantment> REBOUNDING = key("rebounding");
+        public static final ResourceKey<Enchantment> NATURES_BLESSING = key("natures_blessing");
+        public static final ResourceKey<Enchantment> REFLECTIVE_DEFENSES = key("reflective_defenses");
+        public static final ResourceKey<Enchantment> SCAVENGER = key("scavenger");
+        public static final ResourceKey<Enchantment> SHIELD_BASH = key("shield_bash");
+        public static final ResourceKey<Enchantment> STABLE_FOOTING = key("stable_footing");
+        public static final ResourceKey<Enchantment> TEMPTING = key("tempting");
+
+        private static ResourceKey<Enchantment> key(String name) {
+            return ResourceKey.create(Registries.ENCHANTMENT, ApothicEnchanting.loc(name));
+        }
+    }
 
     public static class EnchantEffects {
 
@@ -370,7 +351,7 @@ public class Ench {
 
     public static class Tabs {
 
-        public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ENCH = R.creativeTab("ench", b -> b.title(TooltipUtil.lang("creative_tab", "all")).icon(() -> Items.HELLSHELF.value().getDefaultInstance()));
+        public static final Holder<CreativeModeTab> ENCH = R.creativeTab("ench", b -> b.title(TooltipUtil.lang("creative_tab", "all")).icon(() -> Items.HELLSHELF.value().getDefaultInstance()));
 
         private static void bootstrap() {}
     }
@@ -447,7 +428,7 @@ public class Ench {
 
     static {
         R.recipeSerializer("infusion", () -> InfusionRecipe.SERIALIZER);
-        R.recipeSerializer("keep_nbt_infusion", () -> NBTInfusionRecipe.SERIALIZER);
+        R.recipeSerializer("keep_nbt_infusion", () -> KeepNBTInfusionRecipe.SERIALIZER);
         R.custom("warden_tendril", NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> WardenLootModifier.CODEC);
         R.custom("enchantment_table_item_handler", NeoForgeRegistries.Keys.ATTACHMENT_TYPES, () -> EnchantmentTableItemHandler.TYPE);
     }
