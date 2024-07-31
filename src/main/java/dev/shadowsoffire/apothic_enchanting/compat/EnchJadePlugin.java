@@ -2,8 +2,8 @@ package dev.shadowsoffire.apothic_enchanting.compat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import dev.shadowsoffire.apothic_attributes.ApothicAttributes;
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.objects.FilteringShelfBlock.FilteringShelfTile;
@@ -11,19 +11,19 @@ import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.phys.Vec2;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaPlugin;
-import snownee.jade.api.Identifiers;
+import snownee.jade.api.JadeIds;
 import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IDisplayHelper;
@@ -31,7 +31,7 @@ import snownee.jade.api.ui.IElement;
 import snownee.jade.api.ui.IElementHelper;
 
 @WailaPlugin
-public class EnchHwylaPlugin implements IWailaPlugin, IBlockComponentProvider {
+public class EnchJadePlugin implements IWailaPlugin, IBlockComponentProvider {
 
     @Override
     public void registerClient(IWailaClientRegistration reg) {
@@ -43,7 +43,7 @@ public class EnchHwylaPlugin implements IWailaPlugin, IBlockComponentProvider {
         TooltipUtil.appendBlockStats(accessor.getLevel(), accessor.getBlockState(), accessor.getPosition(), tooltip::add);
         if (accessor.getBlock() == Blocks.ENCHANTING_TABLE) {
             TooltipUtil.appendTableStats(accessor.getLevel(), accessor.getPosition(), tooltip::add);
-            tooltip.remove(Identifiers.MC_TOTAL_ENCHANTMENT_POWER);
+            tooltip.remove(JadeIds.MC_TOTAL_ENCHANTMENT_POWER);
         }
 
         if (accessor.getBlock() == Ench.Blocks.FILTERING_SHELF.get()) this.handleFilteringShelf(tooltip, accessor);
@@ -68,20 +68,17 @@ public class EnchHwylaPlugin implements IWailaPlugin, IBlockComponentProvider {
     }
 
     public void handleFilteringShelf(ITooltip tooltip, BlockAccessor accessor) {
-        tooltip.remove(Identifiers.MC_ENCHANTMENT_POWER);
-        tooltip.remove(Identifiers.MC_CHISELED_BOOKSHELF);
-        tooltip.remove(Identifiers.UNIVERSAL_ITEM_STORAGE);
+        tooltip.remove(JadeIds.MC_ENCHANTMENT_POWER);
+        tooltip.remove(JadeIds.MC_CHISELED_BOOKSHELF);
+        tooltip.remove(JadeIds.UNIVERSAL_ITEM_STORAGE);
 
         if (accessor.showDetails()) {
             return;
         }
 
         if (accessor.getBlockEntity() instanceof FilteringShelfTile tile) {
-            Optional<Vec2> optional = ChiseledBookShelfBlock.getRelativeHitCoordinatesForBlockFace(accessor.getHitResult(), accessor.getBlockState().getValue(HorizontalDirectionalBlock.FACING));
-            if (optional.isEmpty()) {
-                return;
-            }
-            int slot = ChiseledBookShelfBlock.getHitSlot(optional.get());
+            int slot = ((ChiseledBookShelfBlock) accessor.getBlock()).getHitSlot(accessor.getHitResult(), accessor.getBlockState()).orElse(-1);
+            if (slot == -1) return;
             ItemStack stack = tile.getItem(slot);
             if (stack.isEmpty()) return;
             tooltip.add(CommonComponents.EMPTY);
@@ -94,11 +91,13 @@ public class EnchHwylaPlugin implements IWailaPlugin, IBlockComponentProvider {
                 .message(null));
             tooltip.add(elements);
 
-            if (stack.getTag() != null && stack.getTag().contains(EnchantedBookItem.TAG_STORED_ENCHANTMENTS)) {
+            ItemEnchantments enchants = EnchantmentHelper.getEnchantmentsForCrafting(stack);
+            if (!enchants.isEmpty()) {
                 List<Component> list = new ArrayList<>();
-                ItemStack.appendEnchantmentNames(list, EnchantedBookItem.getEnchantments(stack));
-                for (Component c : list)
+                enchants.addToTooltip(TooltipContext.of(accessor.getLevel()), list::add, ApothicAttributes.getTooltipFlag());
+                for (Component c : list) {
                     tooltip.add(Component.literal(" - ").append(c));
+                }
             }
         }
     }

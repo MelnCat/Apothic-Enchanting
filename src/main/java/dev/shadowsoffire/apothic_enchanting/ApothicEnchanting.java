@@ -14,6 +14,8 @@ import dev.shadowsoffire.apothic_attributes.ApothicAttributes;
 import dev.shadowsoffire.apothic_enchanting.EnchantmentInfo.PowerFunc;
 import dev.shadowsoffire.apothic_enchanting.asm.EnchHooks;
 import dev.shadowsoffire.apothic_enchanting.data.ApothEnchantmentProvider;
+import dev.shadowsoffire.apothic_enchanting.data.EnchTagsProvider;
+import dev.shadowsoffire.apothic_enchanting.data.LootProvider;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile;
 import dev.shadowsoffire.apothic_enchanting.objects.TomeItem;
 import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
@@ -23,7 +25,6 @@ import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import dev.shadowsoffire.apothic_enchanting.util.MiscDatagen;
 import dev.shadowsoffire.placebo.config.Configuration;
 import dev.shadowsoffire.placebo.events.ResourceReloadEvent;
-import dev.shadowsoffire.placebo.loot.LootSystem;
 import dev.shadowsoffire.placebo.network.PayloadHelper;
 import dev.shadowsoffire.placebo.tabs.ITabFiller;
 import dev.shadowsoffire.placebo.tabs.TabFillingRegistry;
@@ -45,7 +46,6 @@ import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -83,33 +83,6 @@ public class ApothicEnchanting {
         NeoForge.EVENT_BUS.register(new ApothEnchEvents());
         NeoForge.EVENT_BUS.addListener(this::reload);
         e.enqueueWork(() -> {
-            LootSystem.defaultBlockTable(Ench.Blocks.HELLSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.INFUSED_HELLSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.BLAZING_HELLSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.GLOWING_HELLSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.SEASHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.INFUSED_SEASHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.CRYSTAL_SEASHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.HEART_SEASHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.DORMANT_DEEPSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.DEEPSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.ECHOING_DEEPSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.SOUL_TOUCHED_DEEPSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.ECHOING_SCULKSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.SOUL_TOUCHED_SCULKSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.ENDSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.PEARL_ENDSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.DRACONIC_ENDSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.BEESHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.MELONSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.STONESHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.LIBRARY.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.GEODE_SHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.SIGHTSHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.SIGHTSHELF_T2.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.ENDER_LIBRARY.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.FILTERING_SHELF.get());
-            LootSystem.defaultBlockTable(Ench.Blocks.TREASURE_SHELF.get());
             DispenserBlock.registerBehavior(Items.SHEARS, new ShearsDispenseItemBehavior());
 
             TabFillingRegistry.register(Ench.Tabs.ENCH.getKey(), Ench.Items.HELLSHELF, Ench.Items.INFUSED_HELLSHELF, Ench.Items.BLAZING_HELLSHELF, Ench.Items.GLOWING_HELLSHELF, Ench.Items.SEASHELF, Ench.Items.INFUSED_SEASHELF,
@@ -175,6 +148,8 @@ public class ApothicEnchanting {
             .add(Registries.ENCHANTMENT, ApothEnchantmentProvider::bootstrap);
 
         e.getGenerator().addProvider(true, new DatapackBuiltinEntriesProvider(output, e.getLookupProvider(), regSet, Set.of(MODID)));
+        e.getGenerator().addProvider(true, LootProvider.create(output, e.getLookupProvider()));
+        e.getGenerator().addProvider(true, new EnchTagsProvider(output, e.getLookupProvider(), e.getExistingFileHelper()));
     }
 
     /*

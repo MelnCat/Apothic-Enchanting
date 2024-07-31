@@ -83,6 +83,7 @@ repositories {
         url "https://maven.shadowsoffire.dev/releases"
         content {
             includeGroup "dev.shadowsoffire"
+            includeGroup "snownee.jade"
         }
     }
     maven {
@@ -99,7 +100,7 @@ dependencies {
     if(project.mixin.toBoolean())                   annotationProcessor "org.spongepowered:mixin:${mixinVersion}:processor"
     if(project.hasProperty('placeboVersion'))       implementation "dev.shadowsoffire:Placebo:${mcVersion}-${placeboVersion}"
     if(project.hasProperty('jeiVersion'))           implementation "mezz.jei:jei-${mcVersion}-neoforge:${jeiVersion}"
-    if(project.hasProperty('jadeFileId'))           implementation "curse.maven:jade-324717:${jadeFileId}"
+    if(project.hasProperty('jadeVersion'))          implementation "snownee.jade:Jade-NeoForge:${mcVersion}-${jadeVersion}"
     if(project.hasProperty('curiosVersion'))        implementation "top.theillusivec4.curios:curios-neoforge:${curiosVersion}"
     if(project.hasProperty('patchouliVersion'))     implementation "vazkii.patchouli:Patchouli:${patchouliVersion}"
     if(project.hasProperty('bookshelfVersion'))     compileOnly    "net.darkhax.bookshelf:Bookshelf-Forge-${mcVersion}:${bookshelfVersion}"
