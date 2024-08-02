@@ -13,6 +13,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.shadowsoffire.apothic_enchanting.enchantments.ChainsawTask;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
+import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveComponent;
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
@@ -175,9 +176,23 @@ public class ApothEnchEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void block(LivingShieldBlockEvent e) {
-        Ench.Enchantments.REFLECTIVE.get().reflect(e);
+        LivingEntity user = e.getEntity();
+        Entity attacker = e.getDamageSource().getDirectEntity();
+        ItemStack shield = user.getUseItem();
+        Pair<ReflectiveComponent, Integer> reflect = EnchantmentHelper.getHighestLevel(shield, Ench.EnchantEffects.REFLECTIVE);
+        if (reflect != null) {
+            float chance = reflect.getFirst().procChance().calculate(reflect.getSecond());
+            if (user.level().random.nextFloat() <= chance) {
+                DamageSource src = user.level().damageSources().indirectMagic(user, user);
+                if (attacker instanceof LivingEntity livingAttacker) {
+                    float ratio = reflect.getFirst().reflectRatio().calculate(reflect.getSecond());
+                    livingAttacker.hurt(src, ratio * e.getBlockedDamage());
+                    shield.hurtAndBreak(10, user, LivingEntity.getSlotForHand(user.getUsedItemHand()));
+                }
+            }
+        }
     }
 
     @SubscribeEvent

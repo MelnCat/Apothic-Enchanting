@@ -9,6 +9,7 @@ import com.mojang.serialization.Codec;
 
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
+import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveComponent;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryBlock;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryContainer;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile.BasicLibraryTile;
@@ -345,6 +346,11 @@ public class Ench {
          */
         public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> EXTRA_LOOT_ROLL = R.enchantmentEffect("extra_loot_roll",
             b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_DAMAGE).listOf()));
+
+        /**
+         * The reflective effect, if present on a blocking shield, gives a chance to inflict part of the blocked damage to the attacker.
+         */
+        public static final DataComponentType<ReflectiveComponent> REFLECTIVE = R.enchantmentEffect("reflective", b -> b.persistent(ReflectiveComponent.CODEC));
 
         private static void bootstrap() {}
     }

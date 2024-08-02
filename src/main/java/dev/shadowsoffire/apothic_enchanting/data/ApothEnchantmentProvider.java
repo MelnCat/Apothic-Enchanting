@@ -7,6 +7,7 @@ import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent.VariableMobEffect;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
+import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.values.ExponentialLevelBasedValue;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.TagPredicate;
@@ -246,6 +247,18 @@ public class ApothEnchantmentProvider {
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
                 .withEffect(Ench.EnchantEffects.EXTRA_LOOT_ROLL, new AddValue(LevelBasedValue.perLevel(0.025F))));
+
+        register(context, Ench.Enchantments.REFLECTIVE_DEFENSES,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(Tags.Items.TOOLS_SHIELD),
+                    2, // weight
+                    5, // max level
+                    Enchantment.dynamicCost(0, 18),
+                    Enchantment.constantCost(200),
+                    5, // anvil cost
+                    EquipmentSlotGroup.HAND))
+                .withSpecialEffect(Ench.EnchantEffects.REFLECTIVE, new ReflectiveComponent(LevelBasedValue.perLevel(0.15F, 0.10F), LevelBasedValue.perLevel(0.15F))));
 
         // Vanilla Overrides
 
