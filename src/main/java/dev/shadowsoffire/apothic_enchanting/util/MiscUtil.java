@@ -9,6 +9,7 @@ import com.mojang.authlib.GameProfile;
 import dev.shadowsoffire.placebo.color.GradientColor;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,6 +17,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CommandBlock;
@@ -167,6 +169,10 @@ public class MiscUtil {
         boolean removed = state.onDestroyedByPlayer(world, pos, player, canHarvest, world.getFluidState(pos));
         if (removed) state.getBlock().destroy(world, pos, state);
         return removed;
+    }
+
+    public static String getEnchDescKey(Holder<Enchantment> ench) {
+        return ench.getKey().location().toLanguageKey("enchantment") + ".desc";
     }
 
 }

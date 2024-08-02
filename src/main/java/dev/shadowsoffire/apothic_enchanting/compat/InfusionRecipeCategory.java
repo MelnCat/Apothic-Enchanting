@@ -34,6 +34,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Blocks;
 
 public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
@@ -133,7 +134,8 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
         RenderSystem.disableBlend();
         if (hover) {
             List<Component> list = new ArrayList<>();
-            list.add(Component.translatable("container.enchant.clue", Ench.Enchantments.INFUSION.get().getFullname(1).getString()).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            Component infusionName = Enchantment.getFullname(Minecraft.getInstance().level.holderOrThrow(Ench.Enchantments.INFUSION), 1);
+            list.add(Component.translatable("container.enchant.clue", infusionName).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             gfx.renderComponentTooltip(font, list, (int) mouseX, (int) mouseY);
         }
         else if (mouseX > 56 && mouseX <= 56 + 110 && mouseY > 26 && mouseY <= 27 + 5) {

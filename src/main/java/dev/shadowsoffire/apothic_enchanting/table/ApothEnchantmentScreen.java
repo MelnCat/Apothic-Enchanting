@@ -27,6 +27,9 @@ import net.minecraft.client.gui.screens.inventory.EnchantmentNames;
 import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Holder;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -45,6 +48,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
 
     protected final ApothEnchantmentMenu menu;
     protected final Int2ObjectMap<List<EnchantmentInstance>> clues = new Int2ObjectOpenHashMap<>();
+    protected final IdMap<Holder<Enchantment>> enchIdMap = this.minecraft.level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).asHolderIdMap();
 
     protected float eterna = 0, lastEterna = 0, quanta = 0, lastQuanta = 0, arcana = 0, lastArcana = 0;
     protected boolean[] hasAllClues = { false, false, false };
@@ -105,7 +109,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
             }
         }
 
-        if (this.menu.getSlot(0).hasItem() && this.isHovering(145, -15, 27, 15, pMouseX, pMouseY) && Arrays.stream(this.menu.enchantClue).boxed().map(Enchantment::byId).allMatch(Predicates.notNull())) {
+        if (this.menu.getSlot(0).hasItem() && this.isHovering(145, -15, 27, 15, pMouseX, pMouseY) && Arrays.stream(this.menu.enchantClue).boxed().map(enchIdMap::byId).allMatch(Predicates.notNull())) {
             Minecraft.getInstance().pushGuiLayer(new EnchantingInfoScreen(this));
         }
 
@@ -178,7 +182,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
             gfx.blit(TEXTURES, xCenter + 59, yCenter + 95, 0, 207, getBarLength(this.arcana), 5);
         }
 
-        if (this.menu.getSlot(0).hasItem() && Arrays.stream(this.menu.enchantClue).boxed().map(Enchantment::byId).allMatch(Predicates.notNull())) {
+        if (this.menu.getSlot(0).hasItem() && Arrays.stream(this.menu.enchantClue).boxed().map(enchIdMap::byId).allMatch(Predicates.notNull())) {
             int u = this.isHovering(145, -15, 27, 15, mouseX, mouseY) ? 15 : 0;
             gfx.blit(TEXTURES, xCenter + 145, yCenter - 15, this.imageWidth, u, 27, 15);
         }
@@ -186,7 +190,6 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTicks) {
-        partialTicks = this.minecraft.getFrameTime();
         ((SuperRender) this).apoth_superRender(gfx, mouseX, mouseY, partialTicks);
         this.renderTooltip(gfx, mouseX, mouseY);
         boolean creative = this.minecraft.player.getAbilities().instabuild;
@@ -194,7 +197,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
 
         for (int slot = 0; slot < 3; ++slot) {
             int level = this.menu.costs[slot];
-            Enchantment enchantment = Enchantment.byId(this.menu.enchantClue[slot]);
+            Holder<Enchantment> enchantment = enchIdMap.byId(this.menu.enchantClue[slot]);
             int cost = slot + 1;
             if (this.isHovering(60, 14 + 19 * slot, 108, 18, mouseX, mouseY) && level > 0) {
                 List<Component> list = Lists.newArrayList();
@@ -204,7 +207,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
                     if (!this.clues.get(slot).isEmpty()) {
                         list.add(TooltipUtil.lang("info", "runes" + (this.hasAllClues[slot] ? "_all" : "")).withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
                         for (EnchantmentInstance i : this.clues.get(slot)) {
-                            list.add(i.enchantment.getFullname(i.level));
+                            list.add(Enchantment.getFullname(i.enchantment, i.level));
                         }
                     }
                     else {
@@ -212,7 +215,8 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
                     }
                 }
                 else if (isFailedInfusion) {
-                    list.add(Ench.Enchantments.INFUSION.get().getFullname(1).copy().withStyle(ChatFormatting.ITALIC));
+                    MutableComponent infusionName = (MutableComponent) Enchantment.getFullname(Minecraft.getInstance().level.holderOrThrow(Ench.Enchantments.INFUSION), 1);
+                    list.add(infusionName.withStyle(ChatFormatting.ITALIC));
                     Collections.addAll(list, Component.literal(""), TooltipUtil.lang("info", "infusion_failed").withStyle(ChatFormatting.RED));
                 }
                 else {
@@ -317,7 +321,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
                 this.drawOnLeft(gfx, list, this.getGuiTop() + 29 + offset);
             }
         }
-        else if (this.menu.getSlot(0).hasItem() && this.isHovering(145, -15, 27, 15, mouseX, mouseY) && Arrays.stream(this.menu.enchantClue).boxed().map(Enchantment::byId).allMatch(Predicates.notNull())) {
+        else if (this.menu.getSlot(0).hasItem() && this.isHovering(145, -15, 27, 15, mouseX, mouseY) && Arrays.stream(this.menu.enchantClue).boxed().map(enchIdMap::byId).allMatch(Predicates.notNull())) {
             List<Component> list = Lists.newArrayList();
             list.add(TooltipUtil.lang("info", "all_available").withStyle(ChatFormatting.BLUE));
             gfx.renderComponentTooltip(this.font, list, mouseX, mouseY);

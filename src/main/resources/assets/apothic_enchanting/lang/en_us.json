@@ -252,11 +252,16 @@
     "menu.apothic_enchanting.enchanting_info": "Available Enchantments",
     "info.apothic_enchanting.slider_power": "Power: %s",
     "info.apothic_enchanting.enchinfo_level": "Level: %s",
-    "info.apothic_enchanting.enchinfo_rarity": "Rarity: %s",
+    "info.apothic_enchanting.enchinfo_weight": "Weight: %s (%s)",
     "info.apothic_enchanting.enchinfo_chance": "Chance: %s",
     "info.apothic_enchanting.enchinfo_slot": "Enchantment Slot %s",
     "info.apothic_enchanting.enchinfo_minpow": "Min Power: %s",
     "info.apothic_enchanting.enchinfo_maxpow": "Max Power: %s",
+    
+    "rarity.apothic_enchanting.common": "Common",
+    "rarity.apothic_enchanting.uncommon": "Uncommon",
+    "rarity.apothic_enchanting.rare": "Rare",
+    "rarity.apothic_enchanting.very_rare": "Very Rare",
 
     "info.apothic_enchanting.weights": "Weights",
     "info.apothic_enchanting.all_available": "View all available enchantments",

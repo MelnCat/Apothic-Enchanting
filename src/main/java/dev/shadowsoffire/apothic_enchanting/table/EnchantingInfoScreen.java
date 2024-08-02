@@ -14,6 +14,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper.ArcanaEnchantmentData;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
+import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.random.WeightedEntry.IntrusiveBase;
 import net.minecraft.util.random.WeightedRandom;
@@ -37,8 +39,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 public class EnchantingInfoScreen extends Screen {
 
     public static final ResourceLocation TEXTURES = ApothicEnchanting.loc("textures/gui/enchanting_info.png");
-
-    protected static ChatFormatting[] colors = { ChatFormatting.WHITE, ChatFormatting.YELLOW, ChatFormatting.BLUE, ChatFormatting.GOLD };
 
     protected final ApothEnchantmentScreen parent;
     protected final int imageWidth, imageHeight;
@@ -55,8 +55,8 @@ public class EnchantingInfoScreen extends Screen {
     protected float scrollOffs;
     protected boolean scrolling;
     protected int startIndex;
-    List<EnchantmentDataWrapper> enchantments = Collections.emptyList();
-    Map<Enchantment, List<Enchantment>> exclusions = new HashMap<>();
+    protected List<EnchantmentDataWrapper> enchantments = Collections.emptyList();
+    protected Map<Holder<Enchantment>, List<Holder<Enchantment>>> exclusions = new HashMap<>();
 
     public EnchantingInfoScreen(ApothEnchantmentScreen parent) {
         super(TooltipUtil.lang("menu", "enchanting_info"));
@@ -68,7 +68,7 @@ public class EnchantingInfoScreen extends Screen {
         this.clues = parent.getMenu().enchantClue;
         this.treasure = parent.getMenu().stats.treasure();
         for (int i = 0; i < 3; i++) {
-            Enchantment clue = Enchantment.byId(this.clues[i]);
+            Holder<Enchantment> clue = parent.enchIdMap.byId(this.clues[i]);
             if (clue != null) {
                 int level = this.costs[i];
                 float quanta = parent.getMenu().stats.quanta() / 100F;
@@ -94,7 +94,7 @@ public class EnchantingInfoScreen extends Screen {
         pose.translate(this.leftPos, this.topPos, 0);
         gfx.blit(TEXTURES, 0, 0, 0, 0, this.imageWidth, this.imageHeight);
         for (int i = 0; i < 3; i++) {
-            Enchantment clue = Enchantment.byId(this.clues[i]);
+            Holder<Enchantment> clue = parent.enchIdMap.byId(this.clues[i]);
             int u = 199, v = 225;
             if (clue == null) {
                 u += 19;
@@ -124,10 +124,10 @@ public class EnchantingInfoScreen extends Screen {
             if (this.enchantments.size() - 1 < i) break;
             EnchantmentDataWrapper data = this.enchantments.get(this.startIndex + i);
             if (data.isBlacklisted) {
-                gfx.drawString(this.font, Component.translatable(data.getEnch().getDescriptionId()).withStyle(s -> s.withColor(0x58B0CC).withStrikethrough(true)), 91, 21 + 13 * i, 0xFFFF80, false);
+                gfx.drawString(this.font, data.getEnch().value().description().plainCopy().withStyle(s -> s.withColor(0x58B0CC).withStrikethrough(true)), 91, 21 + 13 * i, 0xFFFF80, false);
             }
             else {
-                gfx.drawString(this.font, I18n.get(data.getEnch().getDescriptionId()), 91, 21 + 13 * i, 0xFFFF80, false);
+                gfx.drawString(this.font, data.getEnch().value().description().getString(), 91, 21 + 13 * i, 0xFFFF80, false);
             }
         }
 
@@ -157,19 +157,23 @@ public class EnchantingInfoScreen extends Screen {
 
         if (hover != null) {
             list.clear();
-            list.add(Component.translatable(hover.getEnch().getDescriptionId()).withStyle(getColor(hover.getEnch()), ChatFormatting.UNDERLINE));
+            list.add(hover.getEnch().value().description().plainCopy().withStyle(getColor(hover.getEnch()), ChatFormatting.UNDERLINE));
             list.add(TooltipUtil.lang("info", "enchinfo_level", Component.translatable("enchantment.level." + hover.getLevel())).withStyle(ChatFormatting.DARK_AQUA));
-            Component rarity = Component.translatable("rarity.enchantment." + hover.getEnch().getRarity().name().toLowerCase(Locale.ROOT)).withStyle(colors[hover.getEnch().getRarity().ordinal()]);
-            list.add(TooltipUtil.lang("info", "enchinfo_rarity", rarity).withStyle(ChatFormatting.DARK_AQUA));
+
+            int weight = hover.getEnch().value().definition().weight();
+            LegacyRarity rarity = LegacyRarity.byWeight(weight);
+            Component rarityName = TooltipUtil.lang("rarity", rarity.name().toLowerCase(Locale.ROOT)).withColor(rarity.color);
+            list.add(TooltipUtil.lang("info", "enchinfo_weight", weight, rarityName).withStyle(ChatFormatting.DARK_AQUA));
+
             list.add(TooltipUtil.lang("info", "enchinfo_chance", String.format("%.2f", 100F * hover.getWeight().asInt() / WeightedRandom.getTotalWeight(this.enchantments)) + "%").withStyle(ChatFormatting.DARK_AQUA));
-            if (I18n.exists(hover.getEnch().getDescriptionId() + ".desc")) {
-                list.add(Component.translatable(hover.getEnch().getDescriptionId() + ".desc").withStyle(ChatFormatting.DARK_AQUA));
+            if (I18n.exists(MiscUtil.getEnchDescKey(hover.getEnch()))) {
+                list.add(Component.translatable(MiscUtil.getEnchDescKey(hover.getEnch())).withStyle(ChatFormatting.DARK_AQUA));
             }
-            List<Enchantment> excls = this.exclusions.get(hover.getEnch());
+            List<Holder<Enchantment>> excls = this.exclusions.get(hover.getEnch());
             if (!excls.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < excls.size(); i++) {
-                    sb.append(I18n.get(excls.get(i).getDescriptionId()));
+                    sb.append(excls.get(i).value().description().getString());
                     if (i != excls.size() - 1) sb.append(", ");
                 }
                 list.add(Component.translatable("Exclusive With: %s", sb.toString()).withStyle(ChatFormatting.RED));
@@ -202,7 +206,7 @@ public class EnchantingInfoScreen extends Screen {
         }
 
         for (int i = 0; i < 3; i++) {
-            Enchantment clue = Enchantment.byId(this.clues[i]);
+            Holder<Enchantment> clue = parent.enchIdMap.byId(this.clues[i]);
             if (this.selectedSlot != i && clue != null && this.isHovering(8, 18 + 18 * i, 18, 16, pMouseX, pMouseY)) {
                 this.selectedSlot = i;
                 this.slider.setValue((this.slider.min() + this.slider.max()) / 2);
@@ -270,7 +274,7 @@ public class EnchantingInfoScreen extends Screen {
         this.exclusions.clear();
         for (EnchantmentDataWrapper d : this.enchantments) {
             if (blacklist.contains(d.getEnch())) continue;
-            List<Enchantment> excls = new ArrayList<>();
+            List<Holder<Enchantment>> excls = new ArrayList<>();
             for (EnchantmentDataWrapper d2 : this.enchantments) {
                 if (d != d2 && !Enchantment.areCompatible(d.getEnch(), d2.getEnch())) {
                     excls.add(d2.getEnch());
@@ -296,8 +300,8 @@ public class EnchantingInfoScreen extends Screen {
         return null;
     }
 
-    public static ChatFormatting getColor(Enchantment ench) {
-        return ApothicEnchanting.getEnchInfo(ench).isTreasure() ? ChatFormatting.GOLD : ChatFormatting.GREEN;
+    public static ChatFormatting getColor(Holder<Enchantment> holder) {
+        return holder.is(EnchantmentTags.TREASURE) ? ChatFormatting.GOLD : ChatFormatting.GREEN;
     }
 
     public class PowerSlider extends AbstractSliderButton {
@@ -382,6 +386,37 @@ public class EnchantingInfoScreen extends Screen {
 
         public int getLevel() {
             return this.data.data.level;
+        }
+
+    }
+
+    public static enum LegacyRarity {
+        COMMON(10, ChatFormatting.WHITE),
+        UNCOMMON(5, ChatFormatting.YELLOW),
+        RARE(2, ChatFormatting.BLUE),
+        VERY_RARE(1, ChatFormatting.GOLD);
+
+        private final int weight;
+        private final int color;
+
+        private LegacyRarity(int pWeight, ChatFormatting color) {
+            this.weight = pWeight;
+            this.color = color.getColor();
+        }
+
+        public int weight() {
+            return this.weight;
+        }
+
+        public int color() {
+            return this.color;
+        }
+
+        public static LegacyRarity byWeight(int weight) {
+            if (weight > 10) return COMMON;
+            else if (weight > 5) return UNCOMMON;
+            else if (weight > 2) return RARE;
+            else return VERY_RARE;
         }
 
     }

@@ -283,6 +283,17 @@ public class ApothEnchantmentProvider {
                         new ApplyMobEffect(HolderSet.direct(MobEffects.MOVEMENT_SLOWDOWN), LevelBasedValue.perLevel(100), LevelBasedValue.perLevel(200), LevelBasedValue.perLevel(1), LevelBasedValue.perLevel(2))),
                     LootItemRandomChanceCondition.randomChance(EnchantmentLevelProvider.forEnchantmentLevel(LevelBasedValue.perLevel(0.5F)))));
 
+        register(context, Ench.Enchantments.INFUSION,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    HolderSet.empty(),
+                    1, // weight
+                    1, // max level
+                    Enchantment.constantCost(0),
+                    Enchantment.constantCost(0),
+                    0, // anvil cost
+                    EquipmentSlotGroup.ANY)));
+
         // Vanilla Overrides
 
         register(context, Enchantments.SHARPNESS,

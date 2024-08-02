@@ -10,13 +10,13 @@ import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
 import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
-import dev.shadowsoffire.placebo.network.PacketDistro;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -25,12 +25,12 @@ import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 @SuppressWarnings("deprecation")
 public class ApothEnchantmentMenu extends EnchantmentMenu {
@@ -122,7 +122,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
             if (!list.isEmpty()) {
                 EnchantmentUtils.chargeExperience(player, MiscUtil.getExpCostForSlot(level, slot));
                 player.onEnchantmentPerformed(toEnchant, 0); // Pass zero here instead of the cost so no experience is taken, but the method is still called for tracking reasons.
-                if (list.get(0).enchantment == Ench.Enchantments.INFUSION.get()) {
+                if (list.get(0).enchantment.is(Ench.Enchantments.INFUSION)) {
                     InfusionRecipe match = InfusionRecipe.findMatch(world, toEnchant, eterna, quanta, arcana);
                     if (match != null) this.enchantSlots.setItem(0, match.assemble(toEnchant, eterna, quanta, arcana));
                     else return;
@@ -187,7 +187,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
 
                             if (list != null && !list.isEmpty()) {
                                 EnchantmentInstance enchantmentdata = list.remove(this.random.nextInt(list.size()));
-                                this.enchantClue[slot] = BuiltInRegistries.ENCHANTMENT.getId(enchantmentdata.enchantment);
+                                this.enchantClue[slot] = this.player.level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getId(enchantmentdata.enchantment.value());
                                 this.levelClue[slot] = enchantmentdata.level;
                                 int clues = this.stats.clues();
                                 List<EnchantmentInstance> clueList = new ArrayList<>();
@@ -195,7 +195,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
                                 while (clues-- > 0 && !list.isEmpty()) {
                                     clueList.add(list.remove(this.random.nextInt(list.size())));
                                 }
-                                PacketDistro.sendTo(new CluePayload(slot, clueList, list.isEmpty()), this.player);
+                                PacketDistributor.sendToPlayer((ServerPlayer) this.player, new CluePayload(slot, clueList, list.isEmpty()));
                             }
                         }
                     }
@@ -209,7 +209,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
                         this.levelClue[i] = -1;
                     }
                     this.stats = EnchantmentTableStats.INVALID;
-                    PacketDistro.sendTo(new StatsPayload(this.stats), this.player);
+                    PacketDistributor.sendToPlayer((ServerPlayer) this.player, new StatsPayload(this.stats));
                 }
             }
             return this;
@@ -219,7 +219,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
     public void gatherStats() {
         this.access.evaluate((world, pos) -> {
             this.stats = EnchantmentTableStats.gatherStats(world, pos, this.getSlot(0).getItem().getEnchantmentValue());
-            PacketDistro.sendTo(new StatsPayload(this.stats), this.player);
+            PacketDistributor.sendToPlayer((ServerPlayer) this.player, new StatsPayload(this.stats));
             return this;
         }).orElse(this);
     }
@@ -239,7 +239,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
         InfusionRecipe match = this.access.evaluate((world, pos) -> Optional.ofNullable(InfusionRecipe.findMatch(world, stack, this.stats.eterna(), this.stats.quanta(), this.stats.arcana()))).get().orElse(null);
         if (enchantSlot == 2 && match != null) {
             list.clear();
-            list.add(new EnchantmentInstance(Ench.Enchantments.INFUSION.get(), 1));
+            list.add(new EnchantmentInstance(this.player.level().holderOrThrow(Ench.Enchantments.INFUSION), 1));
         }
         return list;
     }
@@ -249,7 +249,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
      */
     public static boolean isEnchantableEnough(ItemStack stack) {
         if (!stack.isEnchanted()) return true;
-        else return EnchantmentHelper.getEnchantments(stack).keySet().stream().allMatch(Enchantment::isCurse);
+        else return EnchantmentHelper.getEnchantmentsForCrafting(stack).keySet().stream().allMatch(h -> h.is(EnchantmentTags.CURSE));
     }
 
     /**
