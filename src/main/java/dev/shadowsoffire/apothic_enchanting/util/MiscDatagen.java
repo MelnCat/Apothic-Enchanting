@@ -222,7 +222,7 @@ public class MiscDatagen implements DataProvider {
         @Override
         public int hashCode() {
             int hash = 31;
-            for (Value v : this.ing.values) {
+            for (Value v : this.ing.getValues()) {
                 if (v instanceof TagValue t) {
                     hash ^= t.hashCode();
                 }

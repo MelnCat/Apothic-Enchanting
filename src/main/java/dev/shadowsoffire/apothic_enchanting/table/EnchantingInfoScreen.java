@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -26,6 +27,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -35,6 +37,7 @@ import net.minecraft.util.random.WeightedEntry.IntrusiveBase;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class EnchantingInfoScreen extends Screen {
 
@@ -46,7 +49,6 @@ public class EnchantingInfoScreen extends Screen {
     protected final int[] costs;
     protected final int[] clues;
     protected final int[][] powers = new int[3][];
-    protected final boolean treasure;
 
     protected int selectedSlot = -1;
     protected int leftPos, topPos;
@@ -66,7 +68,6 @@ public class EnchantingInfoScreen extends Screen {
         this.toEnchant = parent.getMenu().getSlot(0).getItem();
         this.costs = parent.getMenu().costs;
         this.clues = parent.getMenu().enchantClue;
-        this.treasure = parent.getMenu().stats.treasure();
         for (int i = 0; i < 3; i++) {
             Holder<Enchantment> clue = parent.enchIdMap.byId(this.clues[i]);
             if (clue != null) {
@@ -262,15 +263,19 @@ public class EnchantingInfoScreen extends Screen {
     protected void recomputeEnchantments() {
         Arcana arc = Arcana.getForThreshold(this.parent.getMenu().stats.arcana());
         Set<Holder<Enchantment>> blacklist = this.parent.getMenu().stats.blacklist();
-        this.enchantments = ApothEnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, this.treasure, Collections.emptySet())
+
+        Stream<Holder<Enchantment>> possible = ApothEnchantmentHelper.getPossibleEnchantments(this.minecraft.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), toEnchant, this.parent.getMenu().stats);
+        this.enchantments = EnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, possible)
             .stream()
             .map(e -> new ArcanaEnchantmentData(arc, e))
             .map(a -> new EnchantmentDataWrapper(a, blacklist.contains(a.data.enchantment)))
             .collect(Collectors.toList());
+
         if (this.startIndex + 11 >= this.enchantments.size()) {
             this.startIndex = 0;
             this.scrollOffs = 0;
         }
+
         this.exclusions.clear();
         for (EnchantmentDataWrapper d : this.enchantments) {
             if (blacklist.contains(d.getEnch())) continue;
