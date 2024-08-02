@@ -8,12 +8,15 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingCo
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent.VariableMobEffect;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.values.ExponentialLevelBasedValue;
+import net.minecraft.advancements.critereon.DamageSourcePredicate;
+import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.damagesource.DamageType;
@@ -31,6 +34,7 @@ import net.minecraft.world.item.enchantment.effects.AddValue;
 import net.minecraft.world.item.enchantment.effects.DamageItem;
 import net.minecraft.world.item.enchantment.effects.SetValue;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
 import net.neoforged.neoforge.common.Tags;
 
 public class ApothEnchantmentProvider {
@@ -242,6 +246,37 @@ public class ApothEnchantmentProvider {
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
                 .withEffect(Ench.EnchantEffects.EXTRA_LOOT_ROLL, new AddValue(LevelBasedValue.perLevel(0.025F))));
+
+        // Vanilla Overrides
+
+        register(context, Enchantments.SHARPNESS,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.SHARP_WEAPON_ENCHANTABLE),
+                    items.getOrThrow(ItemTags.SWORD_ENCHANTABLE),
+                    10,
+                    5,
+                    Enchantment.dynamicCost(1, 11),
+                    Enchantment.dynamicCost(21, 11),
+                    1,
+                    EquipmentSlotGroup.MAINHAND))
+                .withEffect(EnchantmentEffectComponents.DAMAGE, new AddValue(LevelBasedValue.perLevel(1.0F, 0.5F))));
+
+        register(context, Enchantments.PROTECTION,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.ARMOR_ENCHANTABLE),
+                    10,
+                    4,
+                    Enchantment.dynamicCost(1, 11),
+                    Enchantment.dynamicCost(12, 11),
+                    1,
+                    EquipmentSlotGroup.ARMOR))
+                .withEffect(
+                    EnchantmentEffectComponents.DAMAGE_PROTECTION,
+                    new AddValue(LevelBasedValue.perLevel(1.0F)),
+                    DamageSourceCondition.hasDamageSource(
+                        DamageSourcePredicate.Builder.damageType().tag(TagPredicate.isNot(DamageTypeTags.BYPASSES_INVULNERABILITY)))));
     }
 
     private static void register(BootstrapContext<Enchantment> context, ResourceKey<Enchantment> key, Enchantment.Builder builder) {

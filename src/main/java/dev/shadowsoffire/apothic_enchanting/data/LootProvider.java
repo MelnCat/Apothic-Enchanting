@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
@@ -13,6 +14,7 @@ import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
@@ -41,33 +43,37 @@ public class LootProvider extends LootTableProvider {
 
         @Override
         protected void generate() {
-            this.dropSelf(Ench.Blocks.HELLSHELF.get());
-            this.dropSelf(Ench.Blocks.INFUSED_HELLSHELF.get());
-            this.dropSelf(Ench.Blocks.BLAZING_HELLSHELF.get());
-            this.dropSelf(Ench.Blocks.GLOWING_HELLSHELF.get());
-            this.dropSelf(Ench.Blocks.SEASHELF.get());
-            this.dropSelf(Ench.Blocks.INFUSED_SEASHELF.get());
-            this.dropSelf(Ench.Blocks.CRYSTAL_SEASHELF.get());
-            this.dropSelf(Ench.Blocks.HEART_SEASHELF.get());
-            this.dropSelf(Ench.Blocks.DORMANT_DEEPSHELF.get());
-            this.dropSelf(Ench.Blocks.DEEPSHELF.get());
-            this.dropSelf(Ench.Blocks.ECHOING_DEEPSHELF.get());
-            this.dropSelf(Ench.Blocks.SOUL_TOUCHED_DEEPSHELF.get());
-            this.dropSelf(Ench.Blocks.ECHOING_SCULKSHELF.get());
-            this.dropSelf(Ench.Blocks.SOUL_TOUCHED_SCULKSHELF.get());
-            this.dropSelf(Ench.Blocks.ENDSHELF.get());
-            this.dropSelf(Ench.Blocks.PEARL_ENDSHELF.get());
-            this.dropSelf(Ench.Blocks.DRACONIC_ENDSHELF.get());
-            this.dropSelf(Ench.Blocks.BEESHELF.get());
-            this.dropSelf(Ench.Blocks.MELONSHELF.get());
-            this.dropSelf(Ench.Blocks.STONESHELF.get());
-            this.dropSelf(Ench.Blocks.LIBRARY.get());
-            this.dropSelf(Ench.Blocks.GEODE_SHELF.get());
-            this.dropSelf(Ench.Blocks.SIGHTSHELF.get());
-            this.dropSelf(Ench.Blocks.SIGHTSHELF_T2.get());
-            this.dropSelf(Ench.Blocks.ENDER_LIBRARY.get());
-            this.dropSelf(Ench.Blocks.FILTERING_SHELF.get());
-            this.dropSelf(Ench.Blocks.TREASURE_SHELF.get());
+            this.dropSelf(Ench.Blocks.HELLSHELF);
+            this.dropSelf(Ench.Blocks.INFUSED_HELLSHELF);
+            this.dropSelf(Ench.Blocks.BLAZING_HELLSHELF);
+            this.dropSelf(Ench.Blocks.GLOWING_HELLSHELF);
+            this.dropSelf(Ench.Blocks.SEASHELF);
+            this.dropSelf(Ench.Blocks.INFUSED_SEASHELF);
+            this.dropSelf(Ench.Blocks.CRYSTAL_SEASHELF);
+            this.dropSelf(Ench.Blocks.HEART_SEASHELF);
+            this.dropSelf(Ench.Blocks.DORMANT_DEEPSHELF);
+            this.dropSelf(Ench.Blocks.DEEPSHELF);
+            this.dropSelf(Ench.Blocks.ECHOING_DEEPSHELF);
+            this.dropSelf(Ench.Blocks.SOUL_TOUCHED_DEEPSHELF);
+            this.dropSelf(Ench.Blocks.ECHOING_SCULKSHELF);
+            this.dropSelf(Ench.Blocks.SOUL_TOUCHED_SCULKSHELF);
+            this.dropSelf(Ench.Blocks.ENDSHELF);
+            this.dropSelf(Ench.Blocks.PEARL_ENDSHELF);
+            this.dropSelf(Ench.Blocks.DRACONIC_ENDSHELF);
+            this.dropSelf(Ench.Blocks.BEESHELF);
+            this.dropSelf(Ench.Blocks.MELONSHELF);
+            this.dropSelf(Ench.Blocks.STONESHELF);
+            this.dropSelf(Ench.Blocks.LIBRARY);
+            this.dropSelf(Ench.Blocks.GEODE_SHELF);
+            this.dropSelf(Ench.Blocks.SIGHTSHELF);
+            this.dropSelf(Ench.Blocks.SIGHTSHELF_T2);
+            this.dropSelf(Ench.Blocks.ENDER_LIBRARY);
+            this.dropSelf(Ench.Blocks.FILTERING_SHELF);
+            this.dropSelf(Ench.Blocks.TREASURE_SHELF);
+        }
+
+        protected void dropSelf(Holder<Block> block) {
+            this.dropSelf(block.value());
         }
 
     }

@@ -46,25 +46,24 @@ public class EnchJEIPlugin implements IModPlugin {
 
         reg.addRecipes(RecipeTypes.ANVIL, ImmutableList.of(
             factory.createAnvilRecipe(
-                enchDiaSword,
-                ImmutableList.of(new ItemStack(Blocks.COBWEB)),
-                ImmutableList.of(new ItemStack(Items.DIAMOND_SWORD))),
-            factory.createAnvilRecipe(
                 cursedDiaSword,
-                ImmutableList.of(new ItemStack(dev.shadowsoffire.apothic_enchanting.Ench.Items.PRISMATIC_WEB.get())),
-                ImmutableList.of(new ItemStack(Items.DIAMOND_SWORD))),
+                ImmutableList.of(new ItemStack(Ench.Items.PRISMATIC_WEB)),
+                ImmutableList.of(new ItemStack(Items.DIAMOND_SWORD)),
+                ApothicEnchanting.loc("prismatic_cobweb")),
             factory.createAnvilRecipe(
                 enchDiaSword,
-                ImmutableList.of(new ItemStack(dev.shadowsoffire.apothic_enchanting.Ench.Items.SCRAP_TOME.get())),
-                ImmutableList.of(enchBook)),
+                ImmutableList.of(new ItemStack(Ench.Items.SCRAP_TOME)),
+                ImmutableList.of(enchBook),
+                ApothicEnchanting.loc("scrap_tome")),
             factory.createAnvilRecipe(
                 new ItemStack(Blocks.DAMAGED_ANVIL),
                 ImmutableList.of(new ItemStack(Blocks.IRON_BLOCK)),
-                ImmutableList.of(new ItemStack(Blocks.ANVIL)))));
+                ImmutableList.of(new ItemStack(Blocks.ANVIL)),
+                ApothicEnchanting.loc("anvil_repair"))));
 
-        reg.addIngredientInfo(new ItemStack(Blocks.ENCHANTING_TABLE), VanillaTypes.ITEM_STACK, TooltipUtil.lang("info", "enchanting"));
-        reg.addIngredientInfo(new ItemStack(Ench.Blocks.LIBRARY.get()), VanillaTypes.ITEM_STACK, TooltipUtil.lang("info", "library"));
-        List<InfusionRecipe> recipes = Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION.get())
+        reg.addIngredientInfo(new ItemStack(Items.ENCHANTING_TABLE), VanillaTypes.ITEM_STACK, TooltipUtil.lang("info", "enchanting"));
+        reg.addIngredientInfo(new ItemStack(Ench.Items.LIBRARY), VanillaTypes.ITEM_STACK, TooltipUtil.lang("info", "library"));
+        List<InfusionRecipe> recipes = Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(Ench.RecipeTypes.INFUSION)
             .stream()
             .map(RecipeHolder::value)
             .sorted((r1, r2) -> Float.compare(r1.getRequirements().eterna(), r2.getRequirements().eterna()))

@@ -2,11 +2,11 @@ package dev.shadowsoffire.apothic_enchanting;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 
-import dev.shadowsoffire.apothic_enchanting.data.ApothEnchantmentProvider;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryBlock;
@@ -74,74 +74,74 @@ public class Ench {
 
     public static final class Blocks {
 
-        public static final Supplier<Block> BEESHELF = woodShelf("beeshelf", MapColor.COLOR_YELLOW, 0.75F, () -> ParticleTypes.ENCHANT);
+        public static final Holder<Block> BEESHELF = woodShelf("beeshelf", MapColor.COLOR_YELLOW, 0.75F, () -> ParticleTypes.ENCHANT);
 
-        public static final Supplier<Block> BLAZING_HELLSHELF = stoneShelf("blazing_hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
+        public static final Holder<Block> BLAZING_HELLSHELF = stoneShelf("blazing_hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
 
-        public static final Supplier<Block> CRYSTAL_SEASHELF = stoneShelf("crystal_seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
+        public static final Holder<Block> CRYSTAL_SEASHELF = stoneShelf("crystal_seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
 
-        public static final Supplier<Block> DEEPSHELF = stoneShelf("deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
+        public static final Holder<Block> DEEPSHELF = stoneShelf("deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
 
-        public static final Supplier<Block> DORMANT_DEEPSHELF = stoneShelf("dormant_deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
+        public static final Holder<Block> DORMANT_DEEPSHELF = stoneShelf("dormant_deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
 
-        public static final Supplier<Block> DRACONIC_ENDSHELF = stoneShelf("draconic_endshelf", MapColor.SAND, 5F, Particles.ENCHANT_END);
+        public static final Holder<Block> DRACONIC_ENDSHELF = stoneShelf("draconic_endshelf", MapColor.SAND, 5F, Particles.ENCHANT_END);
 
-        public static final Supplier<Block> ECHOING_DEEPSHELF = stoneShelf("echoing_deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
+        public static final Holder<Block> ECHOING_DEEPSHELF = stoneShelf("echoing_deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
 
-        public static final Supplier<Block> ECHOING_SCULKSHELF = sculkShelf("echoing_sculkshelf");
+        public static final Holder<Block> ECHOING_SCULKSHELF = sculkShelf("echoing_sculkshelf");
 
-        public static final Supplier<EnchLibraryBlock> ENDER_LIBRARY = R.block("ender_library", () -> new EnchLibraryBlock(EnderLibraryTile::new, 31));
+        public static final Holder<Block> ENDER_LIBRARY = R.block("ender_library", () -> new EnchLibraryBlock(EnderLibraryTile::new, 31));
 
-        public static final Supplier<Block> ENDSHELF = stoneShelf("endshelf", MapColor.SAND, 4.5F, Particles.ENCHANT_END);
+        public static final Holder<Block> ENDSHELF = stoneShelf("endshelf", MapColor.SAND, 4.5F, Particles.ENCHANT_END);
 
-        public static final Supplier<Block> GLOWING_HELLSHELF = stoneShelf("glowing_hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
+        public static final Holder<Block> GLOWING_HELLSHELF = stoneShelf("glowing_hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
 
-        public static final Supplier<Block> HEART_SEASHELF = stoneShelf("heart_seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
+        public static final Holder<Block> HEART_SEASHELF = stoneShelf("heart_seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
 
-        public static final Supplier<Block> HELLSHELF = stoneShelf("hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
+        public static final Holder<Block> HELLSHELF = stoneShelf("hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
 
-        public static final Supplier<Block> INFUSED_HELLSHELF = stoneShelf("infused_hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
+        public static final Holder<Block> INFUSED_HELLSHELF = stoneShelf("infused_hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
 
-        public static final Supplier<Block> INFUSED_SEASHELF = stoneShelf("infused_seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
+        public static final Holder<Block> INFUSED_SEASHELF = stoneShelf("infused_seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
 
-        public static final Supplier<EnchLibraryBlock> LIBRARY = R.block("library", () -> new EnchLibraryBlock(BasicLibraryTile::new, 16));
+        public static final Holder<Block> LIBRARY = R.block("library", () -> new EnchLibraryBlock(BasicLibraryTile::new, 16));
 
-        public static final Supplier<Block> MELONSHELF = woodShelf("melonshelf", MapColor.COLOR_GREEN, 0.75F, () -> ParticleTypes.ENCHANT);
+        public static final Holder<Block> MELONSHELF = woodShelf("melonshelf", MapColor.COLOR_GREEN, 0.75F, () -> ParticleTypes.ENCHANT);
 
-        public static final Supplier<Block> PEARL_ENDSHELF = stoneShelf("pearl_endshelf", MapColor.SAND, 4.5F, Particles.ENCHANT_END);
+        public static final Holder<Block> PEARL_ENDSHELF = stoneShelf("pearl_endshelf", MapColor.SAND, 4.5F, Particles.ENCHANT_END);
 
-        public static final Supplier<Block> SEASHELF = stoneShelf("seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
+        public static final Holder<Block> SEASHELF = stoneShelf("seashelf", MapColor.COLOR_CYAN, 1.5F, Particles.ENCHANT_WATER);
 
-        public static final Supplier<Block> SIGHTSHELF = stoneShelf("sightshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
+        public static final Holder<Block> SIGHTSHELF = stoneShelf("sightshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
 
-        public static final Supplier<Block> SIGHTSHELF_T2 = stoneShelf("sightshelf_t2", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
+        public static final Holder<Block> SIGHTSHELF_T2 = stoneShelf("sightshelf_t2", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
 
-        public static final Supplier<Block> SOUL_TOUCHED_DEEPSHELF = stoneShelf("soul_touched_deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
+        public static final Holder<Block> SOUL_TOUCHED_DEEPSHELF = stoneShelf("soul_touched_deepshelf", MapColor.COLOR_BLACK, 2.5F, Particles.ENCHANT_SCULK);
 
-        public static final Supplier<Block> SOUL_TOUCHED_SCULKSHELF = sculkShelf("soul_touched_sculkshelf");
+        public static final Holder<Block> SOUL_TOUCHED_SCULKSHELF = sculkShelf("soul_touched_sculkshelf");
 
-        public static final Supplier<Block> STONESHELF = stoneShelf("stoneshelf", MapColor.STONE, 1.75F, () -> ParticleTypes.ENCHANT);
+        public static final Holder<Block> STONESHELF = stoneShelf("stoneshelf", MapColor.STONE, 1.75F, () -> ParticleTypes.ENCHANT);
 
-        public static final Supplier<Block> FILTERING_SHELF = R.block("filtering_shelf", FilteringShelfBlock::new,
+        public static final Holder<Block> FILTERING_SHELF = R.block("filtering_shelf", FilteringShelfBlock::new,
             p -> p.mapColor(MapColor.COLOR_CYAN).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
 
-        public static final Supplier<Block> TREASURE_SHELF = R.block("treasure_shelf", TreasureShelfBlock::new,
+        public static final Holder<Block> TREASURE_SHELF = R.block("treasure_shelf", TreasureShelfBlock::new,
             p -> p.mapColor(MapColor.COLOR_BLACK).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
 
-        public static final Supplier<Block> GEODE_SHELF = R.block("geode_shelf", GeodeShelfBlock::new,
+        public static final Holder<Block> GEODE_SHELF = R.block("geode_shelf", GeodeShelfBlock::new,
             p -> p.mapColor(MapColor.TERRACOTTA_WHITE).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
 
         private static void bootstrap() {}
 
-        private static Supplier<Block> sculkShelf(String id) {
+        private static Holder<Block> sculkShelf(String id) {
             return R.block(id, () -> new SculkShelfBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).sound(SoundType.STONE).randomTicks().requiresCorrectToolForDrops().strength(3.5F), Particles.ENCHANT_SCULK));
         }
 
-        private static Supplier<Block> stoneShelf(String id, MapColor color, float strength, Supplier<? extends ParticleOptions> particle) {
+        private static Holder<Block> stoneShelf(String id, MapColor color, float strength, Supplier<? extends ParticleOptions> particle) {
             return R.block(id, () -> new TypedShelfBlock(Block.Properties.of().requiresCorrectToolForDrops().sound(SoundType.STONE).mapColor(color).strength(strength), particle));
         }
 
-        private static Supplier<Block> woodShelf(String id, MapColor color, float strength, Supplier<? extends ParticleOptions> particle) {
+        private static Holder<Block> woodShelf(String id, MapColor color, float strength, Supplier<? extends ParticleOptions> particle) {
             return R.block(id, () -> new TypedShelfBlock(Block.Properties.of().sound(SoundType.WOOD).mapColor(color).strength(strength), particle));
         }
 
@@ -149,9 +149,9 @@ public class Ench {
 
     public static class Items extends net.minecraft.world.item.Items {
 
-        public static final Holder<Item> BEESHELF = R.item("beeshelf", () -> new BlockItem(Ench.Blocks.BEESHELF.get(), new Item.Properties()));
+        public static final Holder<Item> BEESHELF = R.item("beeshelf", () -> new BlockItem(Ench.Blocks.BEESHELF.value(), new Item.Properties()));
 
-        public static final Holder<Item> BLAZING_HELLSHELF = R.item("blazing_hellshelf", () -> new BlockItem(Ench.Blocks.BLAZING_HELLSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> BLAZING_HELLSHELF = R.item("blazing_hellshelf", () -> new BlockItem(Ench.Blocks.BLAZING_HELLSHELF.value(), new Item.Properties()));
 
         public static final Holder<Item> BOOTS_TOME = R.item("boots_tome", () -> new TomeItem(DIAMOND_BOOTS));
 
@@ -159,31 +159,31 @@ public class Ench {
 
         public static final Holder<Item> CHESTPLATE_TOME = R.item("chestplate_tome", () -> new TomeItem(Items.DIAMOND_CHESTPLATE));
 
-        public static final Holder<Item> CRYSTAL_SEASHELF = R.item("crystal_seashelf", () -> new BlockItem(Ench.Blocks.CRYSTAL_SEASHELF.get(), new Item.Properties()));
+        public static final Holder<Item> CRYSTAL_SEASHELF = R.blockItem("crystal_seashelf", Ench.Blocks.CRYSTAL_SEASHELF);
 
-        public static final Holder<Item> DEEPSHELF = R.item("deepshelf", () -> new GlowyBlockItem(Ench.Blocks.DEEPSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> DEEPSHELF = R.blockItem("deepshelf", Ench.Blocks.DEEPSHELF, GlowyBlockItem::new, UnaryOperator.identity());
 
-        public static final Holder<Item> DORMANT_DEEPSHELF = R.item("dormant_deepshelf", () -> new BlockItem(Ench.Blocks.DORMANT_DEEPSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> DORMANT_DEEPSHELF = R.blockItem("dormant_deepshelf", Ench.Blocks.DORMANT_DEEPSHELF);
 
-        public static final Holder<Item> DRACONIC_ENDSHELF = R.item("draconic_endshelf", () -> new BlockItem(Ench.Blocks.DRACONIC_ENDSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> DRACONIC_ENDSHELF = R.blockItem("draconic_endshelf", Ench.Blocks.DRACONIC_ENDSHELF);
 
-        public static final Holder<Item> ECHOING_DEEPSHELF = R.item("echoing_deepshelf", () -> new BlockItem(Ench.Blocks.ECHOING_DEEPSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> ECHOING_DEEPSHELF = R.blockItem("echoing_deepshelf", Ench.Blocks.ECHOING_DEEPSHELF);
 
-        public static final Holder<Item> ECHOING_SCULKSHELF = R.item("echoing_sculkshelf", () -> new BlockItem(Ench.Blocks.ECHOING_SCULKSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> ECHOING_SCULKSHELF = R.blockItem("echoing_sculkshelf", Ench.Blocks.ECHOING_SCULKSHELF);
 
-        public static final Holder<Item> ENDER_LIBRARY = R.item("ender_library", () -> new BlockItem(Ench.Blocks.ENDER_LIBRARY.get(), new Item.Properties()));
+        public static final Holder<Item> ENDER_LIBRARY = R.blockItem("ender_library", Ench.Blocks.ENDER_LIBRARY);
 
-        public static final Holder<Item> ENDSHELF = R.item("endshelf", () -> new BlockItem(Ench.Blocks.ENDSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> ENDSHELF = R.blockItem("endshelf", Ench.Blocks.ENDSHELF);
 
         public static final Holder<Item> EXTRACTION_TOME = R.item("extraction_tome", ExtractionTomeItem::new, p -> p.rarity(Rarity.EPIC));
 
         public static final Holder<Item> FISHING_TOME = R.item("fishing_tome", () -> new TomeItem(Items.FISHING_ROD));
 
-        public static final Holder<Item> GLOWING_HELLSHELF = R.item("glowing_hellshelf", () -> new BlockItem(Ench.Blocks.GLOWING_HELLSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> GLOWING_HELLSHELF = R.blockItem("glowing_hellshelf", Ench.Blocks.GLOWING_HELLSHELF);
 
-        public static final Holder<Item> HEART_SEASHELF = R.item("heart_seashelf", () -> new BlockItem(Ench.Blocks.HEART_SEASHELF.get(), new Item.Properties()));
+        public static final Holder<Item> HEART_SEASHELF = R.blockItem("heart_seashelf", Ench.Blocks.HEART_SEASHELF);
 
-        public static final Holder<Item> HELLSHELF = R.item("hellshelf", () -> new BlockItem(Ench.Blocks.HELLSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> HELLSHELF = R.blockItem("hellshelf", Ench.Blocks.HELLSHELF);
 
         public static final Holder<Item> HELMET_TOME = R.item("helmet_tome", () -> new TomeItem(Items.DIAMOND_HELMET));
 
@@ -193,19 +193,19 @@ public class Ench {
 
         public static final Holder<Item> INFUSED_BREATH = R.item("infused_breath", () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC)));
 
-        public static final Holder<Item> INFUSED_HELLSHELF = R.item("infused_hellshelf", () -> new GlowyBlockItem(Ench.Blocks.INFUSED_HELLSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> INFUSED_HELLSHELF = R.blockItem("infused_hellshelf", Ench.Blocks.INFUSED_HELLSHELF, GlowyBlockItem::new, UnaryOperator.identity());
 
-        public static final Holder<Item> INFUSED_SEASHELF = R.item("infused_seashelf", () -> new GlowyBlockItem(Ench.Blocks.INFUSED_SEASHELF.get(), new Item.Properties()));
+        public static final Holder<Item> INFUSED_SEASHELF = R.blockItem("infused_seashelf", Ench.Blocks.INFUSED_SEASHELF, GlowyBlockItem::new, UnaryOperator.identity());
 
         public static final Holder<Item> LEGGINGS_TOME = R.item("leggings_tome", () -> new TomeItem(net.minecraft.world.item.Items.DIAMOND_LEGGINGS));
 
-        public static final Holder<Item> LIBRARY = R.item("library", () -> new BlockItem(Ench.Blocks.LIBRARY.get(), new Item.Properties()));
+        public static final Holder<Item> LIBRARY = R.blockItem("library", Ench.Blocks.LIBRARY);
 
-        public static final Holder<Item> MELONSHELF = R.item("melonshelf", () -> new BlockItem(Ench.Blocks.MELONSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> MELONSHELF = R.blockItem("melonshelf", Ench.Blocks.MELONSHELF);
 
         public static final Holder<Item> OTHER_TOME = R.item("other_tome", () -> new TomeItem(net.minecraft.world.item.Items.AIR));
 
-        public static final Holder<Item> PEARL_ENDSHELF = R.item("pearl_endshelf", () -> new BlockItem(Ench.Blocks.PEARL_ENDSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> PEARL_ENDSHELF = R.blockItem("pearl_endshelf", Ench.Blocks.PEARL_ENDSHELF);
 
         public static final Holder<Item> PICKAXE_TOME = R.item("pickaxe_tome", () -> new TomeItem(net.minecraft.world.item.Items.DIAMOND_PICKAXE));
 
@@ -213,27 +213,27 @@ public class Ench {
 
         public static final Holder<Item> SCRAP_TOME = R.item("scrap_tome", () -> new ScrappingTomeItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
 
-        public static final Holder<Item> SEASHELF = R.item("seashelf", () -> new BlockItem(Ench.Blocks.SEASHELF.get(), new Item.Properties()));
+        public static final Holder<Item> SEASHELF = R.blockItem("seashelf", Ench.Blocks.SEASHELF);
 
-        public static final Holder<Item> SIGHTSHELF = R.item("sightshelf", () -> new BlockItem(Ench.Blocks.SIGHTSHELF.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+        public static final Holder<Item> SIGHTSHELF = R.blockItem("sightshelf", Ench.Blocks.SIGHTSHELF, p -> p.rarity(Rarity.UNCOMMON));
 
-        public static final Holder<Item> SIGHTSHELF_T2 = R.item("sightshelf_t2", () -> new BlockItem(Ench.Blocks.SIGHTSHELF_T2.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+        public static final Holder<Item> SIGHTSHELF_T2 = R.blockItem("sightshelf_t2", Ench.Blocks.SIGHTSHELF_T2, p -> p.rarity(Rarity.UNCOMMON));
 
-        public static final Holder<Item> SOUL_TOUCHED_DEEPSHELF = R.item("soul_touched_deepshelf", () -> new BlockItem(Ench.Blocks.SOUL_TOUCHED_DEEPSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> SOUL_TOUCHED_DEEPSHELF = R.blockItem("soul_touched_deepshelf", Ench.Blocks.SOUL_TOUCHED_DEEPSHELF);
 
-        public static final Holder<Item> SOUL_TOUCHED_SCULKSHELF = R.item("soul_touched_sculkshelf", () -> new BlockItem(Ench.Blocks.SOUL_TOUCHED_SCULKSHELF.get(), new Item.Properties()));
+        public static final Holder<Item> SOUL_TOUCHED_SCULKSHELF = R.blockItem("soul_touched_sculkshelf", Ench.Blocks.SOUL_TOUCHED_SCULKSHELF);
 
-        public static final Holder<Item> STONESHELF = R.item("stoneshelf", () -> new BlockItem(Ench.Blocks.STONESHELF.get(), new Item.Properties()));
+        public static final Holder<Item> STONESHELF = R.blockItem("stoneshelf", Ench.Blocks.STONESHELF);
 
         public static final Holder<Item> WARDEN_TENDRIL = R.item("warden_tendril", () -> new Item(new Item.Properties()));
 
         public static final Holder<Item> WEAPON_TOME = R.item("weapon_tome", () -> new TomeItem(net.minecraft.world.item.Items.DIAMOND_SWORD));
 
-        public static final Holder<Item> FILTERING_SHELF = R.item("filtering_shelf", () -> new BlockItem(Ench.Blocks.FILTERING_SHELF.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+        public static final Holder<Item> FILTERING_SHELF = R.blockItem("filtering_shelf", Ench.Blocks.FILTERING_SHELF, p -> p.rarity(Rarity.UNCOMMON));
 
-        public static final Holder<Item> TREASURE_SHELF = R.item("treasure_shelf", () -> new BlockItem(Ench.Blocks.TREASURE_SHELF.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+        public static final Holder<Item> TREASURE_SHELF = R.blockItem("treasure_shelf", Ench.Blocks.TREASURE_SHELF, p -> p.rarity(Rarity.UNCOMMON));
 
-        public static final Holder<Item> GEODE_SHELF = R.item("geode_shelf", () -> new BlockItem(Ench.Blocks.GEODE_SHELF.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+        public static final Holder<Item> GEODE_SHELF = R.blockItem("geode_shelf", Ench.Blocks.GEODE_SHELF, p -> p.rarity(Rarity.UNCOMMON));
 
         private static void bootstrap() {}
 
@@ -358,11 +358,11 @@ public class Ench {
 
     public static class Tiles {
 
-        public static final Supplier<BlockEntityType<FilteringShelfTile>> FILTERING_SHELF = R.blockEntity("filtering_shelf", FilteringShelfTile::new, () -> ImmutableSet.of(Blocks.FILTERING_SHELF.get()));
+        public static final Supplier<BlockEntityType<FilteringShelfTile>> FILTERING_SHELF = R.blockEntity("filtering_shelf", FilteringShelfTile::new, () -> ImmutableSet.of(Blocks.FILTERING_SHELF.value()));
 
-        public static final Supplier<BlockEntityType<BasicLibraryTile>> LIBRARY = R.blockEntity("library", BasicLibraryTile::new, () -> ImmutableSet.of(Blocks.LIBRARY.get()));
+        public static final Supplier<BlockEntityType<BasicLibraryTile>> LIBRARY = R.blockEntity("library", BasicLibraryTile::new, () -> ImmutableSet.of(Blocks.LIBRARY.value()));
 
-        public static final Supplier<BlockEntityType<EnderLibraryTile>> ENDER_LIBRARY = R.blockEntity("ender_library", EnderLibraryTile::new, () -> ImmutableSet.of(Blocks.ENDER_LIBRARY.get()));
+        public static final Supplier<BlockEntityType<EnderLibraryTile>> ENDER_LIBRARY = R.blockEntity("ender_library", EnderLibraryTile::new, () -> ImmutableSet.of(Blocks.ENDER_LIBRARY.value()));
 
         private static void bootstrap() {}
     }

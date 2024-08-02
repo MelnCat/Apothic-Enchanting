@@ -24,6 +24,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -256,7 +257,7 @@ public class EnchantingInfoScreen extends Screen {
 
     protected void recomputeEnchantments() {
         Arcana arc = Arcana.getForThreshold(this.parent.getMenu().stats.arcana());
-        Set<Enchantment> blacklist = this.parent.getMenu().stats.blacklist();
+        Set<Holder<Enchantment>> blacklist = this.parent.getMenu().stats.blacklist();
         this.enchantments = ApothEnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, this.treasure, Collections.emptySet())
             .stream()
             .map(e -> new ArcanaEnchantmentData(arc, e))
@@ -271,7 +272,9 @@ public class EnchantingInfoScreen extends Screen {
             if (blacklist.contains(d.getEnch())) continue;
             List<Enchantment> excls = new ArrayList<>();
             for (EnchantmentDataWrapper d2 : this.enchantments) {
-                if (d != d2 && !d.getEnch().isCompatibleWith(d2.getEnch())) excls.add(d2.getEnch());
+                if (d != d2 && !Enchantment.areCompatible(d.getEnch(), d2.getEnch())) {
+                    excls.add(d2.getEnch());
+                }
             }
             this.exclusions.put(d.getEnch(), excls);
         }
@@ -373,7 +376,7 @@ public class EnchantingInfoScreen extends Screen {
             this.isBlacklisted = isBlacklisted;
         }
 
-        public Enchantment getEnch() {
+        public Holder<Enchantment> getEnch() {
             return this.data.data.enchantment;
         }
 

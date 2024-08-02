@@ -147,26 +147,10 @@ public class ApothicEnchanting {
         RegistrySetBuilder regSet = new RegistrySetBuilder()
             .add(Registries.ENCHANTMENT, ApothEnchantmentProvider::bootstrap);
 
-        e.getGenerator().addProvider(true, new DatapackBuiltinEntriesProvider(output, e.getLookupProvider(), regSet, Set.of(MODID)));
+        e.getGenerator().addProvider(true, new DatapackBuiltinEntriesProvider(output, e.getLookupProvider(), regSet, Set.of(MODID, "minecraft")));
         e.getGenerator().addProvider(true, LootProvider.create(output, e.getLookupProvider()));
         e.getGenerator().addProvider(true, new EnchTagsProvider(output, e.getLookupProvider(), e.getExistingFileHelper()));
     }
-
-    /*
-     * @SubscribeEvent
-     * public void enchants(Register<Enchantment> e) {
-     * e.getRegistry().registerAll(
-     * new BaneEnchant(Rarity.UNCOMMON, MobType.ARTHROPOD, EquipmentSlot.MAINHAND), new ResourceLocation("minecraft", "bane_of_arthropods"),
-     * new BaneEnchant(Rarity.UNCOMMON, MobType.UNDEAD, EquipmentSlot.MAINHAND), new ResourceLocation("minecraft", "smite"),
-     * new BaneEnchant(Rarity.COMMON, MobType.UNDEFINED, EquipmentSlot.MAINHAND), new ResourceLocation("minecraft", "sharpness"),
-     * new BaneEnchant(Rarity.UNCOMMON, MobType.ILLAGER, EquipmentSlot.MAINHAND), "bane_of_illagers",
-     * new DefenseEnchant(Rarity.COMMON, ProtectionEnchantment.Type.ALL, ARMOR), new ResourceLocation("minecraft", "protection"),
-     * new DefenseEnchant(Rarity.UNCOMMON, ProtectionEnchantment.Type.FIRE, ARMOR), new ResourceLocation("minecraft", "fire_protection"),
-     * new DefenseEnchant(Rarity.RARE, ProtectionEnchantment.Type.EXPLOSION, ARMOR), new ResourceLocation("minecraft", "blast_protection"),
-     * new DefenseEnchant(Rarity.UNCOMMON, ProtectionEnchantment.Type.PROJECTILE, ARMOR), new ResourceLocation("minecraft", "projectile_protection"),
-     * new DefenseEnchant(Rarity.UNCOMMON, ProtectionEnchantment.Type.FALL, EquipmentSlot.FEET), new ResourceLocation("minecraft", "feather_falling"));
-     * }
-     */
 
     @SuppressWarnings("deprecation")
     public static EnchantmentInfo getEnchInfo(Enchantment ench) {

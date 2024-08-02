@@ -46,12 +46,14 @@ public class EnchJadePlugin implements IWailaPlugin, IBlockComponentProvider {
             tooltip.remove(JadeIds.MC_TOTAL_ENCHANTMENT_POWER);
         }
 
-        if (accessor.getBlock() == Ench.Blocks.FILTERING_SHELF.get()) this.handleFilteringShelf(tooltip, accessor);
+        if (accessor.getBlock() == Ench.Blocks.FILTERING_SHELF.value()) {
+            this.handleFilteringShelf(tooltip, accessor);
+        }
     }
 
     @Override
     public IElement getIcon(BlockAccessor accessor, IPluginConfig config, IElement currentIcon) {
-        if (accessor.getBlock() == Ench.Blocks.FILTERING_SHELF.get()) {
+        if (accessor.getBlock() == Ench.Blocks.FILTERING_SHELF.value()) {
             return IElementHelper.get().item(accessor.getPickedResult()); // Need to override the book icon back to the shelf when Jade triggers vanilla integration.
         }
         return currentIcon;
