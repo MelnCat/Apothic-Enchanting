@@ -32,10 +32,14 @@ import net.minecraft.world.item.enchantment.EnchantmentTarget;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.AddValue;
+import net.minecraft.world.item.enchantment.effects.AllOf;
+import net.minecraft.world.item.enchantment.effects.ApplyMobEffect;
 import net.minecraft.world.item.enchantment.effects.DamageItem;
 import net.minecraft.world.item.enchantment.effects.SetValue;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
+import net.minecraft.world.level.storage.loot.providers.number.EnchantmentLevelProvider;
 import net.neoforged.neoforge.common.Tags;
 
 public class ApothEnchantmentProvider {
@@ -259,6 +263,25 @@ public class ApothEnchantmentProvider {
                     5, // anvil cost
                     EquipmentSlotGroup.HAND))
                 .withSpecialEffect(Ench.EnchantEffects.REFLECTIVE, new ReflectiveComponent(LevelBasedValue.perLevel(0.15F, 0.10F), LevelBasedValue.perLevel(0.15F))));
+
+        register(context, Ench.Enchantments.ICY_THORNS,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.CHEST_ARMOR_ENCHANTABLE),
+                    2, // weight
+                    3, // max level
+                    Enchantment.dynamicCost(35, 20),
+                    Enchantment.constantCost(200),
+                    5, // anvil cost
+                    EquipmentSlotGroup.CHEST))
+                .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.THORNS)))
+                .withEffect(
+                    EnchantmentEffectComponents.POST_ATTACK,
+                    EnchantmentTarget.VICTIM,
+                    EnchantmentTarget.ATTACKER,
+                    AllOf.entityEffects(
+                        new ApplyMobEffect(HolderSet.direct(MobEffects.MOVEMENT_SLOWDOWN), LevelBasedValue.perLevel(100), LevelBasedValue.perLevel(200), LevelBasedValue.perLevel(1), LevelBasedValue.perLevel(2))),
+                    LootItemRandomChanceCondition.randomChance(EnchantmentLevelProvider.forEnchantmentLevel(LevelBasedValue.perLevel(0.5F)))));
 
         // Vanilla Overrides
 
