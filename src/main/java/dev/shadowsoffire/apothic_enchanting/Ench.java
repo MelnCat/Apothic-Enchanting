@@ -10,6 +10,7 @@ import com.mojang.serialization.Codec;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveComponent;
+import dev.shadowsoffire.apothic_enchanting.enchantments.entity_effects.ReboundingEffect;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryBlock;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryContainer;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile.BasicLibraryTile;
@@ -437,6 +438,7 @@ public class Ench {
         R.recipeSerializer("keep_nbt_infusion", () -> KeepNBTInfusionRecipe.SERIALIZER);
         R.custom("warden_tendril", NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> WardenLootModifier.CODEC);
         R.custom("enchantment_table_item_handler", NeoForgeRegistries.Keys.ATTACHMENT_TYPES, () -> EnchantmentTableItemHandler.TYPE);
+        R.custom("rebounding", Registries.ENCHANTMENT_ENTITY_EFFECT_TYPE, () -> ReboundingEffect.CODEC);
     }
 
     public static void bootstrap(IEventBus bus) {

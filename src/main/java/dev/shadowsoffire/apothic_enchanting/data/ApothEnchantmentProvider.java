@@ -8,6 +8,7 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingCo
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent.VariableMobEffect;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveComponent;
+import dev.shadowsoffire.apothic_enchanting.enchantments.entity_effects.ReboundingEffect;
 import dev.shadowsoffire.apothic_enchanting.enchantments.values.ExponentialLevelBasedValue;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.TagPredicate;
@@ -41,6 +42,7 @@ import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.EnchantmentLevelProvider;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.registries.holdersets.OrHolderSet;
 
 public class ApothEnchantmentProvider {
 
@@ -279,8 +281,7 @@ public class ApothEnchantmentProvider {
                     EnchantmentEffectComponents.POST_ATTACK,
                     EnchantmentTarget.VICTIM,
                     EnchantmentTarget.ATTACKER,
-                    AllOf.entityEffects(
-                        new ApplyMobEffect(HolderSet.direct(MobEffects.MOVEMENT_SLOWDOWN), LevelBasedValue.perLevel(100), LevelBasedValue.perLevel(200), LevelBasedValue.perLevel(1), LevelBasedValue.perLevel(2))),
+                    new ApplyMobEffect(HolderSet.direct(MobEffects.MOVEMENT_SLOWDOWN), LevelBasedValue.perLevel(100), LevelBasedValue.perLevel(200), LevelBasedValue.perLevel(1), LevelBasedValue.perLevel(2)),
                     LootItemRandomChanceCondition.randomChance(EnchantmentLevelProvider.forEnchantmentLevel(LevelBasedValue.perLevel(0.5F)))));
 
         register(context, Ench.Enchantments.INFUSION,
@@ -293,6 +294,22 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(0),
                     0, // anvil cost
                     EquipmentSlotGroup.ANY)));
+
+        register(context, Ench.Enchantments.REBOUNDING,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    new OrHolderSet<>(List.of(items.getOrThrow(ItemTags.CHEST_ARMOR_ENCHANTABLE), items.getOrThrow(ItemTags.LEG_ARMOR_ENCHANTABLE))),
+                    2, // weight
+                    3, // max level
+                    Enchantment.dynamicCost(22, 18),
+                    Enchantment.constantCost(200),
+                    5, // anvil cost
+                    EquipmentSlotGroup.ARMOR))
+                .withEffect(
+                    EnchantmentEffectComponents.POST_ATTACK,
+                    EnchantmentTarget.VICTIM,
+                    EnchantmentTarget.ATTACKER,
+                    new ReboundingEffect(LevelBasedValue.constant(4F), LevelBasedValue.perLevel(2), LevelBasedValue.perLevel(3))));
 
         // Vanilla Overrides
 

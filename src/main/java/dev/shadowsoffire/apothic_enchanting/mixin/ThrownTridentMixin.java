@@ -8,11 +8,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -32,13 +33,16 @@ public abstract class ThrownTridentMixin extends AbstractArrow {
     @Shadow
     private boolean dealtDamage;
 
-    protected ThrownTridentMixin(EntityType<? extends AbstractArrow> type, Level level, ItemStack stack) {
-        super(type, level, stack);
+    protected ThrownTridentMixin(EntityType<? extends AbstractArrow> entityType, double x, double y, double z, Level level, ItemStack pickupItemStack, ItemStack firedFromWeapon) {
+        super(entityType, x, y, z, level, pickupItemStack, firedFromWeapon);
     }
 
     @Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)V", at = @At("TAIL"), require = 1, remap = false)
     private void init(CallbackInfo ci) {
-        this.setPierceLevel((byte) this.getPickupItem().getEnchantmentLevel(Enchantments.PIERCING));
+        if (!this.level().isClientSide()) {
+            int pierce = EnchantmentHelper.getPiercingCount((ServerLevel) this.level(), this.getPickupItem(), this.getPickupItem());
+            this.setPierceLevel((byte) pierce);
+        }
     }
 
     @Inject(method = "onHitEntity(Lnet/minecraft/world/phys/EntityHitResult;)V", at = @At("HEAD"), cancellable = true, require = 1)
@@ -63,6 +67,11 @@ public abstract class ThrownTridentMixin extends AbstractArrow {
                 this.setDeltaMovement(this.oldVel);
             }
         }
+    }
+
+    @Shadow
+    private void setPierceLevel(byte pierceLevel) {
+        throw new RuntimeException("setPierceLevel not shadowed");
     }
 
 }
