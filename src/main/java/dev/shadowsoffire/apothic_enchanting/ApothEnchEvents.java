@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -29,6 +30,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -260,7 +262,16 @@ public class ApothEnchEvents {
      */
     @SubscribeEvent
     public void rightClick(PlayerInteractEvent.RightClickBlock e) {
-        Ench.Enchantments.NATURES_BLESSING.get().rightClick(e);
+        ItemStack s = e.getItemStack();
+        Pair<LevelBasedValue, Integer> bonemealCost = EnchantmentHelper.getHighestLevel(s, Ench.EnchantEffects.BONEMEAL_CROPS);
+        if (bonemealCost != null && !e.getEntity().isShiftKeyDown() && BoneMealItem.applyBonemeal(s.copy(), e.getLevel(), e.getPos(), e.getEntity())) {
+            int cost = (int) bonemealCost.getFirst().calculate(bonemealCost.getSecond());
+            if (cost > 0) {
+                s.hurtAndBreak(cost, e.getEntity(), LivingEntity.getSlotForHand(e.getHand()));
+            }
+            e.setCanceled(true);
+            e.setCancellationResult(InteractionResult.SUCCESS);
+        }
     }
 
     @SubscribeEvent

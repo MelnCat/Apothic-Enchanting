@@ -353,6 +353,11 @@ public class Ench {
          */
         public static final DataComponentType<ReflectiveComponent> REFLECTIVE = R.enchantmentEffect("reflective", b -> b.persistent(ReflectiveComponent.CODEC));
 
+        /**
+         * The bonemeal crops effect, when present on an item, will bonemeal any right-clicked crops at a durability cost equal to the level-based value.
+         */
+        public static final DataComponentType<LevelBasedValue> BONEMEAL_CROPS = R.enchantmentEffect("bonemeal_crops", b -> b.persistent(LevelBasedValue.CODEC));
+
         private static void bootstrap() {}
     }
 

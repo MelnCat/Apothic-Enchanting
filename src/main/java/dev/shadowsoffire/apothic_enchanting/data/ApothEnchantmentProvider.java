@@ -33,7 +33,6 @@ import net.minecraft.world.item.enchantment.EnchantmentTarget;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.item.enchantment.effects.AddValue;
-import net.minecraft.world.item.enchantment.effects.AllOf;
 import net.minecraft.world.item.enchantment.effects.ApplyMobEffect;
 import net.minecraft.world.item.enchantment.effects.DamageItem;
 import net.minecraft.world.item.enchantment.effects.SetValue;
@@ -310,6 +309,18 @@ public class ApothEnchantmentProvider {
                     EnchantmentTarget.VICTIM,
                     EnchantmentTarget.ATTACKER,
                     new ReboundingEffect(LevelBasedValue.constant(4F), LevelBasedValue.perLevel(2), LevelBasedValue.perLevel(3))));
+
+        register(context, Ench.Enchantments.NATURES_BLESSING,
+            Enchantment.enchantment(
+                Enchantment.definition(
+                    items.getOrThrow(ItemTags.HOES),
+                    2, // weight
+                    3, // max level
+                    Enchantment.dynamicCost(15, 10),
+                    Enchantment.constantCost(200),
+                    3, // anvil cost
+                    EquipmentSlotGroup.HAND))
+                .withSpecialEffect(Ench.EnchantEffects.BONEMEAL_CROPS, LevelBasedValue.perLevel(5, -1)));
 
         // Vanilla Overrides
 
