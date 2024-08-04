@@ -1,34 +1,101 @@
 package dev.shadowsoffire.apothic_enchanting.mixin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.shadowsoffire.apothic_enchanting.asm.EnchHooks;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 @Mixin(value = ItemStack.class, priority = 500, remap = false)
 public class ItemStackMixin {
 
+    /**
+     * Rewrites the enchantment tooltip lines to include the effective level, as well as the (NBT + bonus) calculation.
+     */
+    @SuppressWarnings("deprecation")
+    @Inject(method = "addToTooltip", at = @At(value = "HEAD"), cancellable = true)
+    public <T extends TooltipProvider> void apoth_enchTooltipRewrite(DataComponentType<T> component, Item.TooltipContext ctx, Consumer<Component> tooltip, TooltipFlag tooltipFlag, CallbackInfo ci) {
+        ItemStack ths = (ItemStack) (Object) this;
+        T t = ths.get(component);
+        if (t instanceof ItemEnchantments enchants) {
+            HolderLookup.Provider regs = ctx.registries();
+            HolderSet<Enchantment> iterationOrder = getTagOrEmpty(regs, Registries.ENCHANTMENT, EnchantmentTags.TOOLTIP_ORDER);
+            ItemEnchantments realLevels = ths.getAllEnchantments(regs.lookupOrThrow(Registries.ENCHANTMENT));
+
+            // Apply tooltips in the following order:
+            // 1. By iteration order.
+            // 2. Any other NBT enchantments not in the iteration order.
+            // 3. Any other Gameplay enchantments not in either of the other two passes.
+
+            Consumer<Holder<Enchantment>> applyTooltip = ench -> applyEnchTooltip(ench, enchants, realLevels, tooltip);
+
+            iterationOrder.forEach(applyTooltip);
+
+            Set<Holder<Enchantment>> seen = new HashSet<>();
+
+            enchants.entrySet().stream()
+                .map(Entry::getKey)
+                .filter(ench -> !iterationOrder.contains(ench))
+                .forEach(applyTooltip);
+
+            realLevels.entrySet().stream()
+                .map(Entry::getKey)
+                .filter(ench -> !iterationOrder.contains(ench))
+                .filter(ench -> !seen.contains(ench))
+                .forEach(applyTooltip);
+
+            ci.cancel();
+        }
+    }
+
     @Unique
-    private static void appendModifiedEnchTooltip(List<Component> tooltip, Holder<Enchantment> ench, int realLevel, int nbtLevel) {
+    private static void applyEnchTooltip(Holder<Enchantment> ench, ItemEnchantments nbt, ItemEnchantments gameplay, Consumer<Component> tooltip) {
+        int nbtLevel = nbt.getLevel(ench);
+        int realLevel = gameplay.getLevel(ench);
+
+        if (nbtLevel == realLevel) {
+            // Default logic when levels are the same
+            if (realLevel > 0) {
+                tooltip.accept(Enchantment.getFullname(ench, realLevel));
+            }
+        }
+        else {
+            // Show the change vs nbt level
+            appendModifiedEnchTooltip(tooltip, ench, realLevel, nbtLevel);
+        }
+    }
+
+    @Unique
+    private static void appendModifiedEnchTooltip(Consumer<Component> tooltip, Holder<Enchantment> ench, int realLevel, int nbtLevel) {
         MutableComponent mc = Enchantment.getFullname(ench, realLevel).copy();
         mc.getSiblings().clear();
         Component nbtLevelComp = Component.translatable("enchantment.level." + nbtLevel);
@@ -42,47 +109,18 @@ public class ItemStackMixin {
         if (realLevel == 0) {
             mc.withStyle(ChatFormatting.DARK_GRAY);
         }
-        tooltip.add(mc);
+        tooltip.accept(mc);
     }
 
-    /**
-     * Rewrites the enchantment tooltip lines to include the effective level, as well as the (NBT + bonus) calculation.
-     */
-    @SuppressWarnings("deprecation")
-    @Redirect(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;appendEnchantmentNames(Ljava/util/List;Lnet/minecraft/nbt/ListTag;)V"))
-    public void apoth_enchTooltipRewrite(List<Component> tooltip, ListTag tagEnchants) {
-        ItemStack ths = (ItemStack) (Object) this;
-        Map<Enchantment, Integer> realLevels = new HashMap<>(ths.getAllEnchantments());
-        List<Component> enchTooltips = new ArrayList<>();
-
-        // Iterate backwards to address duplicate enchantment logic (always use the last-positioned copy).
-        for (int i = tagEnchants.size() - 1; i >= 0; i--) {
-            CompoundTag compoundtag = tagEnchants.getCompound(i);
-
-            Enchantment ench = BuiltInRegistries.ENCHANTMENT.get(EnchantmentHelper.getEnchantmentId(compoundtag));
-            if (ench == null || !realLevels.containsKey(ench)) continue;
-
-            int nbtLevel = EnchantmentHelper.getEnchantmentLevel(compoundtag);
-            int realLevel = realLevels.remove(ench);
-
-            if (nbtLevel == realLevel) {
-                // Default logic when levels are the same
-                enchTooltips.add(ench.getFullname(EnchantmentHelper.getEnchantmentLevel(compoundtag)));
-            }
-            else {
-                // Show the change vs nbt level
-                appendModifiedEnchTooltip(enchTooltips, ench, realLevel, nbtLevel);
+    @Unique
+    private static <T> HolderSet<T> getTagOrEmpty(@Nullable HolderLookup.Provider registries, ResourceKey<Registry<T>> registryKey, TagKey<T> key) {
+        if (registries != null) {
+            Optional<HolderSet.Named<T>> optional = registries.lookupOrThrow(registryKey).get(key);
+            if (optional.isPresent()) {
+                return optional.get();
             }
         }
 
-        // Reverse and add to tooltip. Honestly we probably don't even need to reverse, but for consistency's sake.
-        Collections.reverse(enchTooltips);
-        tooltip.addAll(enchTooltips);
-
-        // Show the tooltip for any modified enchantments not present in NBT.
-        for (Map.Entry<Enchantment, Integer> real : realLevels.entrySet()) {
-            if (real.getValue() > 0) appendModifiedEnchTooltip(tooltip, real.getKey(), real.getValue(), 0);
-        }
+        return HolderSet.direct();
     }
-
 }
