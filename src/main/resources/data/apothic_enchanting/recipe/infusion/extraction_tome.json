@@ -14,7 +14,7 @@
 		"arcana": -1
 	},
 	"result": {
-		"item": "apothic_enchanting:extraction_tome",
+		"id": "apothic_enchanting:extraction_tome",
 		"count": 4
 	}
 }

@@ -9,7 +9,7 @@
 		"arcana": 50
 	},
 	"result": {
-		"item": "minecraft:echo_shard",
+		"id": "minecraft:echo_shard",
 		"count": 4
 	}
 }

@@ -15,7 +15,7 @@
 	},
 	"display_level": 3,
 	"result": {
-		"item": "minecraft:experience_bottle",
+		"id": "minecraft:experience_bottle",
 		"count": 32
 	}
 }

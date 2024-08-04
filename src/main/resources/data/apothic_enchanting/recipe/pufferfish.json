@@ -15,7 +15,7 @@
     }
   },
   "result": {
-    "item": "minecraft:pufferfish",
+    "id": "minecraft:pufferfish",
     "count": 1,
     "nbt": {
         "display": {

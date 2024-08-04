@@ -9,7 +9,7 @@
 		"arcana": 0
 	},
 	"result": {
-		"item": "apothic_enchanting:infused_hellshelf",
+		"id": "apothic_enchanting:infused_hellshelf",
 		"count": 1
 	}
 }

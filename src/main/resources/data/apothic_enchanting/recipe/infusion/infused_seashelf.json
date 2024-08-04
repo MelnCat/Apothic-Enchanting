@@ -9,7 +9,7 @@
 		"arcana": 10
 	},
 	"result": {
-		"item": "apothic_enchanting:infused_seashelf",
+		"id": "apothic_enchanting:infused_seashelf",
 		"count": 1
 	}
 }

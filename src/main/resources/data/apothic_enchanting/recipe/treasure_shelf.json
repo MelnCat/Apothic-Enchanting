@@ -21,7 +21,7 @@
     }
   },
   "result": {
-    "item": "apothic_enchanting:treasure_shelf",
+    "id": "apothic_enchanting:treasure_shelf",
     "count": 1
   }
 }

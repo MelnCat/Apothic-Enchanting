@@ -14,7 +14,7 @@
 		"arcana": 100
 	},
 	"result": {
-		"item": "apothic_enchanting:ender_library",
+		"id": "apothic_enchanting:ender_library",
 		"count": 1
 	}
 }

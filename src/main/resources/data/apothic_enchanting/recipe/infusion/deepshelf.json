@@ -9,7 +9,7 @@
 		"arcana": 40
 	},
 	"result": {
-		"item": "apothic_enchanting:deepshelf",
+		"id": "apothic_enchanting:deepshelf",
 		"count": 1
 	}
 }

@@ -14,7 +14,7 @@
 		"arcana": -1
 	},
 	"result": {
-		"item": "apothic_enchanting:infused_breath",
+		"id": "apothic_enchanting:infused_breath",
 		"count": 3
 	}
 }

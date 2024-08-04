@@ -14,7 +14,7 @@
 		"arcana": -1
 	},
 	"result": {
-		"item": "apothic_enchanting:improved_scrap_tome",
+		"id": "apothic_enchanting:improved_scrap_tome",
 		"count": 4
 	}
 }
