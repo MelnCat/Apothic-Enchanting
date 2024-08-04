@@ -4,7 +4,7 @@
   "group": "apothic_enchanting",
   "key": {
     "B": {
-      "tag": "forge:bookshelves"
+      "tag": "c:bookshelves"
     },
     "C": {
       "item": "minecraft:calcite"
@@ -19,6 +19,7 @@
     "CUC"
   ],
   "result": {
-    "item": "apothic_enchanting:geode_shelf"
+    "count": 1,
+    "id": "apothic_enchanting:geode_shelf"
   }
 }

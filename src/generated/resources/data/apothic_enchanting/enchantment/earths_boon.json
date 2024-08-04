@@ -1,0 +1,38 @@
+{
+  "anvil_cost": 10,
+  "description": {
+    "translate": "enchantment.apothic_enchanting.earths_boon"
+  },
+  "effects": {
+    "apothic_enchanting:earths_boon": {
+      "drop_chance": [
+        {
+          "effect": {
+            "type": "minecraft:add",
+            "value": {
+              "type": "minecraft:linear",
+              "base": 0.01,
+              "per_level_above_first": 0.01
+            }
+          }
+        }
+      ],
+      "drops": "apothic_enchanting:boon_drops",
+      "target": "c:stones"
+    }
+  },
+  "max_cost": {
+    "base": 200,
+    "per_level_above_first": 0
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 60,
+    "per_level_above_first": 20
+  },
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#minecraft:pickaxes",
+  "weight": 1
+}

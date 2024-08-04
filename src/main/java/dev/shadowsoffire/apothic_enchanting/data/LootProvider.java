@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
@@ -29,7 +30,7 @@ public class LootProvider extends LootTableProvider {
             output,
             Set.of(),
             List.of(
-                new LootTableProvider.SubProviderEntry(VanillaBlockLoot::new, LootContextParamSets.BLOCK)),
+                new LootTableProvider.SubProviderEntry(BlockLoot::new, LootContextParamSets.BLOCK)),
             registries);
     }
 
@@ -70,6 +71,11 @@ public class LootProvider extends LootTableProvider {
             this.dropSelf(Ench.Blocks.ENDER_LIBRARY);
             this.dropSelf(Ench.Blocks.FILTERING_SHELF);
             this.dropSelf(Ench.Blocks.TREASURE_SHELF);
+        }
+
+        @Override
+        protected Iterable<Block> getKnownBlocks() {
+            return BuiltInRegistries.BLOCK.holders().filter(h -> h.getKey().location().getNamespace().equals(ApothicEnchanting.MODID)).map(Holder::value).toList();
         }
 
         protected void dropSelf(Holder<Block> block) {

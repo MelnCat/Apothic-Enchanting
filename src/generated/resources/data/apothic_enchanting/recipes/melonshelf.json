@@ -4,7 +4,7 @@
   "group": "apothic_enchanting",
   "key": {
     "B": {
-      "tag": "forge:bookshelves"
+      "tag": "c:bookshelves"
     },
     "G": {
       "item": "minecraft:glistering_melon_slice"
@@ -19,6 +19,7 @@
     "MMM"
   ],
   "result": {
-    "item": "apothic_enchanting:melonshelf"
+    "count": 1,
+    "id": "apothic_enchanting:melonshelf"
   }
 }

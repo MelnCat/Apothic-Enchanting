@@ -69,9 +69,4 @@ public abstract class ThrownTridentMixin extends AbstractArrow {
         }
     }
 
-    @Shadow
-    private void setPierceLevel(byte pierceLevel) {
-        throw new RuntimeException("setPierceLevel not shadowed");
-    }
-
 }

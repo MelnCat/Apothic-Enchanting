@@ -115,21 +115,20 @@ public class MiscDatagen implements DataProvider {
 
     public static ShapedRecipePattern toPattern(int width, int height, NonNullList<Ingredient> input) {
         Map<Character, Ingredient> key = new HashMap<>();
-        Map<IngredientKey, Character> chars = new HashMap<>();
+        Map<Ingredient, Character> chars = new HashMap<>();
         List<String> rows = new ArrayList<>(height);
         for (int h = 0; h < height; h++) {
             String row = "";
             for (int w = 0; w < width; w++) {
                 Ingredient ing = input.get(h * width + w);
-                IngredientKey iKey = new IngredientKey(ing);
-                if (chars.containsKey(iKey)) {
-                    row += chars.get(iKey);
+                if (chars.containsKey(ing)) {
+                    row += chars.get(ing);
                     continue;
                 }
                 else {
                     Character c = getFirstChar(chars.values(), ing);
                     key.put(c, ing);
-                    chars.put(iKey, c);
+                    chars.put(ing, c);
                     row += c;
                     continue;
                 }
@@ -159,14 +158,14 @@ public class MiscDatagen implements DataProvider {
                 path = BuiltInRegistries.ITEM.getKey(i.item().getItem()).getPath();
             }
             else {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Unknown Ingredient$Value type: " + v.getClass().getCanonicalName());
             }
         }
         path = path.toUpperCase(Locale.ROOT);
         for (char c : path.toCharArray()) {
             if (!inUse.contains(c)) return c;
         }
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Failed to find any unused characters for ingredient: " + ing);
     }
 
     private ShapedRecipe genShaped(ItemStack output, int width, int height, Object... input) {
@@ -206,44 +205,5 @@ public class MiscDatagen implements DataProvider {
     @Override
     public String getName() {
         return ApothicEnchanting.MODID;
-    }
-
-    private static class IngredientKey {
-        private final Ingredient ing;
-
-        private IngredientKey(Ingredient ing) {
-            this.ing = ing;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof IngredientKey key) {
-                Value[] ours = this.ing.getValues();
-                Value[] theirs = key.ing.getValues();
-                if (ours.length != theirs.length) return false;
-                for (int i = 0; i < ours.length; i++) {
-                    if (!ours[i].equals(theirs[i])) return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 31;
-            for (Value v : this.ing.getValues()) {
-                if (v instanceof TagValue t) {
-                    hash ^= t.hashCode();
-                }
-                else if (v instanceof ItemValue i) {
-                    hash ^= BuiltInRegistries.ITEM.getKey(i.item().getItem()).hashCode();
-                }
-                else {
-                    throw new UnsupportedOperationException();
-                }
-            }
-            return hash;
-        }
     }
 }

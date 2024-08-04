@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +36,7 @@ import dev.shadowsoffire.placebo.util.PlaceboUtil;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.registries.Registries;
@@ -150,10 +152,13 @@ public class ApothicEnchanting {
         RegistrySetBuilder regSet = new RegistrySetBuilder()
             .add(Registries.ENCHANTMENT, ApothEnchantmentProvider::bootstrap);
 
-        e.getGenerator().addProvider(true, new DatapackBuiltinEntriesProvider(output, e.getLookupProvider(), regSet, Set.of(MODID, "minecraft")));
-        e.getGenerator().addProvider(true, LootProvider.create(output, e.getLookupProvider()));
-        e.getGenerator().addProvider(true, new EnchTagsProvider(output, e.getLookupProvider(), e.getExistingFileHelper()));
-        e.getGenerator().addProvider(true, new MiscDatagen(output.getOutputFolder(Target.DATA_PACK).resolve(MODID), e.getLookupProvider()));
+        DatapackBuiltinEntriesProvider datapackProvider = new DatapackBuiltinEntriesProvider(output, e.getLookupProvider(), regSet, Set.of(MODID, "minecraft"));
+        CompletableFuture<HolderLookup.Provider> registries = datapackProvider.getRegistryProvider();
+
+        e.getGenerator().addProvider(true, datapackProvider);
+        e.getGenerator().addProvider(true, LootProvider.create(output, registries));
+        e.getGenerator().addProvider(true, new EnchTagsProvider(output, registries, e.getExistingFileHelper()));
+        e.getGenerator().addProvider(true, new MiscDatagen(output.getOutputFolder(Target.DATA_PACK).resolve(MODID), registries));
     }
 
     public void reload(ResourceReloadEvent e) {

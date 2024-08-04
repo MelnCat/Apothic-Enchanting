@@ -11,6 +11,7 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingCo
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.entity_effects.ReboundingEffect;
+import dev.shadowsoffire.apothic_enchanting.enchantments.values.ExponentialLevelBasedValue;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryBlock;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryContainer;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile.BasicLibraryTile;
@@ -444,6 +445,7 @@ public class Ench {
         R.custom("warden_tendril", NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> WardenLootModifier.CODEC);
         R.custom("enchantment_table_item_handler", NeoForgeRegistries.Keys.ATTACHMENT_TYPES, () -> EnchantmentTableItemHandler.TYPE);
         R.custom("rebounding", Registries.ENCHANTMENT_ENTITY_EFFECT_TYPE, () -> ReboundingEffect.CODEC);
+        R.custom("exponential", Registries.ENCHANTMENT_LEVEL_BASED_VALUE_TYPE, () -> ExponentialLevelBasedValue.CODEC);
     }
 
     public static void bootstrap(IEventBus bus) {

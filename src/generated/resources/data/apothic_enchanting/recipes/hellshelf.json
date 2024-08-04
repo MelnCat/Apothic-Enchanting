@@ -10,12 +10,16 @@
       "item": "minecraft:nether_bricks"
     },
     "O": {
-      "tag": "forge:bookshelves"
+      "tag": "c:bookshelves"
     },
     "P": {
-      "type": "neoforge:nbt",
-      "item": "minecraft:potion",
-      "tag": "{Potion:\"minecraft:regeneration\"}"
+      "type": "neoforge:components",
+      "components": {
+        "minecraft:potion_contents": {
+          "potion": "minecraft:regeneration"
+        }
+      },
+      "items": "minecraft:potion"
     }
   },
   "pattern": [
@@ -24,6 +28,7 @@
     "NNN"
   ],
   "result": {
-    "item": "apothic_enchanting:hellshelf"
+    "count": 1,
+    "id": "apothic_enchanting:hellshelf"
   }
 }
