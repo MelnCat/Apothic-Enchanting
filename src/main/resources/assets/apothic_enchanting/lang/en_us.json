@@ -175,20 +175,14 @@
     "enchantment.apothic_enchanting.shield_bash": "Shield Bash",
     "enchantment.apothic_enchanting.shield_bash.desc": "Empowers damage done by shields.",
 
-    "enchantment.apothic_enchanting.reflective": "Reflective Defenses",
-    "enchantment.apothic_enchanting.reflective.desc": "Blocked attacks may harm the attacker.",
+    "enchantment.apothic_enchanting.reflective_defenses": "Reflective Defenses",
+    "enchantment.apothic_enchanting.reflective_defenses.desc": "Blocked attacks may harm the attacker.",
 
     "enchantment.apothic_enchanting.berserkers_fury": "Berserker's Fury",
     "enchantment.apothic_enchanting.berserkers_fury.desc": "Become enraged when taking damage. [⌛ 0:45]",
 
-    "enchantment.apothic_enchanting.knowledge": "Knowledge of the Ages",
-    "enchantment.apothic_enchanting.knowledge.desc": "Enemy drops are directly converted to experience.",
-
-    "enchantment.apothic_enchanting.splitting": "Splitting",
-    "enchantment.apothic_enchanting.splitting.desc": "Allows anvils to split multiple enchantments from books they fall upon.",
-    
-    "enchantment.apothic_enchanting.obliteration": "Obliteration",
-    "enchantment.apothic_enchanting.obliteration.desc": "Allows anvils to split single enchantments from books they fall upon.",
+    "enchantment.apothic_enchanting.knowledge_of_the_ages": "Knowledge of the Ages",
+    "enchantment.apothic_enchanting.knowledge_of_the_ages.desc": "Enemy drops are directly converted to experience.",
 
     "enchantment.apothic_enchanting.natures_blessing": "Nature's Blessing",
     "enchantment.apothic_enchanting.natures_blessing.desc": "Hoes may be used to bonemeal crops.",
@@ -199,14 +193,14 @@
     "enchantment.apothic_enchanting.magic_protection": "Occult Aversion",
     "enchantment.apothic_enchanting.magic_protection.desc": "Magic damage dealt by and to the user is reduced.",
     
-    "enchantment.apothic_enchanting.crescendo": "Crescendo of Bolts",
-    "enchantment.apothic_enchanting.crescendo.desc": "Your crossbow may be fired additional times per reload.",
+    "enchantment.apothic_enchanting.crescendo_of_bolts": "Crescendo of Bolts",
+    "enchantment.apothic_enchanting.crescendo_of_bolts.desc": "Your crossbow may be fired additional times per reload.",
 
     "enchantment.apothic_enchanting.chromatic": "Chromatic Aberration",
     "enchantment.apothic_enchanting.chromatic.desc": "Sheared wool will be changed to a random color.",
 
-    "enchantment.apothic_enchanting.exploitation": "Worker Exploitation",
-    "enchantment.apothic_enchanting.exploitation.desc": "Wool received is doubled, but the sheep takes damage.",
+    "enchantment.apothic_enchanting.worker_exploitation": "Worker Exploitation",
+    "enchantment.apothic_enchanting.worker_exploitation.desc": "Wool received is doubled, but the sheep takes damage.",
 
     "enchantment.apothic_enchanting.growth_serum": "Growth Serum",
     "enchantment.apothic_enchanting.growth_serum.desc": "Sheep have a 50% chance to instantly regrow their wool.",

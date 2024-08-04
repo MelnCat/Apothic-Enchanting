@@ -18,6 +18,7 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveCo
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
+import dev.shadowsoffire.apothic_enchanting.payloads.EnchantmentInfoPayload;
 import dev.shadowsoffire.placebo.config.Configuration;
 import dev.shadowsoffire.placebo.util.RunnableReloader;
 import net.minecraft.core.BlockPos;
@@ -47,6 +48,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
@@ -57,6 +59,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ApothEnchEvents {
 
@@ -315,6 +318,13 @@ public class ApothEnchEvents {
 
     @SubscribeEvent
     public void logout(ClientPlayerNetworkEvent.LoggingOut e) {
-        ApothicEnchanting.ENCHANTMENT_INFO.clear();
+       // ApothicEnchanting.ENCHANTMENT_INFO.clear();
+    }
+
+    @SubscribeEvent
+    public void sync(OnDatapackSyncEvent e) {
+        e.getRelevantPlayers().forEach(p -> {
+            PacketDistributor.sendToPlayer(p, new EnchantmentInfoPayload(ApothicEnchanting.ENCHANTMENT_INFO));
+        });
     }
 }

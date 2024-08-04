@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
+import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.api.EnchantmentStatBlock;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
@@ -12,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -82,5 +84,11 @@ public class TooltipUtil {
 
     public static MutableComponent lang(String type, String path, Object... args) {
         return Component.translatable(type + "." + ApothicEnchanting.MODID + "." + path, args);
+    }
+
+    public static void applyOverMaxLevelColor(Holder<Enchantment> ench, int level, Component name) {
+        if (!ench.is(EnchantmentTags.CURSE) && level > ench.value().definition().maxLevel() && name instanceof MutableComponent mc) {
+            mc.setStyle(mc.getStyle().withColor(Ench.Colors.LIGHT_BLUE_FLASH));
+        }
     }
 }

@@ -176,13 +176,13 @@ public class MiscDatagen implements DataProvider {
     public void addShaped(Object output, int width, int height, Object... input) {
         ItemStack out = makeStack(output);
         ShapedRecipe recipe = this.genShaped(out, width, height, input);
-        write(recipe, ShapedRecipe.CODEC, "recipes", BuiltInRegistries.ITEM.getKey(out.getItem()).getPath());
+        write(recipe, ShapedRecipe.CODEC, "recipe", BuiltInRegistries.ITEM.getKey(out.getItem()).getPath());
     }
 
     public void addShapeless(Object output, Object... inputs) {
         ItemStack out = makeStack(output);
         ShapelessRecipe recipe = new ShapelessRecipe(ApothicEnchanting.MODID, CraftingBookCategory.MISC, out, createInput(ApothicEnchanting.MODID, false, inputs));
-        write(recipe, ShapelessRecipe.CODEC, "recipes", BuiltInRegistries.ITEM.getKey(out.getItem()).getPath());
+        write(recipe, ShapelessRecipe.CODEC, "recipe", BuiltInRegistries.ITEM.getKey(out.getItem()).getPath());
     }
 
     private <T> void write(T object, Codec<T> codec, String type, String path) {

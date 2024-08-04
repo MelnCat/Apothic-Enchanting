@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
-import dev.shadowsoffire.apothic_enchanting.api.EnchantableItem;
 import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
 import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
@@ -128,7 +127,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
                     else return;
                 }
                 else {
-                    this.enchantSlots.setItem(0, ((EnchantableItem) toEnchant.getItem()).applyEnchantments(toEnchant, list));
+                    this.enchantSlots.setItem(0, toEnchant.getItem().applyEnchantments(toEnchant, list));
                 }
 
                 if (!player.getAbilities().instabuild) {

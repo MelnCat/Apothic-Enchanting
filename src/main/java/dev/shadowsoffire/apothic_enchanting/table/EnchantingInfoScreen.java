@@ -36,7 +36,6 @@ import net.minecraft.util.random.WeightedEntry.IntrusiveBase;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class EnchantingInfoScreen extends Screen {
 
@@ -264,7 +263,7 @@ public class EnchantingInfoScreen extends Screen {
         Set<Holder<Enchantment>> blacklist = this.parent.getMenu().stats.blacklist();
 
         Stream<Holder<Enchantment>> possible = ApothEnchantmentHelper.getPossibleEnchantments(this.minecraft.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), toEnchant, this.parent.getMenu().stats);
-        this.enchantments = EnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, possible)
+        this.enchantments = ApothEnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, possible)
             .stream()
             .map(e -> new ArcanaEnchantmentData(arc, e))
             .map(a -> new EnchantmentDataWrapper(a, blacklist.contains(a.data.enchantment)))

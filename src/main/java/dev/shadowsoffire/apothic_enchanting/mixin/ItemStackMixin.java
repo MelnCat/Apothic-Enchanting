@@ -21,6 +21,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -46,8 +47,12 @@ public class ItemStackMixin {
     public <T extends TooltipProvider> void apoth_enchTooltipRewrite(DataComponentType<T> component, Item.TooltipContext ctx, Consumer<Component> tooltip, TooltipFlag tooltipFlag, CallbackInfo ci) {
         ItemStack ths = (ItemStack) (Object) this;
         T t = ths.get(component);
-        if (t instanceof ItemEnchantments enchants) {
+        if (component == DataComponents.ENCHANTMENTS && t instanceof ItemEnchantments enchants) {
             HolderLookup.Provider regs = ctx.registries();
+            if (regs == null) {
+                return;
+            }
+
             HolderSet<Enchantment> iterationOrder = getTagOrEmpty(regs, Registries.ENCHANTMENT, EnchantmentTags.TOOLTIP_ORDER);
             ItemEnchantments realLevels = ths.getAllEnchantments(regs.lookupOrThrow(Registries.ENCHANTMENT));
 
@@ -65,7 +70,10 @@ public class ItemStackMixin {
             enchants.entrySet().stream()
                 .map(Entry::getKey)
                 .filter(ench -> !iterationOrder.contains(ench))
-                .forEach(applyTooltip);
+                .forEach(ench -> {
+                    applyTooltip.accept(ench);
+                    seen.add(ench);
+                });
 
             realLevels.entrySet().stream()
                 .map(Entry::getKey)

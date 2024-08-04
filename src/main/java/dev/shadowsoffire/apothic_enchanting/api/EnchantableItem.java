@@ -6,30 +6,9 @@ import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantmentTableStats;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
 public interface EnchantableItem {
-
-    /**
-     * Handles the enchanting of an item.<br>
-     * The item becomes responsible for changing the target item, and applying the Enchantments to the item.<br>
-     *
-     * @param stack        The ItemStack being enchanted.
-     * @param enchantments The enchantments being applied.
-     * @return The newly-enchanted itemstack.
-     */
-    default ItemStack applyEnchantments(ItemStack stack, List<EnchantmentInstance> enchantments) {
-        if (stack.is(Items.BOOK)) {
-            stack = stack.transmuteCopy(Items.ENCHANTED_BOOK);
-        }
-
-        for (EnchantmentInstance inst : enchantments) {
-            stack.enchant(inst.enchantment, inst.level);
-        }
-
-        return stack;
-    }
 
     /**
      * Allow the Item to perform manipulations to the selected list of enchantments.<br>

@@ -89,7 +89,7 @@ public class ApothEnchantmentHelper {
             Arcana arcanaVals = Arcana.getForThreshold(stats.arcana());
 
             Stream<Holder<Enchantment>> possible = getPossibleEnchantments(reg, stack, stats);
-            List<EnchantmentInstance> allEnchants = EnchantmentHelper.getAvailableEnchantmentResults(power, stack, possible);
+            List<EnchantmentInstance> allEnchants = ApothEnchantmentHelper.getAvailableEnchantmentResults(power, stack, possible);
             List<ArcanaEnchantmentData> possibleEnchants = allEnchants.stream().map(d -> new ArcanaEnchantmentData(arcanaVals, d)).collect(Collectors.toList());
 
             // At least one enchantment is guaranteed, with an extra one per 33 Arcana.

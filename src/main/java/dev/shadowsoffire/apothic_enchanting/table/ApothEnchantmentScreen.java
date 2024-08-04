@@ -47,7 +47,7 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
 
     protected final ApothEnchantmentMenu menu;
     protected final Int2ObjectMap<List<EnchantmentInstance>> clues = new Int2ObjectOpenHashMap<>();
-    protected final IdMap<Holder<Enchantment>> enchIdMap = this.minecraft.level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).asHolderIdMap();
+    protected final IdMap<Holder<Enchantment>> enchIdMap = Minecraft.getInstance().level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).asHolderIdMap();
 
     protected float eterna = 0, lastEterna = 0, quanta = 0, lastQuanta = 0, arcana = 0, lastArcana = 0;
     protected boolean[] hasAllClues = { false, false, false };
