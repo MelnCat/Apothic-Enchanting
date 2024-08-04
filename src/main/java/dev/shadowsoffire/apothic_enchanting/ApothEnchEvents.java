@@ -10,6 +10,7 @@ import org.apache.commons.lang3.mutable.MutableFloat;
 
 import com.mojang.datafixers.util.Pair;
 
+import dev.shadowsoffire.apothic_attributes.ApothicAttributes;
 import dev.shadowsoffire.apothic_enchanting.enchantments.ChainsawTask;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponent;
@@ -17,7 +18,10 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveCo
 import dev.shadowsoffire.apothic_enchanting.objects.ExtractionTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ImprovedScrappingTomeItem;
 import dev.shadowsoffire.apothic_enchanting.objects.ScrappingTomeItem;
+import dev.shadowsoffire.placebo.config.Configuration;
+import dev.shadowsoffire.placebo.util.RunnableReloader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
@@ -29,30 +33,30 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
-import net.neoforged.neoforge.event.entity.living.LootingLevelEvent;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 public class ApothEnchEvents {
 
@@ -197,14 +201,14 @@ public class ApothEnchEvents {
         }
     }
 
-    @SubscribeEvent
-    public void looting(LootingLevelEvent e) {
-        DamageSource src = e.getDamageSource();
-        if (src != null && src.getDirectEntity() instanceof ThrownTrident trident) {
-            ItemStack triStack = trident.getPickupItemStackOrigin();
-            e.setLootingLevel(triStack.getEnchantmentLevel(Enchantments.MOB_LOOTING));
-        }
-    }
+    // @SubscribeEvent
+    // public void looting(LootingLevelEvent e) {
+    // DamageSource src = e.getDamageSource();
+    // if (src != null && src.getDirectEntity() instanceof ThrownTrident trident) {
+    // ItemStack triStack = trident.getPickupItemStackOrigin();
+    // e.setLootingLevel(triStack.getEnchantmentLevel(Enchantments.MOB_LOOTING));
+    // }
+    // }
 
     /**
      * Event handler for the Stable Footing and Miner's Fervor enchants.
@@ -279,4 +283,38 @@ public class ApothEnchEvents {
         BerserkingComponent.attemptToGoBerserk(e);
     }
 
+    @SubscribeEvent
+    public void reload(AddReloadListenerEvent e) {
+        e.addListener(RunnableReloader.of(() -> {
+            Configuration enchInfoConfig = new Configuration(ApothicAttributes.getConfigFile("enchantments"));
+            enchInfoConfig.setTitle("Apotheosis Enchantment Information");
+            enchInfoConfig.setComment("This file contains configurable data for each enchantment.\nThe names of each category correspond to the registry names of every loaded enchantment.");
+            ApothicEnchanting.ENCHANTMENT_INFO.clear();
+
+            e.getServerResources().getRegistryLookup().lookupOrThrow(Registries.ENCHANTMENT).listElements().forEach(ench -> {
+                EnchantmentInfo info = EnchantmentInfo.load(ench, enchInfoConfig);
+                ApothicEnchanting.ENCHANTMENT_INFO.put(ench, info);
+                for (int i = 1; i <= info.getMaxLevel(); i++) {
+                    if (info.getMinPower(i) > info.getMaxPower(i)) {
+                        ApothicEnchanting.LOGGER.warn("Enchantment {} has min/max power {}/{} at level {}, making this level unobtainable except by combination.",
+                            ench.key().location(),
+                            info.getMinPower(i),
+                            info.getMaxPower(i), i);
+                    }
+                }
+            });
+
+            if (enchInfoConfig.hasChanged()) enchInfoConfig.save();
+        }));
+    }
+
+    @SubscribeEvent
+    public void stopped(ServerStoppedEvent e) {
+        ApothicEnchanting.ENCHANTMENT_INFO.clear();
+    }
+
+    @SubscribeEvent
+    public void logout(ClientPlayerNetworkEvent.LoggingOut e) {
+        ApothicEnchanting.ENCHANTMENT_INFO.clear();
+    }
 }

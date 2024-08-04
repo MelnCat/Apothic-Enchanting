@@ -15,7 +15,7 @@ public class TemptGoalMixin {
 
     @Inject(method = "shouldFollow", at = @At(value = "RETURN"), cancellable = true)
     public void apoth_tempting(LivingEntity entity, CallbackInfoReturnable<Boolean> ci) {
-        if (!ci.getReturnValueZ() && EnchantmentHelper.has(entity.getMainHandItem(), Ench.EnchantEffects.TEMPTING.get())) {
+        if (!ci.getReturnValueZ() && EnchantmentHelper.has(entity.getMainHandItem(), Ench.EnchantEffects.TEMPTING)) {
             ci.setReturnValue(true);
         }
     }

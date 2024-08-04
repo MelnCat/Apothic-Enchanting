@@ -13,7 +13,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.client.DrawsOnLeft;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import dev.shadowsoffire.apothic_enchanting.table.infusion.InfusionRecipe;
 import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
@@ -314,10 +313,10 @@ public class ApothEnchantmentScreen extends EnchantmentScreen implements DrawsOn
                 int offset = 20 + list.size() * this.minecraft.font.lineHeight;
                 list.clear();
                 list.add(TooltipUtil.lang("info", "rel_weights").withStyle(ChatFormatting.UNDERLINE, ChatFormatting.YELLOW));
-                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.common"), a.rarities[0]).withStyle(ChatFormatting.GRAY));
-                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.uncommon"), a.rarities[1]).withStyle(ChatFormatting.GREEN));
-                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.rare"), a.rarities[2]).withStyle(ChatFormatting.BLUE));
-                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.very_rare"), a.rarities[3]).withStyle(ChatFormatting.GOLD));
+                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.common"), a.getRarities()[0]).withStyle(ChatFormatting.GRAY));
+                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.uncommon"), a.getRarities()[1]).withStyle(ChatFormatting.GREEN));
+                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.rare"), a.getRarities()[2]).withStyle(ChatFormatting.BLUE));
+                list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.very_rare"), a.getRarities()[3]).withStyle(ChatFormatting.GOLD));
                 this.drawOnLeft(gfx, list, this.getGuiTop() + 29 + offset);
             }
         }

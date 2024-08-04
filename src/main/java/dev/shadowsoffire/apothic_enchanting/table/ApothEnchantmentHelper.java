@@ -12,10 +12,12 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableObject;
 
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
+import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
+import dev.shadowsoffire.apothic_enchanting.EnchantmentInfo;
 import dev.shadowsoffire.apothic_enchanting.api.EnchantableItem;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup.RegistryLookup;
@@ -129,33 +131,26 @@ public class ApothEnchantmentHelper {
     }
 
     /**
-     * TODO: Remove - use EnchantmentHelper.getAvailableEnchantmentResults when calling, and target the method redirector at that function
-     * 
      * @param power         The current enchanting power.
      * @param stack         The ItemStack being enchanted.
      * @param allowTreasure If treasure enchantments are allowed.
      * @param blacklist     A list of all enchantments that may not be selected.
      * @return All possible enchantments that are eligible to be placed on this item at a specific power level.
      */
-    // public static List<EnchantmentInstance> getAvailableEnchantmentResults(int power, ItemStack stack, boolean allowTreasure, Set<Enchantment> blacklist) {
-    // List<EnchantmentInstance> list = new ArrayList<>();
-    // EnchantableItem item = (EnchantableItem) stack.getItem();
-    // allowTreasure = item.isTreasureAllowed(stack, allowTreasure);
-    // for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
-    // EnchantmentInfo info = ApothicEnchanting.getEnchInfo(enchantment);
-    // if (info.isTreasure() && !allowTreasure || !info.isDiscoverable()) continue;
-    // if (blacklist.contains(enchantment)) continue;
-    // if (enchantment.canApplyAtEnchantingTable(stack) || item.forciblyAllowsTableEnchantment(stack, enchantment)) {
-    // for (int level = info.getMaxLevel(); level > enchantment.getMinLevel() - 1; --level) {
-    // if (power >= info.getMinPower(level) && power <= info.getMaxPower(level)) {
-    // list.add(new EnchantmentInstance(enchantment, level));
-    // break;
-    // }
-    // }
-    // }
-    // }
-    // return list;
-    // }
+    public static List<EnchantmentInstance> getAvailableEnchantmentResults(int level, ItemStack stack, Stream<Holder<Enchantment>> possibleEnchantments) {
+        List<EnchantmentInstance> selected = Lists.newArrayList();
+        possibleEnchantments.filter(stack::isPrimaryItemFor).forEach(ench -> {
+            EnchantmentInfo info = ApothicEnchanting.getEnchInfo(ench);
+
+            for (int i = info.getMaxLevel(); i >= ench.value().getMinLevel(); i--) {
+                if (level >= info.getMinPower(i) && level <= info.getMaxPower(i)) {
+                    selected.add(new EnchantmentInstance(ench, i));
+                    break;
+                }
+            }
+        });
+        return selected;
+    }
 
     /**
      * Generates a quanta factor, which is one plus the quanta value times a random number within the range [-1, 1].
@@ -215,7 +210,7 @@ public class ApothEnchantmentHelper {
         EnchantmentInstance data;
 
         public ArcanaEnchantmentData(Arcana arcana, EnchantmentInstance data) {
-            super(arcana.getRarities()[data.enchantment.getRarity().ordinal()]);
+            super(arcana.adjustWeight(data.enchantment.value().getWeight()));
             this.data = data;
         }
     }

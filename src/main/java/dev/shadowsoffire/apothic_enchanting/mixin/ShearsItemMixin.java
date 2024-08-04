@@ -15,10 +15,10 @@ public class ShearsItemMixin extends Item {
         super(pProperties);
     }
 
-    @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment ench) {
-        return super.canApplyAtEnchantingTable(stack, ench) || ench == Enchantments.UNBREAKING || ench == Enchantments.BLOCK_EFFICIENCY || ench == Enchantments.BLOCK_FORTUNE;
-    }
+//    @Override
+//    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment ench) {
+//        return super.canApplyAtEnchantingTable(stack, ench) || ench == Enchantments.UNBREAKING || ench == Enchantments.BLOCK_EFFICIENCY || ench == Enchantments.BLOCK_FORTUNE;
+//    }
 
     @Override
     public int getEnchantmentValue() {

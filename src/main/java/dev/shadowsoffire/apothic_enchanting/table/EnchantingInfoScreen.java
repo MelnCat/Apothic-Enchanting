@@ -14,7 +14,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentHelper.ArcanaEnchantmentData;
-import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentMenu.Arcana;
 import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import net.minecraft.ChatFormatting;
@@ -135,10 +134,10 @@ public class EnchantingInfoScreen extends Screen {
         List<Component> list = new ArrayList<>();
         Arcana a = Arcana.getForThreshold(this.parent.getMenu().stats.arcana());
         list.add(TooltipUtil.lang("info", "weights").withStyle(ChatFormatting.UNDERLINE, ChatFormatting.YELLOW));
-        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.common"), a.rarities[0]).withStyle(ChatFormatting.GRAY));
-        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.uncommon"), a.rarities[1]).withStyle(ChatFormatting.GREEN));
-        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.rare"), a.rarities[2]).withStyle(ChatFormatting.BLUE));
-        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.very_rare"), a.rarities[3]).withStyle(ChatFormatting.GOLD));
+        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.common"), a.getRarities()[0]).withStyle(ChatFormatting.GRAY));
+        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.uncommon"), a.getRarities()[1]).withStyle(ChatFormatting.GREEN));
+        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.rare"), a.getRarities()[2]).withStyle(ChatFormatting.BLUE));
+        list.add(TooltipUtil.lang("info", "weight", I18n.get("rarity.enchantment.very_rare"), a.getRarities()[3]).withStyle(ChatFormatting.GOLD));
         gfx.renderComponentTooltip(this.font, list, a == Arcana.MAX ? -2 : 1, 120);
 
         gfx.drawString(this.font, this.title, 7, 4, 4210752, false);
@@ -163,7 +162,7 @@ public class EnchantingInfoScreen extends Screen {
 
             int weight = hover.getEnch().value().definition().weight();
             LegacyRarity rarity = LegacyRarity.byWeight(weight);
-            Component rarityName = TooltipUtil.lang("rarity", rarity.name().toLowerCase(Locale.ROOT)).withColor(rarity.color);
+            Component rarityName = TooltipUtil.lang("rarity", rarity.name().toLowerCase(Locale.ROOT)).withColor(rarity.color());
             list.add(TooltipUtil.lang("info", "enchinfo_weight", weight, rarityName).withStyle(ChatFormatting.DARK_AQUA));
 
             list.add(TooltipUtil.lang("info", "enchinfo_chance", String.format("%.2f", 100F * hover.getWeight().asInt() / WeightedRandom.getTotalWeight(this.enchantments)) + "%").withStyle(ChatFormatting.DARK_AQUA));
@@ -391,37 +390,6 @@ public class EnchantingInfoScreen extends Screen {
 
         public int getLevel() {
             return this.data.data.level;
-        }
-
-    }
-
-    public static enum LegacyRarity {
-        COMMON(10, ChatFormatting.WHITE),
-        UNCOMMON(5, ChatFormatting.YELLOW),
-        RARE(2, ChatFormatting.BLUE),
-        VERY_RARE(1, ChatFormatting.GOLD);
-
-        private final int weight;
-        private final int color;
-
-        private LegacyRarity(int pWeight, ChatFormatting color) {
-            this.weight = pWeight;
-            this.color = color.getColor();
-        }
-
-        public int weight() {
-            return this.weight;
-        }
-
-        public int color() {
-            return this.color;
-        }
-
-        public static LegacyRarity byWeight(int weight) {
-            if (weight > 10) return COMMON;
-            else if (weight > 5) return UNCOMMON;
-            else if (weight > 2) return RARE;
-            else return VERY_RARE;
         }
 
     }

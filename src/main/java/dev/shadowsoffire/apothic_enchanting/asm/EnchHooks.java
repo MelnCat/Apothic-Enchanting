@@ -1,7 +1,10 @@
 package dev.shadowsoffire.apothic_enchanting.asm;
 
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
+import dev.shadowsoffire.apothic_enchanting.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -18,7 +21,11 @@ public class EnchHooks {
      * Injected by coremods/ench/ench_info_redirector.js
      */
     public static int getMaxLevel(Enchantment ench) {
-        return ApothicEnchanting.getEnchInfo(ench).getMaxLevel();
+        Holder<Enchantment> holder = MiscUtil.findHolder(Registries.ENCHANTMENT, ench);
+        if (holder != null) {
+            return ApothicEnchanting.getEnchInfo(holder).getMaxLevel();
+        }
+        return ench.getMaxLevel();
     }
 
     /**
@@ -26,7 +33,11 @@ public class EnchHooks {
      * Injected by coremods/ench/ench_info_loot_redirector.js
      */
     public static int getMaxLootLevel(Enchantment ench) {
-        return ApothicEnchanting.getEnchInfo(ench).getMaxLootLevel();
+        Holder<Enchantment> holder = MiscUtil.findHolder(Registries.ENCHANTMENT, ench);
+        if (holder != null) {
+            return ApothicEnchanting.getEnchInfo(holder).getMaxLootLevel();
+        }
+        return ench.getMaxLevel();
     }
 
     /**

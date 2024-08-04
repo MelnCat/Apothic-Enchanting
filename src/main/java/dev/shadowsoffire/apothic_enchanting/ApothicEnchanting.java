@@ -10,8 +10,10 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.mojang.datafixers.util.Pair;
+
 import dev.shadowsoffire.apothic_attributes.ApothicAttributes;
-import dev.shadowsoffire.apothic_enchanting.EnchantmentInfo.PowerFunc;
+import dev.shadowsoffire.apothic_enchanting.PowerFunction.DefaultMinPowerFunction;
 import dev.shadowsoffire.apothic_enchanting.asm.EnchHooks;
 import dev.shadowsoffire.apothic_enchanting.data.ApothEnchantmentProvider;
 import dev.shadowsoffire.apothic_enchanting.data.EnchTagsProvider;
@@ -19,6 +21,7 @@ import dev.shadowsoffire.apothic_enchanting.data.LootProvider;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile;
 import dev.shadowsoffire.apothic_enchanting.objects.TomeItem;
 import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
+import dev.shadowsoffire.apothic_enchanting.payloads.EnchantmentInfoPayload;
 import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantingTableBlock;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
@@ -34,7 +37,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
@@ -65,11 +67,10 @@ public class ApothicEnchanting {
     public static final String MODID = "apothic_enchanting";
     public static final Logger LOGGER = LogManager.getLogger("Apotheosis : Enchantment");
 
-    public static final Map<Enchantment, EnchantmentInfo> ENCHANTMENT_INFO = new HashMap<>();
-    public static final Object2IntMap<Enchantment> ENCH_HARD_CAPS = new Object2IntOpenHashMap<>();
+    public static final Map<Holder<Enchantment>, EnchantmentInfo> ENCHANTMENT_INFO = new HashMap<>();
+    public static final Object2IntMap<ResourceKey<Enchantment>> ENCH_HARD_CAPS = new Object2IntOpenHashMap<>();
     public static final String ENCH_HARD_CAP_IMC = "set_ench_hard_cap";
     public static final List<TomeItem> TYPED_BOOKS = new ArrayList<>();
-    static Configuration enchInfoConfig;
 
     public ApothicEnchanting(IEventBus bus) {
         Ench.bootstrap(bus);
@@ -107,20 +108,24 @@ public class ApothicEnchanting {
 
         PayloadHelper.registerPayload(new CluePayload.Provider());
         PayloadHelper.registerPayload(new StatsPayload.Provider());
+        PayloadHelper.registerPayload(new EnchantmentInfoPayload.Provider());
     }
 
     /**
-     * This handles IMC events for the enchantment module. <br>
-     * Currently only one type is supported. A mod may pass a single {@link EnchantmentInstance} indicating the hard capped max level for an enchantment. <br>
+     * This handles IMC events for the enchantment module.
+     * Currently only one type is supported.
+     * A mod may pass a single {@link Pair} holding a {@link ResourceKey} naming the enchantment and an {@link Integer} indicating the hard capped max level for an
+     * enchantment.
      * That pair must use the method {@link ENCH_HARD_CAP_IMC}.
      */
     @SubscribeEvent
+    @SuppressWarnings("unchecked")
     public void handleIMC(InterModProcessEvent e) {
         e.getIMCStream(ENCH_HARD_CAP_IMC::equals).forEach(msg -> {
             try {
-                EnchantmentInstance data = (EnchantmentInstance) msg.messageSupplier().get();
-                if (data != null && data.enchantment != null && data.level > 0) {
-                    ENCH_HARD_CAPS.put(data.enchantment, data.level);
+                Pair<ResourceKey<Enchantment>, Integer> data = (Pair<ResourceKey<Enchantment>, Integer>) msg.messageSupplier().get();
+                if (data.getFirst() != null && data.getSecond() > 0) {
+                    ENCH_HARD_CAPS.put(data.getFirst(), data.getSecond().intValue());
                 }
                 else LOGGER.error("Failed to process IMC message with method {} from {} (invalid values passed).", msg.method(), msg.senderModId());
             }
@@ -141,8 +146,6 @@ public class ApothicEnchanting {
     @SubscribeEvent
     public void data(GatherDataEvent e) {
         PackOutput output = e.getGenerator().getPackOutput();
-        MiscDatagen gen = new MiscDatagen(output.getOutputFolder(Target.DATA_PACK).resolve(MODID));
-        e.getGenerator().addProvider(true, gen);
 
         RegistrySetBuilder regSet = new RegistrySetBuilder()
             .add(Registries.ENCHANTMENT, ApothEnchantmentProvider::bootstrap);
@@ -150,26 +153,20 @@ public class ApothicEnchanting {
         e.getGenerator().addProvider(true, new DatapackBuiltinEntriesProvider(output, e.getLookupProvider(), regSet, Set.of(MODID, "minecraft")));
         e.getGenerator().addProvider(true, LootProvider.create(output, e.getLookupProvider()));
         e.getGenerator().addProvider(true, new EnchTagsProvider(output, e.getLookupProvider(), e.getExistingFileHelper()));
+        e.getGenerator().addProvider(true, new MiscDatagen(output.getOutputFolder(Target.DATA_PACK).resolve(MODID), e.getLookupProvider()));
     }
 
-    @SuppressWarnings("deprecation")
-    public static EnchantmentInfo getEnchInfo(Enchantment ench) {
+    public void reload(ResourceReloadEvent e) {
+        ApothEnchConfig.load(new Configuration(ApothicAttributes.getConfigFile(MODID)));
+    }
+
+    public static EnchantmentInfo getEnchInfo(Holder<Enchantment> ench) {
+        if (ENCHANTMENT_INFO.isEmpty()) {
+            throw new UnsupportedOperationException("Cannot access enchantment information before it has been loaded!");
+        }
+
         EnchantmentInfo info = ENCHANTMENT_INFO.get(ench);
-
-        if (enchInfoConfig == null) { // Legitimate occurances can now happen, such as when vanilla calls fillItemGroup
-            // LOGGER.error("A mod has attempted to access enchantment information before Apotheosis init, this should not happen.");
-            // Thread.dumpStack();
-            return new EnchantmentInfo(ench);
-        }
-
-        if (info == null) { // Should be impossible now.
-            info = EnchantmentInfo.load(ench, enchInfoConfig);
-            ENCHANTMENT_INFO.put(ench, info);
-            if (enchInfoConfig.hasChanged()) enchInfoConfig.save();
-            LOGGER.error("Had to late load enchantment info for {}, this is a bug in the mod {} as they are registering late!", BuiltInRegistries.ENCHANTMENT.getKey(ench), BuiltInRegistries.ENCHANTMENT.getKey(ench).getNamespace());
-        }
-
-        return info;
+        return info != null ? info : EnchantmentInfo.fallback(ench);
     }
 
     /**
@@ -177,10 +174,10 @@ public class ApothicEnchanting {
      * Single-Level enchantments are not scaled.
      * Barring that, enchantments are scaled using the {@link EnchantmentInfo#defaultMin(Enchantment)} until outside the default level space.
      */
-    public static int getDefaultMax(Enchantment ench) {
-        int level = ench.getMaxLevel();
+    public static int getDefaultMaxLevel(Holder<Enchantment> ench) {
+        int level = ench.value().getMaxLevel();
         if (level == 1) return 1;
-        PowerFunc minFunc = EnchantmentInfo.defaultMin(ench);
+        PowerFunction minFunc = new DefaultMinPowerFunction(ench);
         int max = 200;
         int minPower = minFunc.getPower(level);
         if (minPower >= max) return level;
@@ -212,27 +209,6 @@ public class ApothicEnchanting {
                 event.accept(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(ench, level)), TabVisibility.SEARCH_TAB_ONLY);
             }
         };
-    }
-
-    public void reload(ResourceReloadEvent e) {
-        enchInfoConfig = new Configuration(ApothicAttributes.getConfigFile("enchantments"));
-        enchInfoConfig.setTitle("Apotheosis Enchantment Information");
-        enchInfoConfig.setComment("This file contains configurable data for each enchantment.\nThe names of each category correspond to the registry names of every loaded enchantment.");
-        ENCHANTMENT_INFO.clear();
-
-        for (Enchantment ench : BuiltInRegistries.ENCHANTMENT) {
-            ENCHANTMENT_INFO.put(ench, EnchantmentInfo.load(ench, enchInfoConfig));
-        }
-
-        for (Enchantment ench : BuiltInRegistries.ENCHANTMENT) {
-            EnchantmentInfo info = ENCHANTMENT_INFO.get(ench);
-            for (int i = 1; i <= info.getMaxLevel(); i++)
-                if (info.getMinPower(i) > info.getMaxPower(i))
-                    LOGGER.warn("Enchantment {} has min/max power {}/{} at level {}, making this level unobtainable except by combination.", BuiltInRegistries.ENCHANTMENT.getKey(ench), info.getMinPower(i), info.getMaxPower(i), i);
-        }
-
-        if (e == null && enchInfoConfig.hasChanged()) enchInfoConfig.save();
-        ApothEnchConfig.load(new Configuration(ApothicAttributes.getConfigFile(MODID)));
     }
 
     public static ResourceLocation loc(String path) {

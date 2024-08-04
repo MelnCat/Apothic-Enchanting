@@ -1,28 +1,28 @@
 package dev.shadowsoffire.apothic_enchanting;
 
-import java.math.BigDecimal;
-
-import dev.shadowsoffire.apothic_attributes.repack.evalex.Expression;
+import dev.shadowsoffire.apothic_enchanting.PowerFunction.DefaultMaxPowerFunction;
+import dev.shadowsoffire.apothic_enchanting.PowerFunction.DefaultMinPowerFunction;
+import dev.shadowsoffire.apothic_enchanting.PowerFunction.ExpressionPowerFunction;
 import dev.shadowsoffire.placebo.config.Configuration;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 /**
  * EnchantmentInfo retains all configurable data about an {@link Enchantment}.
  */
-public class EnchantmentInfo {
+public record EnchantmentInfo(Holder<Enchantment> ench, int maxLevel, int maxLootLevel, PowerFunction maxPower, PowerFunction minPower) {
 
-    protected final Holder<Enchantment> ench;
-    protected final int maxLevel, maxLootLevel;
-    protected final PowerFunc maxPower, minPower;
-
-    public EnchantmentInfo(Holder<Enchantment> ench, int maxLevel, int maxLootLevel, PowerFunc max, PowerFunc min) {
-        this.ench = ench;
-        this.maxLevel = maxLevel;
-        this.maxLootLevel = maxLootLevel;
-        this.maxPower = max;
-        this.minPower = min;
-    }
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnchantmentInfo> STREAM_CODEC = StreamCodec.composite(
+        ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT), EnchantmentInfo::ench,
+        ByteBufCodecs.VAR_INT, EnchantmentInfo::maxLevel,
+        ByteBufCodecs.VAR_INT, EnchantmentInfo::maxLootLevel,
+        PowerFunction.STREAM_CODEC, EnchantmentInfo::maxPower,
+        PowerFunction.STREAM_CODEC, EnchantmentInfo::minPower,
+        EnchantmentInfo::new);
 
     /**
      * Returns the max level of the enchantment, as set by the config or enforced by IMC.
@@ -60,59 +60,20 @@ public class EnchantmentInfo {
         return this.maxPower.getPower(level);
     }
 
+    public static EnchantmentInfo fallback(Holder<Enchantment> ench) {
+        return new EnchantmentInfo(ench, ench.value().getMaxLevel(), ench.value().getMaxLevel(), DefaultMaxPowerFunction.INSTANCE, new DefaultMinPowerFunction(ench));
+    }
+
     public static EnchantmentInfo load(Holder<Enchantment> ench, Configuration cfg) {
         String category = ench.getKey().location().toString();
-        int max = cfg.getInt("Max Level", category, ApothicEnchanting.getDefaultMax(ench.value()), 1, 127, "The max level of this enchantment - originally " + ench.value().getMaxLevel() + ".");
-        int maxLoot = cfg.getInt("Max Loot Level", category, ench.value().getMaxLevel(), 1, 127, "The max level of this enchantment available from loot sources.");
+        int vanillaMax = ench.value().definition().maxLevel();
+        int max = cfg.getInt("Max Level", category, ApothicEnchanting.getDefaultMaxLevel(ench), 1, 127, "The max level of this enchantment - originally " + vanillaMax + ".");
+        int maxLoot = cfg.getInt("Max Loot Level", category, vanillaMax, 1, 127, "The max level of this enchantment available from loot sources.");
         String maxF = cfg.getString("Max Power Function", category, "", "A function to determine the max enchanting power.  The variable \"x\" is level.  See: https://github.com/uklimaschewski/EvalEx#usage-examples");
         String minF = cfg.getString("Min Power Function", category, "", "A function to determine the min enchanting power.");
-        PowerFunc maxPower = maxF.isEmpty() ? defaultMax(ench.value()) : new ExpressionPowerFunc(maxF);
-        PowerFunc minPower = minF.isEmpty() ? defaultMin(ench.value()) : new ExpressionPowerFunc(minF);
+        PowerFunction maxPower = maxF.isEmpty() ? DefaultMaxPowerFunction.INSTANCE : new ExpressionPowerFunction(maxF);
+        PowerFunction minPower = minF.isEmpty() ? new DefaultMinPowerFunction(ench) : new ExpressionPowerFunction(minF);
         return new EnchantmentInfo(ench, max, maxLoot, maxPower, minPower);
-    }
-
-    /**
-     * Simple int to int function, used for converting a level into a required enchanting power.
-     */
-    public static interface PowerFunc {
-        int getPower(int level);
-    }
-
-    public static class ExpressionPowerFunc implements PowerFunc {
-
-        Expression ex;
-
-        public ExpressionPowerFunc(String func) {
-            this.ex = new Expression(func);
-        }
-
-        @Override
-        public int getPower(int level) {
-            return this.ex.setVariable("x", new BigDecimal(level)).eval().intValue();
-        }
-
-    }
-
-    public static PowerFunc defaultMax(Enchantment ench) {
-        return level -> 200;
-    }
-
-    /**
-     * This is the default minimum power function.
-     * If the level is equal to or below the default max level, we return the original value {@link Enchantment#getMinCost(int)}
-     * If the level is above than the default max level, then we compute the following:
-     * Let diff be the slope of {@link Enchantment#getMinCost(int)}, or 15, if the slope would be zero.
-     * minPower = baseMinPower + diff * (level - baseMaxLevel) ^ 1.6
-     */
-    public static PowerFunc defaultMin(Enchantment ench) {
-        return level -> {
-            if (level > ench.getMaxLevel() && level > 1) {
-                int diff = ench.getMinCost(ench.getMaxLevel()) - ench.getMinCost(ench.getMaxLevel() - 1);
-                if (diff == 0) diff = 15;
-                return ench.getMinCost(level) + diff * (int) Math.pow(level - ench.getMaxLevel(), 1.6);
-            }
-            return ench.getMinCost(level);
-        };
     }
 
 }

@@ -15,9 +15,9 @@ public abstract class TridentItemMixin extends Item {
         super(pProperties);
     }
 
-    @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment ench) {
-        return super.canApplyAtEnchantingTable(stack, ench) || ench == Enchantments.SHARPNESS || ench == Enchantments.LOOTING || ench == Enchantments.PIERCING;
-    }
+//    @Override
+//    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment ench) {
+//        return super.canApplyAtEnchantingTable(stack, ench) || ench == Enchantments.SHARPNESS || ench == Enchantments.LOOTING || ench == Enchantments.PIERCING;
+//    }
 
 }

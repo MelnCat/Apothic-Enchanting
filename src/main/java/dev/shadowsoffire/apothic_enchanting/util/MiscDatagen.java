@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.mojang.serialization.Codec;
@@ -15,17 +14,22 @@ import com.mojang.serialization.Codec;
 import dev.shadowsoffire.apothic_enchanting.ApothicEnchanting;
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -37,21 +41,24 @@ import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.crafting.NBTIngredient;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 
 public class MiscDatagen implements DataProvider {
 
     private final Path outputDir;
     private CachedOutput cachedOutput;
     private List<CompletableFuture<?>> futures = new ArrayList<>();
+    private CompletableFuture<HolderLookup.Provider> registries;
 
-    public MiscDatagen(Path outputDir) {
+    public MiscDatagen(Path outputDir, CompletableFuture<HolderLookup.Provider> registries) {
         this.outputDir = outputDir;
+        this.registries = registries;
     }
 
     private void genRecipes() {
         Ingredient pot = potionIngredient(Potions.REGENERATION);
-        addShaped(Ench.Blocks.HELLSHELF.value(), 3, 3, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Items.BLAZE_ROD, "forge:bookshelves", pot, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS,
+        addShaped(Ench.Blocks.HELLSHELF.value(), 3, 3, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Items.BLAZE_ROD, "c:bookshelves", pot, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS,
             Blocks.NETHER_BRICKS);
         addShaped(Ench.Items.PRISMATIC_WEB, 3, 3, null, Items.PRISMARINE_SHARD, null, Items.PRISMARINE_SHARD, Blocks.COBWEB, Items.PRISMARINE_SHARD, null, Items.PRISMARINE_SHARD, null);
         ItemStack book = new ItemStack(Items.BOOK);
@@ -70,7 +77,7 @@ public class MiscDatagen implements DataProvider {
         Ingredient maxHellshelf = Ingredient.of(Ench.Blocks.INFUSED_HELLSHELF.value());
         addShaped(Ench.Blocks.BLAZING_HELLSHELF.value(), 3, 3, null, Items.FIRE_CHARGE, null, Items.FIRE_CHARGE, maxHellshelf, Items.FIRE_CHARGE, Items.BLAZE_POWDER, Items.BLAZE_POWDER, Items.BLAZE_POWDER);
         addShaped(Ench.Blocks.GLOWING_HELLSHELF.value(), 3, 3, null, Blocks.GLOWSTONE, null, null, maxHellshelf, null, Blocks.GLOWSTONE, null, Blocks.GLOWSTONE);
-        addShaped(Ench.Blocks.SEASHELF.value(), 3, 3, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, potionIngredient(Potions.WATER), "forge:bookshelves", Items.PUFFERFISH,
+        addShaped(Ench.Blocks.SEASHELF.value(), 3, 3, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, potionIngredient(Potions.WATER), "c:bookshelves", Items.PUFFERFISH,
             Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS);
         Ingredient maxSeashelf = Ingredient.of(Ench.Blocks.INFUSED_SEASHELF.value());
         addShaped(Ench.Blocks.CRYSTAL_SEASHELF.value(), 3, 3, null, Items.PRISMARINE_CRYSTALS, null, null, maxSeashelf, null, Items.PRISMARINE_CRYSTALS, null, Items.PRISMARINE_CRYSTALS);
@@ -78,9 +85,9 @@ public class MiscDatagen implements DataProvider {
             Items.PRISMARINE_SHARD);
         addShaped(Ench.Blocks.PEARL_ENDSHELF.value(), 3, 3, Items.END_ROD, null, Items.END_ROD, Items.ENDER_PEARL, Ench.Blocks.ENDSHELF.value(), Items.ENDER_PEARL, Items.END_ROD, null, Items.END_ROD);
         addShaped(Ench.Blocks.DRACONIC_ENDSHELF.value(), 3, 3, null, Items.DRAGON_HEAD, null, Items.ENDER_PEARL, Ench.Blocks.ENDSHELF.value(), Items.ENDER_PEARL, Items.ENDER_PEARL, Items.ENDER_PEARL, Items.ENDER_PEARL);
-        addShaped(Ench.Blocks.BEESHELF.value(), 3, 3, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB, Items.HONEY_BLOCK, "forge:bookshelves", Items.HONEY_BLOCK, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB);
-        addShaped(Ench.Blocks.MELONSHELF.value(), 3, 3, Items.MELON, Items.MELON, Items.MELON, Items.GLISTERING_MELON_SLICE, "forge:bookshelves", Items.GLISTERING_MELON_SLICE, Items.MELON, Items.MELON, Items.MELON);
-        addShaped(Ench.Blocks.GEODE_SHELF.value(), 3, 3, Items.CALCITE, Items.CALCITE, Items.CALCITE, Items.CALCITE, "forge:bookshelves", Items.CALCITE, Items.CALCITE, Items.BUDDING_AMETHYST, Items.CALCITE);
+        addShaped(Ench.Blocks.BEESHELF.value(), 3, 3, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB, Items.HONEY_BLOCK, "c:bookshelves", Items.HONEY_BLOCK, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB);
+        addShaped(Ench.Blocks.MELONSHELF.value(), 3, 3, Items.MELON, Items.MELON, Items.MELON, Items.GLISTERING_MELON_SLICE, "c:bookshelves", Items.GLISTERING_MELON_SLICE, Items.MELON, Items.MELON, Items.MELON);
+        addShaped(Ench.Blocks.GEODE_SHELF.value(), 3, 3, Items.CALCITE, Items.CALCITE, Items.CALCITE, Items.CALCITE, "c:bookshelves", Items.CALCITE, Items.CALCITE, Items.BUDDING_AMETHYST, Items.CALCITE);
     }
 
     public static ItemStack makeStack(Object thing) {
@@ -96,7 +103,7 @@ public class MiscDatagen implements DataProvider {
         for (int i = 0; i < inputArr.length; i++) {
             Object input = inputArr[i];
             if (input instanceof TagKey tag) inputL.add(i, Ingredient.of(tag));
-            else if (input instanceof String str) inputL.add(i, Ingredient.of(ItemTags.create(new ResourceLocation(str))));
+            else if (input instanceof String str) inputL.add(i, Ingredient.of(ItemTags.create(ResourceLocation.parse(str))));
             else if (input instanceof ItemStack stack && !stack.isEmpty()) inputL.add(i, Ingredient.of(stack));
             else if (input instanceof ItemLike || input instanceof Holder) inputL.add(i, Ingredient.of(makeStack(input)));
             else if (input instanceof Ingredient ing) inputL.add(i, ing);
@@ -138,8 +145,10 @@ public class MiscDatagen implements DataProvider {
         if (ing == Ingredient.EMPTY) {
             return ' ';
         }
-        else if (ing instanceof NBTIngredient nbt) {
-            path = BuiltInRegistries.ITEM.getKey(nbt.getItems()[0].getItem()).getPath();
+        else if (ing.isCustom()) {
+            ICustomIngredient custom = ing.getCustomIngredient();
+            Item item = custom.getItems().findFirst().map(ItemStack::getItem).orElse(Items.AIR);
+            path = BuiltInRegistries.ITEM.getKey(item).getPath();
         }
         else {
             Value v = ing.getValues()[0];
@@ -178,12 +187,13 @@ public class MiscDatagen implements DataProvider {
     }
 
     private <T> void write(T object, Codec<T> codec, String type, String path) {
-        this.futures.add(DataProvider.saveStable(this.cachedOutput, codec, object, outputDir.resolve(type + "/" + path + ".json")));
+        this.futures.add(this.registries.thenCompose(regs -> DataProvider.saveStable(this.cachedOutput, regs, codec, object, outputDir.resolve(type + "/" + path + ".json"))));
     }
 
-    @SuppressWarnings("removal")
-    public static Ingredient potionIngredient(Potion type) {
-        return new NBTIngredient(Set.of(Items.POTION), PotionUtils.setPotion(new ItemStack(Items.POTION), type).getTag(), false){};
+    public static Ingredient potionIngredient(Holder<Potion> type) {
+        HolderSet<Item> items = HolderSet.direct(BuiltInRegistries.ITEM.wrapAsHolder(Items.POTION));
+        DataComponentPredicate predicate = DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS, new PotionContents(type)).build();
+        return new Ingredient(new DataComponentIngredient(items, predicate, false));
     }
 
     @Override

@@ -3,6 +3,8 @@ package dev.shadowsoffire.apothic_enchanting;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
+
 import dev.shadowsoffire.apothic_enchanting.Ench.Particles;
 import dev.shadowsoffire.apothic_enchanting.client.DrawsOnLeft;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryScreen;
@@ -14,10 +16,13 @@ import dev.shadowsoffire.placebo.util.EnchantmentUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.particle.FlyTowardsPositionParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -72,6 +77,15 @@ public class ApothEnchClient {
         if (Minecraft.getInstance().screen instanceof ApothEnchantmentScreen es) {
             es.getMenu().setStats(msg.stats());
         }
+    }
+
+    @Nullable
+    public static <T> Registry<T> findClientRegistry(ResourceKey<? extends Registry<T>> registryKey) {
+        ClientPacketListener listener = Minecraft.getInstance().getConnection();
+        if (listener == null) {
+            return null;
+        }
+        return listener.registryAccess().registry(registryKey).orElse(null);
     }
 
     public static class ForgeBusEvents {

@@ -252,43 +252,4 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
         else return EnchantmentHelper.getEnchantmentsForCrafting(stack).keySet().stream().allMatch(h -> h.is(EnchantmentTags.CURSE));
     }
 
-    /**
-     * Arcana Tiers, each represents a new rarity set.
-     */
-    public static enum Arcana {
-        EMPTY(0, 10, 5, 2, 1),
-        LITTLE(10, 8, 5, 3, 1),
-        FEW(20, 7, 5, 4, 2),
-        SOME(30, 5, 5, 4, 2),
-        LESS(40, 5, 5, 4, 3),
-        MEDIUM(50, 5, 5, 5, 5),
-        MORE(60, 3, 4, 5, 5),
-        VALUE(70, 2, 4, 5, 5),
-        EXTRA(80, 2, 4, 5, 7),
-        ALMOST(90, 1, 3, 5, 8),
-        MAX(99, 1, 2, 5, 10);
-
-        final float threshold;
-        final int[] rarities;
-
-        Arcana(float threshold, int... rarities) {
-            this.threshold = threshold;
-            this.rarities = rarities;
-        }
-
-        static Arcana[] VALUES = values();
-
-        public int[] getRarities() {
-            return this.rarities;
-        }
-
-        public static Arcana getForThreshold(float threshold) {
-            for (int i = VALUES.length - 1; i >= 0; i--) {
-                if (threshold >= VALUES[i].threshold) return VALUES[i];
-            }
-            return EMPTY;
-        }
-
-    }
-
 }
