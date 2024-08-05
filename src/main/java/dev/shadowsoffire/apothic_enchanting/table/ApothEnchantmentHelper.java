@@ -100,7 +100,7 @@ public class ApothEnchantmentHelper {
             }
 
             // A random number of extra enchantments are added, with the chance reducing per enchantment added.
-            int randomBound = Math.max(50, (int) (level * 1.25F)); // Vanilla threshold is 50 for all levels.
+            int randomBound = Math.max(50, (int) (level * 1.15F)); // Vanilla threshold is 50 for all levels.
             while (rand.nextInt(randomBound) <= level && !possibleEnchants.isEmpty()) {
                 pickEnchantment(rand, chosenEnchants, possibleEnchants);
                 level /= 2;
@@ -166,7 +166,7 @@ public class ApothEnchantmentHelper {
      */
     public static float getQuantaFactor(RandomSource rand, float quanta, boolean isStable) {
         if (isStable) {
-            return 1 + quanta * rand.nextFloat();
+            return 1 + quanta * rand.nextFloat() / 100F;
         }
         else {
             // Division by three yields a "good enough" normal distribution over [-1, 1].
