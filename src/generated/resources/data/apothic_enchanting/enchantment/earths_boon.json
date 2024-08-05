@@ -1,6 +1,7 @@
 {
   "anvil_cost": 10,
   "description": {
+    "color": "dark_green",
     "translate": "enchantment.apothic_enchanting.earths_boon"
   },
   "effects": {

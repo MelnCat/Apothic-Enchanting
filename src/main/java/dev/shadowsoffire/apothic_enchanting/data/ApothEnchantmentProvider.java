@@ -2,6 +2,7 @@ package dev.shadowsoffire.apothic_enchanting.data;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 import dev.shadowsoffire.apothic_enchanting.Ench;
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.BerserkingComponent;
@@ -10,6 +11,8 @@ import dev.shadowsoffire.apothic_enchanting.enchantments.components.BoonComponen
 import dev.shadowsoffire.apothic_enchanting.enchantments.components.ReflectiveComponent;
 import dev.shadowsoffire.apothic_enchanting.enchantments.entity_effects.ReboundingEffect;
 import dev.shadowsoffire.apothic_enchanting.enchantments.values.ExponentialLevelBasedValue;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.core.Holder;
@@ -17,17 +20,20 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.ConditionalEffect;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantment.EnchantmentDefinition;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentTarget;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -36,7 +42,6 @@ import net.minecraft.world.item.enchantment.effects.AddValue;
 import net.minecraft.world.item.enchantment.effects.ApplyMobEffect;
 import net.minecraft.world.item.enchantment.effects.DamageItem;
 import net.minecraft.world.item.enchantment.effects.SetValue;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.EnchantmentLevelProvider;
@@ -46,14 +51,11 @@ import net.neoforged.neoforge.registries.holdersets.OrHolderSet;
 public class ApothEnchantmentProvider {
 
     public static void bootstrap(BootstrapContext<Enchantment> context) {
-        HolderGetter<DamageType> damageTypes = context.lookup(Registries.DAMAGE_TYPE);
         HolderGetter<Enchantment> enchantments = context.lookup(Registries.ENCHANTMENT);
         HolderGetter<Item> items = context.lookup(Registries.ITEM);
-        HolderGetter<Block> blocks = context.lookup(Registries.BLOCK);
-        HolderGetter<MobEffect> effects = context.lookup(Registries.MOB_EFFECT);
 
         register(context, Ench.Enchantments.BERSERKERS_FURY,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.CHEST_ARMOR_ENCHANTABLE),
                     1, // weight
@@ -62,6 +64,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.CHEST))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_RED))
                 .withSpecialEffect(Ench.EnchantEffects.BERSERKING,
                     new BerserkingComponent(
                         List.of(noCondition(new AddValue(new ExponentialLevelBasedValue(2.5F)))),
@@ -72,7 +75,7 @@ public class ApothEnchantmentProvider {
                         List.of(noCondition(new AddValue(LevelBasedValue.constant(900)))))));
 
         register(context, Ench.Enchantments.CHAINSAW,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.AXES),
                     1, // weight
@@ -81,6 +84,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_GREEN))
                 .withEffect(Ench.EnchantEffects.CHAINSAW));
 
         register(context, Ench.Enchantments.CHROMATIC,
@@ -96,7 +100,7 @@ public class ApothEnchantmentProvider {
                 .withEffect(Ench.EnchantEffects.CHROMATIC));
 
         register(context, Ench.Enchantments.WORKER_EXPLOITATION,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(Tags.Items.TOOLS_SHEAR),
                     2, // weight
@@ -105,10 +109,11 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     5, // anvil cost
                     EquipmentSlotGroup.HAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_PURPLE))
                 .withEffect(Ench.EnchantEffects.EXPLOITATION));
 
         register(context, Ench.Enchantments.GROWTH_SERUM,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(Tags.Items.TOOLS_SHEAR),
                     1, // weight
@@ -117,6 +122,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.HAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_GREEN))
                 .withSpecialEffect(Ench.EnchantEffects.GROWTH_SERUM, 0.5F));
 
         register(context, Ench.Enchantments.TEMPTING,
@@ -161,7 +167,7 @@ public class ApothEnchantmentProvider {
                     new DamageItem(new LevelBasedValue.Clamped(LevelBasedValue.perLevel(20, -2), 1, 1024))));
 
         register(context, Ench.Enchantments.EARTHS_BOON,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.PICKAXES),
                     1, // weight
@@ -170,6 +176,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_GREEN))
                 .withSpecialEffect(Ench.EnchantEffects.EARTHS_BOON,
                     new BoonComponent(
                         Tags.Blocks.STONES,
@@ -177,7 +184,7 @@ public class ApothEnchantmentProvider {
                         List.of(noCondition(new AddValue(LevelBasedValue.perLevel(0.01F)))))));
 
         register(context, Ench.Enchantments.CRESCENDO_OF_BOLTS,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.CROSSBOW_ENCHANTABLE),
                     1, // weight
@@ -186,10 +193,11 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.HAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_GREEN))
                 .withEffect(Ench.EnchantEffects.CRESCENDO, new AddValue(LevelBasedValue.perLevel(1))));
 
         register(context, Ench.Enchantments.ENDLESS_QUIVER,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.BOW_ENCHANTABLE),
                     1, // weight
@@ -198,11 +206,12 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.HAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_GREEN))
                 .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.INFINITY)))
                 .withEffect(EnchantmentEffectComponents.AMMO_USE, new SetValue(LevelBasedValue.constant(0))));
 
         register(context, Ench.Enchantments.LIFE_MENDING,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE),
                     1, // weight
@@ -211,11 +220,12 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.ANY))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_RED))
                 .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.MENDING)))
                 .withEffect(Ench.EnchantEffects.REPAIR_WITH_HP, new AddValue(new ExponentialLevelBasedValue(2, LevelBasedValue.perLevel(0, 1)))));
 
         register(context, Ench.Enchantments.MINERS_FERVOR,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.MINING_ENCHANTABLE),
                     2, // weight
@@ -224,11 +234,12 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_PURPLE))
                 .exclusiveWith(HolderSet.direct(enchantments.getOrThrow(Enchantments.EFFICIENCY)))
                 .withSpecialEffect(Ench.EnchantEffects.MINERS_FERVOR, LevelBasedValue.perLevel(12, 4.5F)));
 
         register(context, Ench.Enchantments.KNOWLEDGE_OF_THE_AGES,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.SHARP_WEAPON_ENCHANTABLE),
                     items.getOrThrow(ItemTags.SWORD_ENCHANTABLE),
@@ -238,10 +249,11 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_GREEN))
                 .withEffect(Ench.EnchantEffects.DROPS_TO_XP, new AddValue(LevelBasedValue.perLevel(25))));
 
         register(context, Ench.Enchantments.SCAVENGER,
-            Enchantment.enchantment(
+            enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.SHARP_WEAPON_ENCHANTABLE),
                     items.getOrThrow(ItemTags.SWORD_ENCHANTABLE),
@@ -251,6 +263,7 @@ public class ApothEnchantmentProvider {
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
+                .withCustomName(c -> c.withStyle(ChatFormatting.DARK_GREEN))
                 .withEffect(Ench.EnchantEffects.EXTRA_LOOT_ROLL, new AddValue(LevelBasedValue.perLevel(0.025F))));
 
         register(context, Ench.Enchantments.REFLECTIVE_DEFENSES,
@@ -367,5 +380,30 @@ public class ApothEnchantmentProvider {
             List.of(new AddValue(LevelBasedValue.constant(duration))),
             List.of(new AddValue(LevelBasedValue.perLevel(0, 1))),
             false, true, Optional.empty());
+    }
+
+    private static NamedBuilder enchantment(Enchantment.EnchantmentDefinition definition) {
+        return new NamedBuilder(definition);
+    }
+
+    private static class NamedBuilder extends Enchantment.Builder {
+
+        private UnaryOperator<MutableComponent> op = UnaryOperator.identity();
+
+        public NamedBuilder(EnchantmentDefinition definition) {
+            super(definition);
+        }
+
+        public Enchantment.Builder withCustomName(UnaryOperator<MutableComponent> op) {
+            this.op = op;
+            return this;
+        }
+
+        @Override
+        public Enchantment build(ResourceLocation location) {
+            return new Enchantment(
+                this.op.apply(Component.translatable(Util.makeDescriptionId("enchantment", location))), this.definition, this.exclusiveSet, this.effectMapBuilder.build());
+        }
+
     }
 }

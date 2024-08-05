@@ -1,6 +1,7 @@
 {
   "anvil_cost": 10,
   "description": {
+    "color": "dark_red",
     "translate": "enchantment.apothic_enchanting.life_mending"
   },
   "effects": {

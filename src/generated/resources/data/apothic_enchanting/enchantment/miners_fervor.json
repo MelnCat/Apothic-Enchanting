@@ -1,6 +1,7 @@
 {
   "anvil_cost": 10,
   "description": {
+    "color": "dark_purple",
     "translate": "enchantment.apothic_enchanting.miners_fervor"
   },
   "effects": {
