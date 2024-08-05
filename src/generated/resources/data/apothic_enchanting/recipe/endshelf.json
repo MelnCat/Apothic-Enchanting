@@ -3,23 +3,26 @@
   "category": "misc",
   "group": "apothic_enchanting",
   "key": {
-    "D": {
-      "item": "apothic_enchanting:endshelf"
+    "B": {
+      "tag": "c:bookshelves"
     },
     "E": {
-      "item": "minecraft:end_rod"
+      "item": "minecraft:end_stone_bricks"
+    },
+    "I": {
+      "item": "apothic_enchanting:infused_breath"
     },
     "N": {
       "tag": "c:ender_pearls"
     }
   },
   "pattern": [
-    "E E",
-    "NDN",
-    "E E"
+    "EEE",
+    "IBN",
+    "EEE"
   ],
   "result": {
     "count": 1,
-    "id": "apothic_enchanting:pearl_endshelf"
+    "id": "apothic_enchanting:endshelf"
   }
 }

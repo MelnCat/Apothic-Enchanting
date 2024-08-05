@@ -19,6 +19,7 @@ import dev.shadowsoffire.apothic_enchanting.asm.EnchHooks;
 import dev.shadowsoffire.apothic_enchanting.data.ApothEnchantmentProvider;
 import dev.shadowsoffire.apothic_enchanting.data.EnchTagsProvider;
 import dev.shadowsoffire.apothic_enchanting.data.LootProvider;
+import dev.shadowsoffire.apothic_enchanting.data.LegacyRecipeProvider;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile;
 import dev.shadowsoffire.apothic_enchanting.objects.TomeItem;
 import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
@@ -26,7 +27,6 @@ import dev.shadowsoffire.apothic_enchanting.payloads.EnchantmentInfoPayload;
 import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantingTableBlock;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
-import dev.shadowsoffire.apothic_enchanting.util.MiscDatagen;
 import dev.shadowsoffire.placebo.config.Configuration;
 import dev.shadowsoffire.placebo.events.ResourceReloadEvent;
 import dev.shadowsoffire.placebo.network.PayloadHelper;
@@ -158,7 +158,7 @@ public class ApothicEnchanting {
         e.getGenerator().addProvider(true, datapackProvider);
         e.getGenerator().addProvider(true, LootProvider.create(output, registries));
         e.getGenerator().addProvider(true, new EnchTagsProvider(output, registries, e.getExistingFileHelper()));
-        e.getGenerator().addProvider(true, new MiscDatagen(output.getOutputFolder(Target.DATA_PACK).resolve(MODID), registries));
+        e.getGenerator().addProvider(true, new LegacyRecipeProvider(output.getOutputFolder(Target.DATA_PACK).resolve(MODID), registries));
     }
 
     public void reload(ResourceReloadEvent e) {

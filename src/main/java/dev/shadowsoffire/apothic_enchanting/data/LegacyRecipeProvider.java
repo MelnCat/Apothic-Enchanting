@@ -1,4 +1,4 @@
-package dev.shadowsoffire.apothic_enchanting.util;
+package dev.shadowsoffire.apothic_enchanting.data;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -22,6 +22,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -41,26 +43,39 @@ import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 
-public class MiscDatagen implements DataProvider {
+/**
+ * Data provider for crafting recipes using the legacy syntax used by RecipeHelper.
+ * <p>
+ * Shaped recipes are written out as the output, width, height, and then a row-major vararg array of the actual inputs.
+ * The pattern will be inferred from the inputs.
+ */
+public class LegacyRecipeProvider implements DataProvider {
 
     private final Path outputDir;
     private CachedOutput cachedOutput;
     private List<CompletableFuture<?>> futures = new ArrayList<>();
     private CompletableFuture<HolderLookup.Provider> registries;
 
-    public MiscDatagen(Path outputDir, CompletableFuture<HolderLookup.Provider> registries) {
+    public LegacyRecipeProvider(Path outputDir, CompletableFuture<HolderLookup.Provider> registries) {
         this.outputDir = outputDir;
         this.registries = registries;
     }
 
     private void genRecipes() {
-        Ingredient pot = potionIngredient(Potions.REGENERATION);
-        addShaped(Ench.Blocks.HELLSHELF.value(), 3, 3, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Items.BLAZE_ROD, "c:bookshelves", pot, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS,
-            Blocks.NETHER_BRICKS);
-        addShaped(Ench.Items.PRISMATIC_WEB, 3, 3, null, Items.PRISMARINE_SHARD, null, Items.PRISMARINE_SHARD, Blocks.COBWEB, Items.PRISMARINE_SHARD, null, Items.PRISMARINE_SHARD, null);
+        addShaped(Ench.Blocks.HELLSHELF, 3, 3,
+            Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS,
+            Items.BLAZE_ROD, Tags.Items.BOOKSHELVES, potionIngredient(Potions.REGENERATION),
+            Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICKS);
+
+        addShaped(Ench.Items.PRISMATIC_WEB, 3, 3,
+            null, Items.PRISMARINE_SHARD, null,
+            Items.PRISMARINE_SHARD, Blocks.COBWEB, Items.PRISMARINE_SHARD,
+            null, Items.PRISMARINE_SHARD, null);
+
         ItemStack book = new ItemStack(Items.BOOK);
         ItemStack stick = new ItemStack(Items.STICK);
         ItemStack blaze = new ItemStack(Items.BLAZE_ROD);
@@ -74,22 +89,102 @@ public class MiscDatagen implements DataProvider {
         addShaped(new ItemStack(Ench.Items.BOW_TOME, 3), 3, 3, null, stick, book, blaze, null, book, null, stick, book);
         addShapeless(new ItemStack(Ench.Items.OTHER_TOME, 6), book, book, book, book, book, book, blaze);
         addShaped(new ItemStack(Ench.Items.SCRAP_TOME, 8), 3, 3, book, book, book, book, Blocks.ANVIL, book, book, book, book);
-        Ingredient maxHellshelf = Ingredient.of(Ench.Blocks.INFUSED_HELLSHELF.value());
-        addShaped(Ench.Blocks.BLAZING_HELLSHELF.value(), 3, 3, null, Items.FIRE_CHARGE, null, Items.FIRE_CHARGE, maxHellshelf, Items.FIRE_CHARGE, Items.BLAZE_POWDER, Items.BLAZE_POWDER, Items.BLAZE_POWDER);
-        addShaped(Ench.Blocks.GLOWING_HELLSHELF.value(), 3, 3, null, Blocks.GLOWSTONE, null, null, maxHellshelf, null, Blocks.GLOWSTONE, null, Blocks.GLOWSTONE);
-        addShaped(Ench.Blocks.SEASHELF.value(), 3, 3, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, potionIngredient(Potions.WATER), "c:bookshelves", Items.PUFFERFISH,
+
+        addShaped(Ench.Blocks.BLAZING_HELLSHELF, 3, 3,
+            null, Items.FIRE_CHARGE, null,
+            Items.FIRE_CHARGE, Ench.Blocks.INFUSED_HELLSHELF, Items.FIRE_CHARGE,
+            Items.BLAZE_POWDER, Items.BLAZE_POWDER, Items.BLAZE_POWDER);
+
+        addShaped(Ench.Blocks.GLOWING_HELLSHELF, 3, 3,
+            null, Blocks.GLOWSTONE, null,
+            null, Ench.Blocks.INFUSED_HELLSHELF, null,
+            Blocks.GLOWSTONE, null, Blocks.GLOWSTONE);
+
+        addShaped(Ench.Blocks.SEASHELF, 3, 3,
+            Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS,
+            potionIngredient(Potions.WATER), Tags.Items.BOOKSHELVES, Items.PUFFERFISH,
             Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS, Blocks.PRISMARINE_BRICKS);
-        Ingredient maxSeashelf = Ingredient.of(Ench.Blocks.INFUSED_SEASHELF.value());
-        addShaped(Ench.Blocks.CRYSTAL_SEASHELF.value(), 3, 3, null, Items.PRISMARINE_CRYSTALS, null, null, maxSeashelf, null, Items.PRISMARINE_CRYSTALS, null, Items.PRISMARINE_CRYSTALS);
-        addShaped(Ench.Blocks.HEART_SEASHELF.value(), 3, 3, null, Items.HEART_OF_THE_SEA, null, Items.PRISMARINE_SHARD, maxSeashelf, Items.PRISMARINE_SHARD, Items.PRISMARINE_SHARD, Items.PRISMARINE_SHARD,
-            Items.PRISMARINE_SHARD);
-        addShaped(Ench.Blocks.PEARL_ENDSHELF.value(), 3, 3, Items.END_ROD, null, Items.END_ROD, Items.ENDER_PEARL, Ench.Blocks.ENDSHELF.value(), Items.ENDER_PEARL, Items.END_ROD, null, Items.END_ROD);
-        addShaped(Ench.Blocks.DRACONIC_ENDSHELF.value(), 3, 3, null, Items.DRAGON_HEAD, null, Items.ENDER_PEARL, Ench.Blocks.ENDSHELF.value(), Items.ENDER_PEARL, Items.ENDER_PEARL, Items.ENDER_PEARL, Items.ENDER_PEARL);
-        addShaped(Ench.Blocks.BEESHELF.value(), 3, 3, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB, Items.HONEY_BLOCK, "c:bookshelves", Items.HONEY_BLOCK, Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB);
-        addShaped(Ench.Blocks.MELONSHELF.value(), 3, 3, Items.MELON, Items.MELON, Items.MELON, Items.GLISTERING_MELON_SLICE, "c:bookshelves", Items.GLISTERING_MELON_SLICE, Items.MELON, Items.MELON, Items.MELON);
-        addShaped(Ench.Blocks.GEODE_SHELF.value(), 3, 3, Items.CALCITE, Items.CALCITE, Items.CALCITE, Items.CALCITE, "c:bookshelves", Items.CALCITE, Items.CALCITE, Items.BUDDING_AMETHYST, Items.CALCITE);
+
+        addShaped(Ench.Blocks.CRYSTAL_SEASHELF, 3, 3,
+            null, Items.PRISMARINE_CRYSTALS, null,
+            null, Ench.Blocks.INFUSED_SEASHELF, null,
+            Items.PRISMARINE_CRYSTALS, null, Items.PRISMARINE_CRYSTALS);
+
+        addShaped(Ench.Blocks.HEART_SEASHELF, 3, 3,
+            null, Items.HEART_OF_THE_SEA, null,
+            Items.PRISMARINE_SHARD, Ench.Blocks.INFUSED_SEASHELF, Items.PRISMARINE_SHARD,
+            Items.PRISMARINE_SHARD, Items.PRISMARINE_SHARD, Items.PRISMARINE_SHARD);
+
+        addShaped(Ench.Blocks.BEESHELF, 3, 3,
+            Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB,
+            Items.HONEY_BLOCK, Tags.Items.BOOKSHELVES, Items.HONEY_BLOCK,
+            Items.HONEYCOMB, Items.BEEHIVE, Items.HONEYCOMB);
+
+        addShaped(Ench.Blocks.MELONSHELF, 3, 3,
+            Items.MELON, Items.MELON, Items.MELON,
+            Items.GLISTERING_MELON_SLICE, Tags.Items.BOOKSHELVES, Items.GLISTERING_MELON_SLICE,
+            Items.MELON, Items.MELON, Items.MELON);
+
+        addShaped(Ench.Blocks.GEODE_SHELF, 3, 3,
+            Items.CALCITE, Items.CALCITE, Items.CALCITE,
+            Items.CALCITE, Tags.Items.BOOKSHELVES, Items.CALCITE,
+            Items.CALCITE, Items.BUDDING_AMETHYST, Items.CALCITE);
+
+        addShaped(Ench.Blocks.SIGHTSHELF, 3, 3,
+            Tags.Items.STORAGE_BLOCKS_GOLD, Ench.Items.INFUSED_HELLSHELF, Tags.Items.STORAGE_BLOCKS_GOLD,
+            potionIngredient(Potions.NIGHT_VISION), Items.ENDER_EYE, Items.SPYGLASS,
+            Tags.Items.STORAGE_BLOCKS_GOLD, Ench.Items.INFUSED_HELLSHELF, Tags.Items.STORAGE_BLOCKS_GOLD);
+
+        Ingredient nightVisPot = potionIngredient(Potions.LONG_NIGHT_VISION);
+        addShaped(Ench.Blocks.SIGHTSHELF_T2, 3, 3,
+            Items.EMERALD_BLOCK, Tags.Items.INGOTS_NETHERITE, Items.EMERALD_BLOCK,
+            nightVisPot, Ench.Items.SIGHTSHELF, nightVisPot,
+            Items.EMERALD_BLOCK, Tags.Items.INGOTS_NETHERITE, Items.EMERALD_BLOCK);
+
+        addShaped(Ench.Blocks.ENDSHELF, 3, 3,
+            Items.END_STONE_BRICKS, Items.END_STONE_BRICKS, Items.END_STONE_BRICKS,
+            Ench.Items.INFUSED_BREATH, Tags.Items.BOOKSHELVES, Tags.Items.ENDER_PEARLS,
+            Items.END_STONE_BRICKS, Items.END_STONE_BRICKS, Items.END_STONE_BRICKS);
+
+        addShaped(Ench.Blocks.PEARL_ENDSHELF, 3, 3,
+            Items.END_ROD, null, Items.END_ROD,
+            Tags.Items.ENDER_PEARLS, Ench.Items.ENDSHELF, Tags.Items.ENDER_PEARLS,
+            Items.END_ROD, null, Items.END_ROD);
+
+        addShaped(Ench.Blocks.DRACONIC_ENDSHELF, 3, 3,
+            null, Items.DRAGON_HEAD, null,
+            Tags.Items.ENDER_PEARLS, Ench.Items.ENDSHELF, Tags.Items.ENDER_PEARLS,
+            Tags.Items.ENDER_PEARLS, Tags.Items.ENDER_PEARLS, Tags.Items.ENDER_PEARLS);
+
+        addShaped(Items.COBWEB, 3, 3,
+            Tags.Items.STRINGS, Tags.Items.STRINGS, Tags.Items.STRINGS,
+            Tags.Items.STRINGS, Items.HONEYCOMB, Tags.Items.STRINGS,
+            Tags.Items.STRINGS, Tags.Items.STRINGS, Tags.Items.STRINGS);
+
+        addShaped(Ench.Items.TREASURE_SHELF, 3, 3,
+            Tags.Items.STORAGE_BLOCKS_GOLD, Ench.Items.DEEPSHELF, Tags.Items.STORAGE_BLOCKS_GOLD,
+            Tags.Items.GEMS_DIAMOND, Tags.Items.STORAGE_BLOCKS_EMERALD, Tags.Items.GEMS_DIAMOND,
+            Tags.Items.STORAGE_BLOCKS_GOLD, Ench.Items.DEEPSHELF, Tags.Items.STORAGE_BLOCKS_GOLD);
+
+        addShaped(Ench.Items.INERT_TRIDENT, 3, 3,
+            Items.NAUTILUS_SHELL, Items.NAUTILUS_SHELL, Items.NAUTILUS_SHELL,
+            null, Items.HEART_OF_THE_SEA, null,
+            null, Tags.Items.INGOTS_IRON, null);
+
+        ItemStack pufferfish = new ItemStack(Items.PUFFERFISH);
+        pufferfish.set(DataComponents.CUSTOM_NAME, Component.translatable("\"%s\"", pufferfish.getHoverName()).withStyle(Style.EMPTY.withItalic(false)));
+        addShaped(pufferfish, 3, 3,
+            null, Items.BAMBOO, null,
+            Items.BAMBOO, ItemTags.FISHES, Items.BAMBOO,
+            null, Items.BAMBOO, null);
     }
 
+    /**
+     * Transforms an object that could be converted into an {@link ItemStack} into one.
+     * 
+     * @param thing A potential candidate object. One of {@link ItemStack}, {@link ItemLike}, or a {@link Holder} containing an {@link ItemLike}.
+     * @throws IllegalArgumentException if the type of object is unknown
+     */
     public static ItemStack makeStack(Object thing) {
         if (thing instanceof ItemStack stack) return stack;
         if (thing instanceof ItemLike il) return new ItemStack(il);
