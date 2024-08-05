@@ -161,8 +161,9 @@ public class EnchantingInfoScreen extends Screen {
 
             int weight = hover.getEnch().value().definition().weight();
             LegacyRarity rarity = LegacyRarity.byWeight(weight);
+            int realWeight = a.adjustWeight(weight);
             Component rarityName = TooltipUtil.lang("rarity", rarity.name().toLowerCase(Locale.ROOT)).withColor(rarity.color());
-            list.add(TooltipUtil.lang("info", "enchinfo_weight", weight, rarityName).withStyle(ChatFormatting.DARK_AQUA));
+            list.add(TooltipUtil.lang("info", "enchinfo_weight", realWeight, rarityName).withStyle(ChatFormatting.DARK_AQUA));
 
             list.add(TooltipUtil.lang("info", "enchinfo_chance", String.format("%.2f", 100F * hover.getWeight().asInt() / WeightedRandom.getTotalWeight(this.enchantments)) + "%").withStyle(ChatFormatting.DARK_AQUA));
             if (I18n.exists(MiscUtil.getEnchDescKey(hover.getEnch()))) {
@@ -262,7 +263,11 @@ public class EnchantingInfoScreen extends Screen {
         Arcana arc = Arcana.getForThreshold(this.parent.getMenu().stats.arcana());
         Set<Holder<Enchantment>> blacklist = this.parent.getMenu().stats.blacklist();
 
-        Stream<Holder<Enchantment>> possible = ApothEnchantmentHelper.getPossibleEnchantments(this.minecraft.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), toEnchant, this.parent.getMenu().stats);
+        // To actually show that blacklisted enchantments are "working", we have to ignore the blacklist during collection and then post-process them in the menu.
+        EnchantmentTableStats realStats = this.parent.getMenu().stats;
+        EnchantmentTableStats withoutBlacklist = new EnchantmentTableStats(realStats.eterna(), realStats.quanta(), realStats.arcana(), realStats.clues(), Set.of(), realStats.treasure(), realStats.stable());
+
+        Stream<Holder<Enchantment>> possible = ApothEnchantmentHelper.getPossibleEnchantments(this.minecraft.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), toEnchant, withoutBlacklist);
         this.enchantments = ApothEnchantmentHelper.getAvailableEnchantmentResults(this.currentPower, this.toEnchant, possible)
             .stream()
             .map(e -> new ArcanaEnchantmentData(arc, e))
