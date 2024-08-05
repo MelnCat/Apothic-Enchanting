@@ -85,7 +85,7 @@ public class MiscUtil {
      */
     public static boolean isOnCooldown(ResourceLocation id, LivingEntity entity) {
         long cooldownEndTime = entity.getPersistentData().getLong("apothic_enchanting.cooldown." + id.toString());
-        return cooldownEndTime <= entity.level().getGameTime();
+        return cooldownEndTime > entity.level().getGameTime();
     }
 
     /**
