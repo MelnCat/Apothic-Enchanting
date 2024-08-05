@@ -109,8 +109,11 @@ public class EnchLibraryBlock extends HorizontalDirectionalBlock implements Enti
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
         list.add(Component.translatable("tooltip.enchlib.capacity", Component.translatable("enchantment.level." + this.maxLevel)).withStyle(ChatFormatting.GOLD));
         CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
-        if (!data.isEmpty() && data.contains("Points")) {
-            list.add(Component.translatable("tooltip.enchlib.item", data.getUnsafe().getCompound("Points").size()).withStyle(ChatFormatting.GOLD));
+        if (!data.isEmpty() && data.contains("points")) {
+            int points = data.getUnsafe().getCompound("points").size();
+            if (points > 0) {
+                list.add(Component.translatable("tooltip.enchlib.item", points).withStyle(ChatFormatting.GRAY));
+            }
         }
     }
 
