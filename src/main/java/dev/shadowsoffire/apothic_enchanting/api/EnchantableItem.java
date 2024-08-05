@@ -27,15 +27,4 @@ public interface EnchantableItem {
         return builtList;
     }
 
-    /**
-     * Normally, allowance of treasure enchantments is determined externally. This can change that.
-     *
-     * @param stack              The stack being enchanted.
-     * @param wasTreasureAllowed If treasure was previously allowed.
-     * @return If treasure enchantments are allowed.
-     */
-    default boolean isTreasureAllowed(ItemStack stack, boolean wasTreasureAllowed) {
-        return wasTreasureAllowed;
-    }
-
 }
