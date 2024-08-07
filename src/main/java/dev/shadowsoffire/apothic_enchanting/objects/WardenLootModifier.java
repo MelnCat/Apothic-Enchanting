@@ -32,7 +32,8 @@ public class WardenLootModifier extends LootModifier {
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> loot, LootContext ctx) {
         if (WARDEN_TABLE_ID.equals(ctx.getQueriedLootTableId())) {
             int amount = 1;
-            if (ctx.getRandom().nextFloat() <= 0.10F + ctx.getParam(LootContextParams.TOOL).getEnchantmentLevel(ctx.getLevel().holderOrThrow(Enchantments.LOOTING)) * 0.10F) {
+            ItemStack tool = ctx.hasParam(LootContextParams.TOOL) ? ctx.getParam(LootContextParams.TOOL) : ItemStack.EMPTY;
+            if (ctx.getRandom().nextFloat() <= 0.10F + tool.getEnchantmentLevel(ctx.getLevel().holderOrThrow(Enchantments.LOOTING)) * 0.10F) {
                 amount++;
             }
             loot.add(new ItemStack(Ench.Items.WARDEN_TENDRIL.value(), amount));
