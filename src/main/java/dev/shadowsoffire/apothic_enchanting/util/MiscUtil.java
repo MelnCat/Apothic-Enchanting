@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.util.thread.EffectiveSide;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.UsernameCache;
@@ -224,14 +225,15 @@ public class MiscUtil {
 
     @Nullable
     public static <T> Holder<T> findHolderFromClient(ResourceKey<? extends Registry<T>> registryKey, T obj) {
-        Registry<T> registry = ApothEnchClient.findClientRegistry(registryKey);
-        if (registry != null) {
-            Holder<T> holder = registry.wrapAsHolder(obj);
-            if (holder.kind() == Kind.REFERENCE) {
-                return holder;
+        if (FMLEnvironment.dist.isClient()) {
+            Registry<T> registry = ApothEnchClient.findClientRegistry(registryKey);
+            if (registry != null) {
+                Holder<T> holder = registry.wrapAsHolder(obj);
+                if (holder.kind() == Kind.REFERENCE) {
+                    return holder;
+                }
             }
         }
-
         return null;
     }
 
