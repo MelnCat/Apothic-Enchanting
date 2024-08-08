@@ -98,7 +98,7 @@ public class ApothicEnchanting {
 
             TabFillingRegistry.register(Ench.Tabs.ENCH.getKey(), Ench.Items.PRISMATIC_WEB, Ench.Items.INERT_TRIDENT, Ench.Items.WARDEN_TENDRIL, Ench.Items.INFUSED_BREATH);
 
-            fill(Ench.Tabs.ENCH.getKey(), Ench.Enchantments.BERSERKERS_FURY, Ench.Enchantments.CHAINSAW, Ench.Enchantments.CHROMATIC, Ench.Enchantments.CRESCENDO_OF_BOLTS, Ench.Enchantments.EARTHS_BOON,
+            fill(Ench.Tabs.ENCH.getKey(), Ench.Enchantments.BERSERKERS_FURY, Ench.Enchantments.CHAINSAW, Ench.Enchantments.CHROMATIC, Ench.Enchantments.CRESCENDO_OF_BOLTS, Ench.Enchantments.BOON_OF_THE_EARTH,
                 Ench.Enchantments.ENDLESS_QUIVER, Ench.Enchantments.WORKER_EXPLOITATION, Ench.Enchantments.GROWTH_SERUM, Ench.Enchantments.ICY_THORNS, Ench.Enchantments.KNOWLEDGE_OF_THE_AGES, Ench.Enchantments.LIFE_MENDING,
                 Ench.Enchantments.MINERS_FERVOR, Ench.Enchantments.NATURES_BLESSING, Ench.Enchantments.REBOUNDING, Ench.Enchantments.REFLECTIVE_DEFENSES, Ench.Enchantments.SCAVENGER, Ench.Enchantments.SHIELD_BASH,
                 Ench.Enchantments.STABLE_FOOTING, Ench.Enchantments.TEMPTING);

@@ -2,7 +2,7 @@
   "anvil_cost": 10,
   "description": {
     "color": "dark_green",
-    "translate": "enchantment.apothic_enchanting.earths_boon"
+    "translate": "enchantment.apothic_enchanting.boon_of_the_earth"
   },
   "effects": {
     "apothic_enchanting:earths_boon": {
@@ -26,10 +26,10 @@
     "base": 200,
     "per_level_above_first": 0
   },
-  "max_level": 3,
+  "max_level": 5,
   "min_cost": {
-    "base": 60,
-    "per_level_above_first": 20
+    "base": 55,
+    "per_level_above_first": 25
   },
   "slots": [
     "mainhand"

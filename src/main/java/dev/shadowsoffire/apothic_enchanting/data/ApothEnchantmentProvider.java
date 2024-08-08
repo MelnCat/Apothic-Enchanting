@@ -166,13 +166,13 @@ public class ApothEnchantmentProvider {
                     EnchantmentTarget.ATTACKER,
                     new DamageItem(new LevelBasedValue.Clamped(LevelBasedValue.perLevel(20, -2), 1, 1024))));
 
-        register(context, Ench.Enchantments.EARTHS_BOON,
+        register(context, Ench.Enchantments.BOON_OF_THE_EARTH,
             enchantment(
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.PICKAXES),
                     1, // weight
-                    3, // max level
-                    Enchantment.dynamicCost(60, 20),
+                    5, // max level
+                    Enchantment.dynamicCost(55, 25),
                     Enchantment.constantCost(200),
                     10, // anvil cost
                     EquipmentSlotGroup.MAINHAND))
@@ -201,7 +201,7 @@ public class ApothEnchantmentProvider {
                 Enchantment.definition(
                     items.getOrThrow(ItemTags.BOW_ENCHANTABLE),
                     1, // weight
-                    5, // max level
+                    1, // max level
                     Enchantment.constantCost(60),
                     Enchantment.constantCost(200),
                     10, // anvil cost
