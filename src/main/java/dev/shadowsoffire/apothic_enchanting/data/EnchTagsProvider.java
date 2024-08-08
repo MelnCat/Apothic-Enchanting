@@ -27,21 +27,24 @@ public class EnchTagsProvider extends EnchantmentTagsProvider {
 
         this.tag(EnchantmentTags.NON_TREASURE).add(
             Ench.Enchantments.BERSERKERS_FURY,
-            Ench.Enchantments.LIFE_MENDING,
+            Ench.Enchantments.BOON_OF_THE_EARTH,
             Ench.Enchantments.CHAINSAW,
+            Ench.Enchantments.CHROMATIC,
             Ench.Enchantments.CRESCENDO_OF_BOLTS,
-            Ench.Enchantments.EARTHS_BOON,
             Ench.Enchantments.ENDLESS_QUIVER,
-            Ench.Enchantments.CHAINSAW,
+            Ench.Enchantments.GROWTH_SERUM,
             Ench.Enchantments.ICY_THORNS,
             Ench.Enchantments.KNOWLEDGE_OF_THE_AGES,
+            Ench.Enchantments.LIFE_MENDING,
             Ench.Enchantments.MINERS_FERVOR,
             Ench.Enchantments.NATURES_BLESSING,
             Ench.Enchantments.REBOUNDING,
             Ench.Enchantments.REFLECTIVE_DEFENSES,
             Ench.Enchantments.SCAVENGER,
             Ench.Enchantments.SHIELD_BASH,
-            Ench.Enchantments.STABLE_FOOTING);
+            Ench.Enchantments.STABLE_FOOTING,
+            Ench.Enchantments.TEMPTING,
+            Ench.Enchantments.WORKER_EXPLOITATION);
 
         // Make Sharpness and Protection non-exclusive - we also override them for the same reason.
         this.tag(EnchantmentTags.DAMAGE_EXCLUSIVE).remove(Enchantments.SHARPNESS);
