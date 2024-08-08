@@ -75,6 +75,28 @@ public class Ench {
 
     private static final DeferredHelper R = DeferredHelper.create(ApothicEnchanting.MODID);
 
+    static {
+        R.recipeSerializer("infusion", () -> InfusionRecipe.SERIALIZER);
+        R.recipeSerializer("keep_nbt_infusion", () -> KeepNBTInfusionRecipe.SERIALIZER);
+        R.custom("warden_tendril", NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> WardenLootModifier.CODEC);
+        R.custom("enchantment_table_item_handler", NeoForgeRegistries.Keys.ATTACHMENT_TYPES, () -> EnchantmentTableItemHandler.TYPE);
+        R.custom("rebounding", Registries.ENCHANTMENT_ENTITY_EFFECT_TYPE, () -> ReboundingEffect.CODEC);
+        R.custom("exponential", Registries.ENCHANTMENT_LEVEL_BASED_VALUE_TYPE, () -> ExponentialLevelBasedValue.CODEC);
+    }
+
+    public static void bootstrap(IEventBus bus) {
+        Blocks.bootstrap();
+        Items.bootstrap();
+        EnchantEffects.bootstrap();
+        Tabs.bootstrap();
+        Tiles.bootstrap();
+        Particles.bootstrap();
+        Menus.bootstrap();
+        RecipeTypes.bootstrap();
+        Components.bootstrap();
+        bus.register(R);
+    }
+
     public static final class Blocks {
 
         public static final Holder<Block> BEESHELF = woodShelf("beeshelf", MapColor.COLOR_YELLOW, 0.75F, () -> ParticleTypes.ENCHANT);
@@ -96,6 +118,12 @@ public class Ench {
         public static final Holder<Block> ENDER_LIBRARY = R.block("ender_library", () -> new EnchLibraryBlock(EnderLibraryTile::new, 31));
 
         public static final Holder<Block> ENDSHELF = stoneShelf("endshelf", MapColor.SAND, 4.5F, Particles.ENCHANT_END);
+
+        public static final Holder<Block> FILTERING_SHELF = R.block("filtering_shelf", FilteringShelfBlock::new,
+            p -> p.mapColor(MapColor.COLOR_CYAN).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
+
+        public static final Holder<Block> GEODE_SHELF = R.block("geode_shelf", GeodeShelfBlock::new,
+            p -> p.mapColor(MapColor.TERRACOTTA_WHITE).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
 
         public static final Holder<Block> GLOWING_HELLSHELF = stoneShelf("glowing_hellshelf", MapColor.COLOR_BLACK, 1.5F, Particles.ENCHANT_FIRE);
 
@@ -125,14 +153,8 @@ public class Ench {
 
         public static final Holder<Block> STONESHELF = stoneShelf("stoneshelf", MapColor.STONE, 1.75F, () -> ParticleTypes.ENCHANT);
 
-        public static final Holder<Block> FILTERING_SHELF = R.block("filtering_shelf", FilteringShelfBlock::new,
-            p -> p.mapColor(MapColor.COLOR_CYAN).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
-
         public static final Holder<Block> TREASURE_SHELF = R.block("treasure_shelf", TreasureShelfBlock::new,
             p -> p.mapColor(MapColor.COLOR_BLACK).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
-
-        public static final Holder<Block> GEODE_SHELF = R.block("geode_shelf", GeodeShelfBlock::new,
-            p -> p.mapColor(MapColor.TERRACOTTA_WHITE).sound(SoundType.STONE).strength(1.75F).requiresCorrectToolForDrops());
 
         private static void bootstrap() {}
 
@@ -148,6 +170,156 @@ public class Ench {
             return R.block(id, () -> new TypedShelfBlock(Block.Properties.of().sound(SoundType.WOOD).mapColor(color).strength(strength), particle));
         }
 
+    }
+
+    public static class Colors {
+        private static int[] _LIGHT_BLUE_FLASH = { 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff,
+            0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff,
+            0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff,
+            0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x0bb5ff,
+            0x17b8ff, 0x22bbff, 0x2dbdff, 0x39c0ff, 0x44c3ff, 0x4fc6ff, 0x5bc9ff, 0x66ccff };
+
+        public static GradientColor LIGHT_BLUE_FLASH = new GradientColor(MiscUtil.doubleUpGradient(_LIGHT_BLUE_FLASH), "light_blue_flash");
+    }
+
+    public static class Components {
+
+        /**
+         * Keeps a copy of the original {@link ChargedProjectiles} when crescendo is present, so they can be re-charged after firing.
+         */
+        public static final DataComponentType<ChargedProjectiles> CRESCENDO_PROJECTILES = R.component("crescendo_projectiles",
+            b -> b.persistent(ChargedProjectiles.CODEC).networkSynchronized(ChargedProjectiles.STREAM_CODEC).cacheEncoding());
+
+        /**
+         * Used when Crescendo of Bolts is active to track the number of remaining bonus shots.
+         */
+        public static final DataComponentType<Integer> CRESCENDO_SHOTS = R.component("crescendo_shots", b -> b.persistent(Codec.intRange(1, 1024)).networkSynchronized(ByteBufCodecs.VAR_INT));
+
+        private static void bootstrap() {}
+    }
+
+    public static final class DamageTypes {
+        public static final ResourceKey<DamageType> CORRUPTED = ResourceKey.create(Registries.DAMAGE_TYPE, ApothicEnchanting.loc("corrupted"));
+    }
+
+    public static class EnchantEffects {
+
+        /**
+         * Component used by Berserker's Fury. Allows configuring the mob effects, health cost, and cooldown.
+         */
+        public static final DataComponentType<BerserkingComponent> BERSERKING = R.enchantmentEffect("berserking", b -> b.persistent(BerserkingComponent.CODEC));
+
+        /**
+         * The bonemeal crops effect, when present on an item, will bonemeal any right-clicked crops at a durability cost equal to the level-based value.
+         */
+        public static final DataComponentType<LevelBasedValue> BONEMEAL_CROPS = R.enchantmentEffect("bonemeal_crops", b -> b.persistent(LevelBasedValue.CODEC));
+
+        /**
+         * The chainsaw effect causes whole trees to break when a log is broken.
+         */
+        public static final DataComponentType<Unit> CHAINSAW = R.enchantmentEffect("chainsaw", b -> b.persistent(Unit.CODEC));
+
+        /**
+         * The chromatic effect causes shears to randomize the color of all sheared wool.
+         */
+        public static final DataComponentType<Unit> CHROMATIC = R.enchantmentEffect("chromatic", b -> b.persistent(Unit.CODEC));
+
+        /**
+         * The crescendo effect causes the crossbow to have an additional number of shots per consumed ammunition, without having to reload between them.
+         */
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> CRESCENDO = R.enchantmentEffect("crescendo",
+            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
+
+        /**
+         * The drops to xp effect, if present on a weapon, causes all items dropped by slain mobs to be converted to experience.
+         * The amount of experience, per item, is equal to the value of the component.
+         */
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> DROPS_TO_XP = R.enchantmentEffect("drops_to_xp",
+            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
+
+        /**
+         * The boon component allows a chance at dropping a random item from a tag when any block from a target tag is broken.
+         */
+        public static final DataComponentType<BoonComponent> EARTHS_BOON = R.enchantmentEffect("earths_boon", b -> b.persistent(BoonComponent.CODEC));
+
+        /**
+         * The exploitation effect doubles all dropped wool, but deals two damage to sheared sheep.
+         */
+        public static final DataComponentType<Unit> EXPLOITATION = R.enchantmentEffect("exploitation", b -> b.persistent(Unit.CODEC));
+
+        /**
+         * The extra loot roll effect, if present on a weapon, gives a chance to roll and drop an additional copy of the slain mob's loot.
+         */
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> EXTRA_LOOT_ROLL = R.enchantmentEffect("extra_loot_roll",
+            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_DAMAGE).listOf()));
+
+        /**
+         * The growth serum effect has a chance (equal to the value) to make a sheared sheep immediately regrow its wool.
+         */
+        public static final DataComponentType<Float> GROWTH_SERUM = R.enchantmentEffect("growth_serum", b -> b.persistent(Codec.floatRange(0.001F, 1)));
+
+        /**
+         * The miner's fervor effect is a version of efficiency that scales faster but has a cap on the max bonus.
+         * The value of the component is the scaling, the cap is hardcoded.
+         * <p>
+         * Since this has to be evaluated on the client, we can't use {@link ConditionalEffect}.
+         */
+        public static final DataComponentType<LevelBasedValue> MINERS_FERVOR = R.enchantmentEffect("miners_fervor", b -> b.persistent(LevelBasedValue.CODEC));
+
+        /**
+         * The reflective effect, if present on a blocking shield, gives a chance to inflict part of the blocked damage to the attacker.
+         */
+        public static final DataComponentType<ReflectiveComponent> REFLECTIVE = R.enchantmentEffect("reflective", b -> b.persistent(ReflectiveComponent.CODEC));
+
+        /**
+         * The repair with hp effect causes incoming healing to be converted into durability. The final value of the effect is the amount of durability restored per
+         * full point of hp.
+         * <p>
+         * If the amount of durability per hp is more than one, fractional units of hp may be
+         * consumed to restore integer durability values (i.e. at 4 / hp, 0.25 hp can repair 1 durability).
+         */
+        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> REPAIR_WITH_HP = R.enchantmentEffect("repair_with_hp",
+            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
+
+        /**
+         * The stable footing effect causes the break speed penalty for flying to be ignored.
+         */
+        public static final DataComponentType<Unit> STABLE_FOOTING = R.enchantmentEffect("stable_footing", b -> b.persistent(Unit.CODEC));
+
+        /**
+         * The tempting effect causes animals to follow the item that has the effect.
+         */
+        public static final DataComponentType<Unit> TEMPTING = R.enchantmentEffect("tempting", b -> b.persistent(Unit.CODEC));
+
+        private static void bootstrap() {}
+    }
+
+    public static final class Enchantments {
+
+        public static final ResourceKey<Enchantment> BERSERKERS_FURY = key("berserkers_fury");
+        public static final ResourceKey<Enchantment> BOON_OF_THE_EARTH = key("boon_of_the_earth");
+        public static final ResourceKey<Enchantment> CHAINSAW = key("chainsaw");
+        public static final ResourceKey<Enchantment> CHROMATIC = key("chromatic");
+        public static final ResourceKey<Enchantment> CRESCENDO_OF_BOLTS = key("crescendo_of_bolts");
+        public static final ResourceKey<Enchantment> ENDLESS_QUIVER = key("endless_quiver");
+        public static final ResourceKey<Enchantment> GROWTH_SERUM = key("growth_serum");
+        public static final ResourceKey<Enchantment> ICY_THORNS = key("icy_thorns");
+        public static final ResourceKey<Enchantment> INFUSION = key("infusion");
+        public static final ResourceKey<Enchantment> KNOWLEDGE_OF_THE_AGES = key("knowledge_of_the_ages");
+        public static final ResourceKey<Enchantment> LIFE_MENDING = key("life_mending");
+        public static final ResourceKey<Enchantment> MINERS_FERVOR = key("miners_fervor");
+        public static final ResourceKey<Enchantment> NATURES_BLESSING = key("natures_blessing");
+        public static final ResourceKey<Enchantment> REBOUNDING = key("rebounding");
+        public static final ResourceKey<Enchantment> REFLECTIVE_DEFENSES = key("reflective_defenses");
+        public static final ResourceKey<Enchantment> SCAVENGER = key("scavenger");
+        public static final ResourceKey<Enchantment> SHIELD_BASH = key("shield_bash");
+        public static final ResourceKey<Enchantment> STABLE_FOOTING = key("stable_footing");
+        public static final ResourceKey<Enchantment> TEMPTING = key("tempting");
+        public static final ResourceKey<Enchantment> WORKER_EXPLOITATION = key("worker_exploitation");
+
+        private static ResourceKey<Enchantment> key(String name) {
+            return ResourceKey.create(Registries.ENCHANTMENT, ApothicEnchanting.loc(name));
+        }
     }
 
     public static class Items extends net.minecraft.world.item.Items {
@@ -180,7 +352,11 @@ public class Ench {
 
         public static final Holder<Item> EXTRACTION_TOME = R.item("extraction_tome", ExtractionTomeItem::new, p -> p.rarity(Rarity.EPIC));
 
+        public static final Holder<Item> FILTERING_SHELF = R.blockItem("filtering_shelf", Ench.Blocks.FILTERING_SHELF, p -> p.rarity(Rarity.UNCOMMON));
+
         public static final Holder<Item> FISHING_TOME = R.item("fishing_tome", () -> new TomeItem(Items.FISHING_ROD));
+
+        public static final Holder<Item> GEODE_SHELF = R.blockItem("geode_shelf", Ench.Blocks.GEODE_SHELF, p -> p.rarity(Rarity.UNCOMMON));
 
         public static final Holder<Item> GLOWING_HELLSHELF = R.blockItem("glowing_hellshelf", Ench.Blocks.GLOWING_HELLSHELF);
 
@@ -228,156 +404,14 @@ public class Ench {
 
         public static final Holder<Item> STONESHELF = R.blockItem("stoneshelf", Ench.Blocks.STONESHELF);
 
+        public static final Holder<Item> TREASURE_SHELF = R.blockItem("treasure_shelf", Ench.Blocks.TREASURE_SHELF, p -> p.rarity(Rarity.UNCOMMON));
+
         public static final Holder<Item> WARDEN_TENDRIL = R.item("warden_tendril", () -> new Item(new Item.Properties()));
 
         public static final Holder<Item> WEAPON_TOME = R.item("weapon_tome", () -> new TomeItem(net.minecraft.world.item.Items.DIAMOND_SWORD));
 
-        public static final Holder<Item> FILTERING_SHELF = R.blockItem("filtering_shelf", Ench.Blocks.FILTERING_SHELF, p -> p.rarity(Rarity.UNCOMMON));
-
-        public static final Holder<Item> TREASURE_SHELF = R.blockItem("treasure_shelf", Ench.Blocks.TREASURE_SHELF, p -> p.rarity(Rarity.UNCOMMON));
-
-        public static final Holder<Item> GEODE_SHELF = R.blockItem("geode_shelf", Ench.Blocks.GEODE_SHELF, p -> p.rarity(Rarity.UNCOMMON));
-
         private static void bootstrap() {}
 
-    }
-
-    public static final class Enchantments {
-
-        public static final ResourceKey<Enchantment> BERSERKERS_FURY = key("berserkers_fury");
-        public static final ResourceKey<Enchantment> CHAINSAW = key("chainsaw");
-        public static final ResourceKey<Enchantment> CHROMATIC = key("chromatic");
-        public static final ResourceKey<Enchantment> CRESCENDO_OF_BOLTS = key("crescendo_of_bolts");
-        public static final ResourceKey<Enchantment> EARTHS_BOON = key("earths_boon");
-        public static final ResourceKey<Enchantment> ENDLESS_QUIVER = key("endless_quiver");
-        public static final ResourceKey<Enchantment> WORKER_EXPLOITATION = key("worker_exploitation");
-        public static final ResourceKey<Enchantment> GROWTH_SERUM = key("growth_serum");
-        public static final ResourceKey<Enchantment> ICY_THORNS = key("icy_thorns");
-        public static final ResourceKey<Enchantment> INFUSION = key("infusion");
-        public static final ResourceKey<Enchantment> KNOWLEDGE_OF_THE_AGES = key("knowledge_of_the_ages");
-        public static final ResourceKey<Enchantment> LIFE_MENDING = key("life_mending");
-        public static final ResourceKey<Enchantment> MINERS_FERVOR = key("miners_fervor");
-        public static final ResourceKey<Enchantment> REBOUNDING = key("rebounding");
-        public static final ResourceKey<Enchantment> NATURES_BLESSING = key("natures_blessing");
-        public static final ResourceKey<Enchantment> REFLECTIVE_DEFENSES = key("reflective_defenses");
-        public static final ResourceKey<Enchantment> SCAVENGER = key("scavenger");
-        public static final ResourceKey<Enchantment> SHIELD_BASH = key("shield_bash");
-        public static final ResourceKey<Enchantment> STABLE_FOOTING = key("stable_footing");
-        public static final ResourceKey<Enchantment> TEMPTING = key("tempting");
-
-        private static ResourceKey<Enchantment> key(String name) {
-            return ResourceKey.create(Registries.ENCHANTMENT, ApothicEnchanting.loc(name));
-        }
-    }
-
-    public static class EnchantEffects {
-
-        /**
-         * The chromatic effect causes shears to randomize the color of all sheared wool.
-         */
-        public static final DataComponentType<Unit> CHROMATIC = R.enchantmentEffect("chromatic", b -> b.persistent(Unit.CODEC));
-
-        /**
-         * The tempting effect causes animals to follow the item that has the effect.
-         */
-        public static final DataComponentType<Unit> TEMPTING = R.enchantmentEffect("tempting", b -> b.persistent(Unit.CODEC));
-
-        /**
-         * The stable footing effect causes the break speed penalty for flying to be ignored.
-         */
-        public static final DataComponentType<Unit> STABLE_FOOTING = R.enchantmentEffect("stable_footing", b -> b.persistent(Unit.CODEC));
-
-        /**
-         * Component used by Berserker's Fury. Allows configuring the mob effects, health cost, and cooldown.
-         */
-        public static final DataComponentType<BerserkingComponent> BERSERKING = R.enchantmentEffect("berserking", b -> b.persistent(BerserkingComponent.CODEC));
-
-        /**
-         * The chainsaw effect causes whole trees to break when a log is broken.
-         */
-        public static final DataComponentType<Unit> CHAINSAW = R.enchantmentEffect("chainsaw", b -> b.persistent(Unit.CODEC));
-
-        /**
-         * The crescendo effect causes the crossbow to have an additional number of shots per consumed ammunition, without having to reload between them.
-         */
-        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> CRESCENDO = R.enchantmentEffect("crescendo",
-            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
-
-        /**
-         * The boon component allows a chance at dropping a random item from a tag when any block from a target tag is broken.
-         */
-        public static final DataComponentType<BoonComponent> EARTHS_BOON = R.enchantmentEffect("earths_boon", b -> b.persistent(BoonComponent.CODEC));
-
-        /**
-         * The exploitation effect doubles all dropped wool, but deals two damage to sheared sheep.
-         */
-        public static final DataComponentType<Unit> EXPLOITATION = R.enchantmentEffect("exploitation", b -> b.persistent(Unit.CODEC));
-
-        /**
-         * The repair with hp effect causes incoming healing to be converted into durability. The final value of the effect is the amount of durability restored per
-         * full point of hp.
-         * <p>
-         * If the amount of durability per hp is more than one, fractional units of hp may be
-         * consumed to restore integer durability values (i.e. at 4 / hp, 0.25 hp can repair 1 durability).
-         */
-        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> REPAIR_WITH_HP = R.enchantmentEffect("repair_with_hp",
-            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
-
-        /**
-         * The growth serum effect has a chance (equal to the value) to make a sheared sheep immediately regrow its wool.
-         */
-        public static final DataComponentType<Float> GROWTH_SERUM = R.enchantmentEffect("growth_serum", b -> b.persistent(Codec.floatRange(0.001F, 1)));
-
-        /**
-         * The miner's fervor effect is a version of efficiency that scales faster but has a cap on the max bonus.
-         * The value of the component is the scaling, the cap is hardcoded.
-         * <p>
-         * Since this has to be evaluated on the client, we can't use {@link ConditionalEffect}.
-         */
-        public static final DataComponentType<LevelBasedValue> MINERS_FERVOR = R.enchantmentEffect("miners_fervor", b -> b.persistent(LevelBasedValue.CODEC));
-
-        /**
-         * The drops to xp effect, if present on a weapon, causes all items dropped by slain mobs to be converted to experience.
-         * The amount of experience, per item, is equal to the value of the component.
-         */
-        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> DROPS_TO_XP = R.enchantmentEffect("drops_to_xp",
-            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf()));
-
-        /**
-         * The extra loot roll effect, if present on a weapon, gives a chance to roll and drop an additional copy of the slain mob's loot.
-         */
-        public static final DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> EXTRA_LOOT_ROLL = R.enchantmentEffect("extra_loot_roll",
-            b -> b.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_DAMAGE).listOf()));
-
-        /**
-         * The reflective effect, if present on a blocking shield, gives a chance to inflict part of the blocked damage to the attacker.
-         */
-        public static final DataComponentType<ReflectiveComponent> REFLECTIVE = R.enchantmentEffect("reflective", b -> b.persistent(ReflectiveComponent.CODEC));
-
-        /**
-         * The bonemeal crops effect, when present on an item, will bonemeal any right-clicked crops at a durability cost equal to the level-based value.
-         */
-        public static final DataComponentType<LevelBasedValue> BONEMEAL_CROPS = R.enchantmentEffect("bonemeal_crops", b -> b.persistent(LevelBasedValue.CODEC));
-
-        private static void bootstrap() {}
-    }
-
-    public static class Tabs {
-
-        public static final Holder<CreativeModeTab> ENCH = R.creativeTab("ench", b -> b.title(TooltipUtil.lang("creative_tab", "all")).icon(() -> Items.HELLSHELF.value().getDefaultInstance()));
-
-        private static void bootstrap() {}
-    }
-
-    public static class Tiles {
-
-        public static final Supplier<BlockEntityType<FilteringShelfTile>> FILTERING_SHELF = R.blockEntity("filtering_shelf", FilteringShelfTile::new, () -> ImmutableSet.of(Blocks.FILTERING_SHELF.value()));
-
-        public static final Supplier<BlockEntityType<BasicLibraryTile>> LIBRARY = R.blockEntity("library", BasicLibraryTile::new, () -> ImmutableSet.of(Blocks.LIBRARY.value()));
-
-        public static final Supplier<BlockEntityType<EnderLibraryTile>> ENDER_LIBRARY = R.blockEntity("ender_library", EnderLibraryTile::new, () -> ImmutableSet.of(Blocks.ENDER_LIBRARY.value()));
-
-        private static void bootstrap() {}
     }
 
     public static class Menus {
@@ -389,21 +423,11 @@ public class Ench {
         private static void bootstrap() {}
     }
 
-    public static class Colors {
-        private static int[] _LIGHT_BLUE_FLASH = { 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff,
-            0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff,
-            0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff,
-            0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x00b3ff, 0x0bb5ff,
-            0x17b8ff, 0x22bbff, 0x2dbdff, 0x39c0ff, 0x44c3ff, 0x4fc6ff, 0x5bc9ff, 0x66ccff };
-
-        public static GradientColor LIGHT_BLUE_FLASH = new GradientColor(MiscUtil.doubleUpGradient(_LIGHT_BLUE_FLASH), "light_blue_flash");
-    }
-
     public static class Particles {
-        public static final Supplier<SimpleParticleType> ENCHANT_FIRE = R.simpleParticle("enchant_fire", false);
-        public static final Supplier<SimpleParticleType> ENCHANT_WATER = R.simpleParticle("enchant_water", false);
-        public static final Supplier<SimpleParticleType> ENCHANT_SCULK = R.simpleParticle("enchant_sculk", false);
         public static final Supplier<SimpleParticleType> ENCHANT_END = R.simpleParticle("enchant_end", false);
+        public static final Supplier<SimpleParticleType> ENCHANT_FIRE = R.simpleParticle("enchant_fire", false);
+        public static final Supplier<SimpleParticleType> ENCHANT_SCULK = R.simpleParticle("enchant_sculk", false);
+        public static final Supplier<SimpleParticleType> ENCHANT_WATER = R.simpleParticle("enchant_water", false);
 
         private static void bootstrap() {}
     }
@@ -414,18 +438,9 @@ public class Ench {
         private static void bootstrap() {}
     }
 
-    public static class Components {
+    public static class Tabs {
 
-        /**
-         * Used when Crescendo of Bolts is active to track the number of remaining bonus shots.
-         */
-        public static final DataComponentType<Integer> CRESCENDO_SHOTS = R.component("crescendo_shots", b -> b.persistent(Codec.intRange(1, 1024)).networkSynchronized(ByteBufCodecs.VAR_INT));
-
-        /**
-         * Keeps a copy of the original {@link ChargedProjectiles} when crescendo is present, so they can be re-charged after firing.
-         */
-        public static final DataComponentType<ChargedProjectiles> CRESCENDO_PROJECTILES = R.component("crescendo_projectiles",
-            b -> b.persistent(ChargedProjectiles.CODEC).networkSynchronized(ChargedProjectiles.STREAM_CODEC).cacheEncoding());
+        public static final Holder<CreativeModeTab> ENCH = R.creativeTab("ench", b -> b.title(TooltipUtil.lang("creative_tab", "all")).icon(() -> Items.HELLSHELF.value().getDefaultInstance()));
 
         private static void bootstrap() {}
     }
@@ -435,30 +450,15 @@ public class Ench {
         public static final TagKey<Item> SPEARFISHING_DROPS = ItemTags.create(ApothicEnchanting.loc("spearfishing_drops"));
     }
 
-    public static final class DamageTypes {
-        public static final ResourceKey<DamageType> CORRUPTED = ResourceKey.create(Registries.DAMAGE_TYPE, ApothicEnchanting.loc("corrupted"));
-    }
+    public static class Tiles {
 
-    static {
-        R.recipeSerializer("infusion", () -> InfusionRecipe.SERIALIZER);
-        R.recipeSerializer("keep_nbt_infusion", () -> KeepNBTInfusionRecipe.SERIALIZER);
-        R.custom("warden_tendril", NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> WardenLootModifier.CODEC);
-        R.custom("enchantment_table_item_handler", NeoForgeRegistries.Keys.ATTACHMENT_TYPES, () -> EnchantmentTableItemHandler.TYPE);
-        R.custom("rebounding", Registries.ENCHANTMENT_ENTITY_EFFECT_TYPE, () -> ReboundingEffect.CODEC);
-        R.custom("exponential", Registries.ENCHANTMENT_LEVEL_BASED_VALUE_TYPE, () -> ExponentialLevelBasedValue.CODEC);
-    }
+        public static final Supplier<BlockEntityType<EnderLibraryTile>> ENDER_LIBRARY = R.blockEntity("ender_library", EnderLibraryTile::new, () -> ImmutableSet.of(Blocks.ENDER_LIBRARY.value()));
 
-    public static void bootstrap(IEventBus bus) {
-        Blocks.bootstrap();
-        Items.bootstrap();
-        EnchantEffects.bootstrap();
-        Tabs.bootstrap();
-        Tiles.bootstrap();
-        Particles.bootstrap();
-        Menus.bootstrap();
-        RecipeTypes.bootstrap();
-        Components.bootstrap();
-        bus.register(R);
+        public static final Supplier<BlockEntityType<FilteringShelfTile>> FILTERING_SHELF = R.blockEntity("filtering_shelf", FilteringShelfTile::new, () -> ImmutableSet.of(Blocks.FILTERING_SHELF.value()));
+
+        public static final Supplier<BlockEntityType<BasicLibraryTile>> LIBRARY = R.blockEntity("library", BasicLibraryTile::new, () -> ImmutableSet.of(Blocks.LIBRARY.value()));
+
+        private static void bootstrap() {}
     }
 
 }
