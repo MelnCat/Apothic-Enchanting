@@ -1,5 +1,5 @@
 {
-    "creative_tab.apothic_enchanting.all": "Apotheosis - Enchanting Module",
+    "creative_tab.apothic_enchanting.all": "Apothic Enchanting",
 
     "block.apothic_enchanting.hellshelf": "Hellshelf",
     "block.apothic_enchanting.infused_hellshelf": "Infused Hellshelf",
@@ -39,7 +39,6 @@
     "block.apothic_enchanting.ender_library": "Library of Alexandria",
 
     "info.apothic_enchanting.ench_power": "Provides %s enchanting power.",
-    "info.apothic_enchanting.cobweb": "Can be used to remove enchantments.",
     "info.apothic_enchanting.masterwork": "Masterwork",
     "info.apothic_enchanting.twisted": "Twisted",
     "info.apothic_enchanting.corrupted": "Corrupted",
