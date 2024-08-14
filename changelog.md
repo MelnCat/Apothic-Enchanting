@@ -1,3 +1,10 @@
+## 1.2.0
+* Updated to Minecraft 1.21.1.
+* Made Tridents and Shears able to accept all enchantments that were possible in 1.20.
+  * This was not possible earlier as it relied on Neo's `Item#supportsEnchantment` hook.
+* Fixed sheep-specific shear enchantments crashing when used.
+* Tightened tooltip level access when resolving enchanting stat tooltips. Falls back to the default block state when unavailable.
+
 ## 1.1.2
 * Fixed crossbows crashing on fire.
 * Fixed the warden loot modifier failing when the TOOL parameter was not provided.

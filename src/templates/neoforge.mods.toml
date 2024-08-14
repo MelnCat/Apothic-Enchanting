@@ -33,6 +33,13 @@ ${mixinConfig}
     side="BOTH"
 
 [[dependencies.${modid}]]
+    modId="placebo"
+    type="required"
+    versionRange="[${placeboVersion},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${modid}]]
     modId="apothic_attributes"
     type="required"
     versionRange="[${attributeslibVersion},)"
