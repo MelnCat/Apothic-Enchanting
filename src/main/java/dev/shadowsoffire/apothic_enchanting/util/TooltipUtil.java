@@ -15,21 +15,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TooltipUtil {
 
-    public static void appendBlockStats(Level world, BlockState state, BlockPos pos, Consumer<Component> tooltip) {
+    public static void appendBlockStats(LevelReader level, BlockState state, BlockPos pos, Consumer<Component> tooltip) {
         EnchantmentStatBlock enchBlock = ((EnchantmentStatBlock) state.getBlock());
 
-        float maxEterna = EnchantingStatRegistry.getMaxEterna(state, world, pos);
-        float eterna = EnchantingStatRegistry.getEterna(state, world, pos);
-        float quanta = EnchantingStatRegistry.getQuanta(state, world, pos);
-        float arcana = EnchantingStatRegistry.getArcana(state, world, pos);
-        int clues = EnchantingStatRegistry.getBonusClues(state, world, pos);
-        boolean treasure = enchBlock.allowsTreasure(state, world, pos);
-        boolean stable = enchBlock.providesStability(state, world, pos);
+        float maxEterna = EnchantingStatRegistry.getMaxEterna(state, level, pos);
+        float eterna = EnchantingStatRegistry.getEterna(state, level, pos);
+        float quanta = EnchantingStatRegistry.getQuanta(state, level, pos);
+        float arcana = EnchantingStatRegistry.getArcana(state, level, pos);
+        int clues = EnchantingStatRegistry.getBonusClues(state, level, pos);
+        boolean treasure = enchBlock.allowsTreasure(state, level, pos);
+        boolean stable = enchBlock.providesStability(state, level, pos);
 
         if (eterna != 0 || quanta != 0 || arcana != 0 || clues != 0 || treasure || stable) {
             tooltip.accept(TooltipUtil.lang("info", "ench_stats").withStyle(ChatFormatting.GOLD));
@@ -62,7 +62,7 @@ public class TooltipUtil {
             tooltip.accept(TooltipUtil.lang("info", "provides_stability").withStyle(ChatFormatting.GOLD));
         }
 
-        Set<Holder<Enchantment>> blacklist = enchBlock.getBlacklistedEnchantments(state, world, pos);
+        Set<Holder<Enchantment>> blacklist = enchBlock.getBlacklistedEnchantments(state, level, pos);
         if (blacklist.size() > 0) {
             tooltip.accept(TooltipUtil.lang("info", "filter").withStyle(s -> s.withColor(0x58B0CC)));
             for (Holder<Enchantment> e : blacklist) {
@@ -74,8 +74,8 @@ public class TooltipUtil {
         }
     }
 
-    public static void appendTableStats(Level world, BlockPos pos, Consumer<Component> tooltip) {
-        EnchantmentTableStats stats = EnchantmentTableStats.gatherStats(world, pos, 0);
+    public static void appendTableStats(LevelReader level, BlockPos pos, Consumer<Component> tooltip) {
+        EnchantmentTableStats stats = EnchantmentTableStats.gatherStats(level, pos, 0);
         tooltip.accept(TooltipUtil.lang("info", "eterna.t", String.format("%.2f", stats.eterna()), 100).withStyle(ChatFormatting.GREEN));
         tooltip.accept(TooltipUtil.lang("info", "quanta.t", String.format("%.2f", Math.min(100, stats.quanta()))).withStyle(ChatFormatting.RED));
         tooltip.accept(TooltipUtil.lang("info", "arcana.t", String.format("%.2f", Math.min(100, stats.arcana()))).withStyle(ChatFormatting.DARK_PURPLE));

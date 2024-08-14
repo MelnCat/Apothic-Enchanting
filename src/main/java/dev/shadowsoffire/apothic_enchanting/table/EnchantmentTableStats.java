@@ -20,6 +20,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.EnchantingTableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
@@ -68,7 +69,7 @@ public record EnchantmentTableStats(float eterna, float quanta, float arcana, in
      * @param itemEnch The enchantability of the item being enchanted.
      * @return The computed {@link EnchantmentTableStats}.
      */
-    public static EnchantmentTableStats gatherStats(Level level, BlockPos pos, int itemEnch) {
+    public static EnchantmentTableStats gatherStats(LevelReader level, BlockPos pos, int itemEnch) {
         EnchantmentTableStats.Builder builder = new EnchantmentTableStats.Builder(itemEnch);
         for (BlockPos offset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
             if (canReadStatsFrom(level, pos, offset)) {
@@ -86,7 +87,7 @@ public record EnchantmentTableStats(float eterna, float quanta, float arcana, in
      * @param offset   The offset being checked.
      * @return True if the block between the table and the offset is {@link BlockTags#ENCHANTMENT_POWER_TRANSMITTER}, false otherwise.
      */
-    public static boolean canReadStatsFrom(Level level, BlockPos tablePos, BlockPos offset) {
+    public static boolean canReadStatsFrom(LevelReader level, BlockPos tablePos, BlockPos offset) {
         return level.getBlockState(tablePos.offset(offset.getX() / 2, offset.getY(), offset.getZ() / 2)).is(BlockTags.ENCHANTMENT_POWER_TRANSMITTER);
     }
 
@@ -96,26 +97,26 @@ public record EnchantmentTableStats(float eterna, float quanta, float arcana, in
      *
      * @param eternaMap A map of max eterna contributions to eterna contributions for that max.
      * @param stats     The stat array, with order {eterna, quanta, arcana, rectification, clues}.
-     * @param world     The world.
+     * @param level     The world.
      * @param pos       The position of the stat-providing block.
      */
-    public static void gatherStats(EnchantmentTableStats.Builder builder, Level world, BlockPos pos) {
-        BlockState state = world.getBlockState(pos);
+    public static void gatherStats(EnchantmentTableStats.Builder builder, LevelReader level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
         if (state.isAir()) return;
-        float eterna = EnchantingStatRegistry.getEterna(state, world, pos);
-        float max = EnchantingStatRegistry.getMaxEterna(state, world, pos);
+        float eterna = EnchantingStatRegistry.getEterna(state, level, pos);
+        float max = EnchantingStatRegistry.getMaxEterna(state, level, pos);
         builder.addEterna(eterna, max);
-        builder.addQuanta(EnchantingStatRegistry.getQuanta(state, world, pos));
-        builder.addArcana(EnchantingStatRegistry.getArcana(state, world, pos));
-        builder.addClues(EnchantingStatRegistry.getBonusClues(state, world, pos));
+        builder.addQuanta(EnchantingStatRegistry.getQuanta(state, level, pos));
+        builder.addArcana(EnchantingStatRegistry.getArcana(state, level, pos));
+        builder.addClues(EnchantingStatRegistry.getBonusClues(state, level, pos));
 
         EnchantmentStatBlock enchBlock = ((EnchantmentStatBlock) state.getBlock());
 
-        enchBlock.getBlacklistedEnchantments(state, world, pos).forEach(builder::blacklistEnchant);
-        if (enchBlock.allowsTreasure(state, world, pos)) {
+        enchBlock.getBlacklistedEnchantments(state, level, pos).forEach(builder::blacklistEnchant);
+        if (enchBlock.allowsTreasure(state, level, pos)) {
             builder.setAllowsTreasure(true);
         }
-        if (enchBlock.providesStability(state, world, pos)) {
+        if (enchBlock.providesStability(state, level, pos)) {
             builder.setStable(true);
         }
     }

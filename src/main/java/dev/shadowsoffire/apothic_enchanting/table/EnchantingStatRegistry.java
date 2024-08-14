@@ -25,7 +25,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -63,10 +63,10 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
      * This can be provided by a stat file, or {@link BlockState#getEnchantPowerBonus}
      * 1 Eterna = +1 level in the enchanting table.
      */
-    public static float getEterna(BlockState state, Level world, BlockPos pos) {
+    public static float getEterna(BlockState state, LevelReader level, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).eterna;
-        return state.getEnchantPowerBonus(world, pos) * 2;
+        return state.getEnchantPowerBonus(level, pos) * 2;
     }
 
     /**
@@ -74,10 +74,10 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
      * This can be provided by a stat file, or {@link EnchantmentStatBlock#getMaxEnchantingPower}
      * 1F of Eterna = 2 Levels in the enchanting table.
      */
-    public static float getMaxEterna(BlockState state, Level world, BlockPos pos) {
+    public static float getMaxEterna(BlockState state, LevelReader level, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).maxEterna;
-        return ((EnchantmentStatBlock) block).getMaxEnchantingPower(state, world, pos);
+        return ((EnchantmentStatBlock) block).getMaxEnchantingPower(state, level, pos);
 
     }
 
@@ -86,10 +86,10 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
      * This can be provided by a stat file, or {@link EnchantmentStatBlock#getQuantaBonus}
      * 1F of Quanta = 1% of Quanta in the enchanting table.
      */
-    public static float getQuanta(BlockState state, Level world, BlockPos pos) {
+    public static float getQuanta(BlockState state, LevelReader level, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).quanta;
-        return ((EnchantmentStatBlock) block).getQuantaBonus(state, world, pos);
+        return ((EnchantmentStatBlock) block).getQuantaBonus(state, level, pos);
     }
 
     /**
@@ -97,20 +97,20 @@ public class EnchantingStatRegistry extends DynamicRegistry<BlockStats> {
      * This can be provided by a stat file, or {@link EnchantmentStatBlock#getArcanaBonus}
      * 1F of Arcana = 1% of Arcana in the enchanting table.
      */
-    public static float getArcana(BlockState state, Level world, BlockPos pos) {
+    public static float getArcana(BlockState state, LevelReader level, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).arcana;
-        return ((EnchantmentStatBlock) block).getArcanaBonus(state, world, pos);
+        return ((EnchantmentStatBlock) block).getArcanaBonus(state, level, pos);
     }
 
     /**
      * Retrieves the number of bonus clues this block provides.
      * See {@link EnchantmentStatBlock#getBonusClues}
      */
-    public static int getBonusClues(BlockState state, Level world, BlockPos pos) {
+    public static int getBonusClues(BlockState state, LevelReader level, BlockPos pos) {
         Block block = state.getBlock();
         if (INSTANCE.statsPerBlock.containsKey(block)) return INSTANCE.statsPerBlock.get(block).clues;
-        return ((EnchantmentStatBlock) block).getBonusClues(state, world, pos);
+        return ((EnchantmentStatBlock) block).getBonusClues(state, level, pos);
     }
 
     /**
