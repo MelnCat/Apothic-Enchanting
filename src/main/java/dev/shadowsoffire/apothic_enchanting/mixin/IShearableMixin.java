@@ -32,8 +32,8 @@ public interface IShearableMixin {
     @Inject(method = "onSheared", at = @At("RETURN"), cancellable = true, require = 1)
     default void apoth_handleShearEnchantments(@Nullable Player player, ItemStack item, Level world, BlockPos pos, CallbackInfoReturnable<List<ItemStack>> ci) {
         if (this instanceof Sheep sheep && !sheep.level().isClientSide) {
-            ci.setReturnValue(ShearsEnchantments.applyChromatic(sheep, item, ci.getReturnValue()));
             ci.setReturnValue(ShearsEnchantments.applyExploitation(sheep, item, ci.getReturnValue()));
+            ci.setReturnValue(ShearsEnchantments.applyChromatic(sheep, item, ci.getReturnValue()));
             ShearsEnchantments.applyGrowthSerum(sheep, item);
         }
     }

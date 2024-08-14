@@ -1,5 +1,6 @@
 package dev.shadowsoffire.apothic_enchanting.enchantments;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,11 @@ public class ShearsEnchantments {
 
     public static List<ItemStack> applyChromatic(Sheep sheep, ItemStack shears, List<ItemStack> items) {
         if (EnchantmentHelper.has(shears, Ench.EnchantEffects.CHROMATIC)) {
+            if (!(items instanceof ArrayList)) {
+                // We need to make the list mutable, but applyExploitation might have already done that.
+                items = new ArrayList<>(items);
+            }
+
             for (int i = 0; i < items.size(); i++) {
                 if (items.get(i).is(ItemTags.WOOL)) {
                     items.set(i, new ItemStack(ITEM_BY_DYE.get(DyeColor.byId(sheep.getRandom().nextInt(16)))));
@@ -50,6 +56,7 @@ public class ShearsEnchantments {
 
     public static List<ItemStack> applyExploitation(Sheep sheep, ItemStack shears, List<ItemStack> items) {
         if (EnchantmentHelper.has(shears, Ench.EnchantEffects.EXPLOITATION)) {
+            items = new ArrayList<>(items);
             if (items.size() > 0) {
                 items.addAll(items.stream().map(ItemStack::copy).toList());
                 sheep.hurt(sheep.level().damageSources().generic(), 2);
