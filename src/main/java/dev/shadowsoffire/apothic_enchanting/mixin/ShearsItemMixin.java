@@ -2,6 +2,7 @@ package dev.shadowsoffire.apothic_enchanting.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
@@ -15,10 +16,10 @@ public class ShearsItemMixin extends Item {
         super(pProperties);
     }
 
-//    @Override
-//    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment ench) {
-//        return super.canApplyAtEnchantingTable(stack, ench) || ench == Enchantments.UNBREAKING || ench == Enchantments.BLOCK_EFFICIENCY || ench == Enchantments.BLOCK_FORTUNE;
-//    }
+    @Override
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> ench) {
+        return super.supportsEnchantment(stack, ench) || ench.is(Enchantments.UNBREAKING) || ench.is(Enchantments.EFFICIENCY) || ench.is(Enchantments.FORTUNE);
+    }
 
     @Override
     public int getEnchantmentValue() {

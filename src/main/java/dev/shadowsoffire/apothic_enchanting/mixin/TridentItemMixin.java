@@ -2,6 +2,7 @@ package dev.shadowsoffire.apothic_enchanting.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TridentItem;
@@ -15,9 +16,9 @@ public abstract class TridentItemMixin extends Item {
         super(pProperties);
     }
 
-//    @Override
-//    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment ench) {
-//        return super.canApplyAtEnchantingTable(stack, ench) || ench == Enchantments.SHARPNESS || ench == Enchantments.LOOTING || ench == Enchantments.PIERCING;
-//    }
+    @Override
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> ench) {
+        return super.supportsEnchantment(stack, ench) || ench.is(Enchantments.SHARPNESS) || ench.is(Enchantments.LOOTING) || ench.is(Enchantments.PIERCING);
+    }
 
 }
