@@ -11,6 +11,7 @@ import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryScreen;
 import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
 import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
+import dev.shadowsoffire.apothic_enchanting.util.FakeLevelReader;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
 import net.minecraft.ChatFormatting;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -108,11 +110,7 @@ public class ApothEnchClient {
                         state = block.getStateForPlacement(ctx);
                     }
                     catch (Exception ex) {
-                        // Since we're calling with an invalid context, this may fail, and we need to handle that quietly.
-                        ApothicEnchanting.LOGGER.trace(ex.getMessage());
-                        StackTraceElement[] trace = ex.getStackTrace();
-                        for (StackTraceElement traceElement : trace)
-                            ApothicEnchanting.LOGGER.trace("\tat " + traceElement);
+                        // Ignore, we're calling this with an invalid context. We just want to try to get the placed state if possible.
                     }
                 }
 
@@ -120,7 +118,13 @@ public class ApothEnchClient {
                     state = block.defaultBlockState();
                 }
 
-                TooltipUtil.appendBlockStats(level, state, BlockPos.ZERO, tooltip::add);
+                try {
+                    LevelReader reader = level == null ? new FakeLevelReader(state) : level;
+                    TooltipUtil.appendBlockStats(reader, state, BlockPos.ZERO, tooltip::add);
+                }
+                catch (NullPointerException ex) {
+                    // Ignore, we're trying to eagerly resolve this with a null level.
+                }
             }
         }
 
