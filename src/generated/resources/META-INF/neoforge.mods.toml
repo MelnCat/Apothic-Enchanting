@@ -1,0 +1,41 @@
+modLoader="javafml"
+
+loaderVersion="[2,)"
+
+license="MIT License"
+
+[[mods]] #mandatory
+
+modId="apothic_enchanting"
+
+version="1.1.2"
+
+displayName="Apothic Enchanting"
+
+authors="Shadows_of_Fire"
+
+description='''The Enchanting Module of Apotheosis, overhauling major enchanting systems.'''
+
+[[mixins]]
+config="apothic_enchanting.mixins.json"
+
+[[dependencies.apothic_enchanting]]
+    modId="minecraft"
+    type="required"
+    versionRange="[1.21.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.apothic_enchanting]]
+    modId="neoforge"
+    type="required"
+    versionRange="[21.1.8,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.apothic_enchanting]]
+    modId="apothic_attributes"
+    type="required"
+    versionRange="[2.3.0,)"
+    ordering="NONE"
+    side="BOTH"

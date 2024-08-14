@@ -1,0 +1,29 @@
+{
+    "required": true,
+    "package": "dev.shadowsoffire.apothic_enchanting.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "AnvilMenuMixin",
+        "BlockMixin",
+        "BlocksMixin",
+        "CandleBlockMixin",
+        "CrossbowItemMixin",
+        "EnchantmentMixin",
+        "GoldToolsHaveFortuneModuleMixin",
+        "IShearableMixin",
+        "ItemMixin",
+        "ItemStackMixin",
+        "ShearsItemMixin",
+        "SheepMixin",
+        "SpellCrossbowMixin",
+        "TemptGoalMixin",
+        "ThrownTridentMixin",
+        "TridentItemMixin"
+    ],
+    "client": [
+        "client.AbstractContainerScreenMixin",
+        "client.AnvilScreenMixin",
+        "client.EnchantmentScreenMixin"
+    ],
+    "minVersion": "0.8"
+}
