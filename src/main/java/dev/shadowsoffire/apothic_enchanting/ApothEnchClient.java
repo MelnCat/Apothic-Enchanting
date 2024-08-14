@@ -99,27 +99,28 @@ public class ApothEnchClient {
             }
             else if (i instanceof BlockItem) {
                 Block block = ((BlockItem) i).getBlock();
-                Level world = Minecraft.getInstance().level;
-                if (world == null || Minecraft.getInstance().player == null) return;
-                BlockPlaceContext ctx = new BlockPlaceContext(world, Minecraft.getInstance().player, InteractionHand.MAIN_HAND, e.getItemStack(), MISS);
-                BlockState state = null;
+                BlockState state = block.defaultBlockState();
 
-                try {
-                    state = block.getStateForPlacement(ctx);
-                }
-                catch (Exception ex) {
-                    // Since we're calling with an invalid context, this may fail, and we need to handle that quietly.
-                    ApothicEnchanting.LOGGER.trace(ex.getMessage());
-                    StackTraceElement[] trace = ex.getStackTrace();
-                    for (StackTraceElement traceElement : trace)
-                        ApothicEnchanting.LOGGER.trace("\tat " + traceElement);
+                Level level = e.getContext().level();
+                if (level != null && Minecraft.getInstance().player != null) {
+                    BlockPlaceContext ctx = new BlockPlaceContext(level, Minecraft.getInstance().player, InteractionHand.MAIN_HAND, e.getItemStack(), MISS);
+                    try {
+                        state = block.getStateForPlacement(ctx);
+                    }
+                    catch (Exception ex) {
+                        // Since we're calling with an invalid context, this may fail, and we need to handle that quietly.
+                        ApothicEnchanting.LOGGER.trace(ex.getMessage());
+                        StackTraceElement[] trace = ex.getStackTrace();
+                        for (StackTraceElement traceElement : trace)
+                            ApothicEnchanting.LOGGER.trace("\tat " + traceElement);
+                    }
                 }
 
                 if (state == null) {
                     state = block.defaultBlockState();
                 }
 
-                TooltipUtil.appendBlockStats(world, state, BlockPos.ZERO, tooltip::add);
+                TooltipUtil.appendBlockStats(level, state, BlockPos.ZERO, tooltip::add);
             }
         }
 
