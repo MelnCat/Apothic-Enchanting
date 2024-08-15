@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,9 +15,9 @@ import dev.shadowsoffire.apothic_attributes.ApothicAttributes;
 import dev.shadowsoffire.apothic_enchanting.PowerFunction.DefaultMinPowerFunction;
 import dev.shadowsoffire.apothic_enchanting.asm.EnchHooks;
 import dev.shadowsoffire.apothic_enchanting.data.ApothEnchantmentProvider;
+import dev.shadowsoffire.apothic_enchanting.data.EnchRecipeProvider;
 import dev.shadowsoffire.apothic_enchanting.data.EnchTagsProvider;
 import dev.shadowsoffire.apothic_enchanting.data.LootProvider;
-import dev.shadowsoffire.apothic_enchanting.data.LegacyRecipeProvider;
 import dev.shadowsoffire.apothic_enchanting.library.EnchLibraryTile;
 import dev.shadowsoffire.apothic_enchanting.objects.TomeItem;
 import dev.shadowsoffire.apothic_enchanting.payloads.CluePayload;
@@ -27,6 +25,7 @@ import dev.shadowsoffire.apothic_enchanting.payloads.EnchantmentInfoPayload;
 import dev.shadowsoffire.apothic_enchanting.payloads.StatsPayload;
 import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantingTableBlock;
 import dev.shadowsoffire.apothic_enchanting.table.EnchantingStatRegistry;
+import dev.shadowsoffire.apothic_enchanting.util.DataGenBuilder;
 import dev.shadowsoffire.placebo.config.Configuration;
 import dev.shadowsoffire.placebo.events.ResourceReloadEvent;
 import dev.shadowsoffire.placebo.network.PayloadHelper;
@@ -36,12 +35,8 @@ import dev.shadowsoffire.placebo.util.PlaceboUtil;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.PackOutput;
-import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -60,7 +55,6 @@ import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.neoforged.neoforge.capabilities.Capabilities.ItemHandler;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 @Mod(ApothicEnchanting.MODID)
@@ -146,19 +140,13 @@ public class ApothicEnchanting {
     }
 
     @SubscribeEvent
-    public void data(GatherDataEvent e) {
-        PackOutput output = e.getGenerator().getPackOutput();
-
-        RegistrySetBuilder regSet = new RegistrySetBuilder()
-            .add(Registries.ENCHANTMENT, ApothEnchantmentProvider::bootstrap);
-
-        DatapackBuiltinEntriesProvider datapackProvider = new DatapackBuiltinEntriesProvider(output, e.getLookupProvider(), regSet, Set.of(MODID, "minecraft"));
-        CompletableFuture<HolderLookup.Provider> registries = datapackProvider.getRegistryProvider();
-
-        e.getGenerator().addProvider(true, datapackProvider);
-        e.getGenerator().addProvider(true, LootProvider.create(output, registries));
-        e.getGenerator().addProvider(true, new EnchTagsProvider(output, registries, e.getExistingFileHelper()));
-        e.getGenerator().addProvider(true, new LegacyRecipeProvider(output.getOutputFolder(Target.DATA_PACK).resolve(MODID), registries));
+    public void data(GatherDataEvent event) {
+        DataGenBuilder.create(MODID, "minecraft")
+            .registry(Registries.ENCHANTMENT, ApothEnchantmentProvider::bootstrap)
+            .provider(LootProvider::create)
+            .provider(EnchTagsProvider::new)
+            .provider(EnchRecipeProvider::new)
+            .build(event);
     }
 
     public void reload(ResourceReloadEvent e) {
