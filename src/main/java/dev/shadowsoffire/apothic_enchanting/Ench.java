@@ -416,9 +416,9 @@ public class Ench {
 
     public static class Menus {
 
-        public static final Supplier<MenuType<ApothEnchantmentMenu>> ENCHANTING_TABLE = R.menu("enchanting_table", ApothEnchantmentMenu::new);
+        public static final MenuType<ApothEnchantmentMenu> ENCHANTING_TABLE = R.menu("enchanting_table", ApothEnchantmentMenu::new);
 
-        public static final Supplier<MenuType<EnchLibraryContainer>> LIBRARY = R.menuWithPos("library", EnchLibraryContainer::new);
+        public static final MenuType<EnchLibraryContainer> LIBRARY = R.menuWithPos("library", EnchLibraryContainer::new);
 
         private static void bootstrap() {}
     }

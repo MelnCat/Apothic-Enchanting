@@ -229,7 +229,7 @@ public class ApothEnchantmentMenu extends EnchantmentMenu {
 
     @Override
     public MenuType<?> getType() {
-        return Ench.Menus.ENCHANTING_TABLE.get();
+        return Ench.Menus.ENCHANTING_TABLE;
     }
 
     private List<EnchantmentInstance> getEnchantmentList(ItemStack stack, int enchantSlot, int level) {

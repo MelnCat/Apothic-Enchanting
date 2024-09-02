@@ -57,8 +57,8 @@ public class ApothEnchClient {
 
     @SubscribeEvent
     public static void screens(RegisterMenuScreensEvent e) {
-        e.register(Ench.Menus.ENCHANTING_TABLE.get(), ApothEnchantmentScreen::new);
-        e.register(Ench.Menus.LIBRARY.get(), EnchLibraryScreen::new);
+        e.register(Ench.Menus.ENCHANTING_TABLE, ApothEnchantmentScreen::new);
+        e.register(Ench.Menus.LIBRARY, EnchLibraryScreen::new);
     }
 
     @SubscribeEvent
