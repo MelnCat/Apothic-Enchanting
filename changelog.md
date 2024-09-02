@@ -1,3 +1,6 @@
+## 1.2.1
+* Updated to Placebo 9.5.1.
+
 ## 1.2.0
 * Updated to Minecraft 1.21.1.
 * Made Tridents and Shears able to accept all enchantments that were possible in 1.20.
