@@ -1,3 +1,7 @@
+## 1.2.2
+* Fixed Boon of the Earth being unlocalized.
+* Translated Infusion JEI tooltips up by 100 on the Z axis (should fix some overlap issues).
+
 ## 1.2.1
 * Updated to Placebo 9.5.1.
 
