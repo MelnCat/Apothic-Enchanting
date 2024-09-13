@@ -132,6 +132,9 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
             gfx.blit(TEXTURES, 56 + pos[2], 47, pos[2], 100, getBarLength(maxStats.arcana() - stats.arcana()), 5, 256, 256);
         }
         RenderSystem.disableBlend();
+        gfx.pose().pushPose();
+        gfx.pose().translate(0, 0, 100);
+
         if (hover) {
             List<Component> list = new ArrayList<>();
             Component infusionName = Enchantment.getFullname(Minecraft.getInstance().level.holderOrThrow(Ench.Enchantments.INFUSION), 1);
@@ -174,6 +177,8 @@ public class InfusionRecipeCategory implements IRecipeCategory<InfusionRecipe> {
             }
             gfx.renderComponentTooltip(font, list, (int) mouseX, (int) mouseY);
         }
+
+        gfx.pose().popPose();
     }
 
     public static int getBarLength(float stat) {
