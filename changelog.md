@@ -1,3 +1,7 @@
+## 1.2.3
+* Added back the enchanted book tooltips present in Apotheosis, these got lost in the split-off somehow.
+  * This includes adding a description even if Enchantment Descriptions isn't installed, and showing various metadata information.
+
 ## 1.2.2
 * Fixed Boon of the Earth being unlocalized.
 * Translated Infusion JEI tooltips up by 100 on the Z axis (should fix some overlap issues).
