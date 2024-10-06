@@ -14,20 +14,30 @@ import dev.shadowsoffire.apothic_enchanting.table.ApothEnchantmentScreen;
 import dev.shadowsoffire.apothic_enchanting.util.FakeLevelReader;
 import dev.shadowsoffire.apothic_enchanting.util.TooltipUtil;
 import dev.shadowsoffire.placebo.util.EnchantmentUtils;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.particle.FlyTowardsPositionParticle;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -36,6 +46,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -126,6 +137,36 @@ public class ApothEnchClient {
                     // Ignore, we're trying to eagerly resolve this with a null level.
                 }
             }
+            else if (i == Items.ENCHANTED_BOOK) {
+                ItemStack stack = e.getItemStack();
+                ItemEnchantments enchMap = EnchantmentHelper.getEnchantmentsForCrafting(stack);
+                if (enchMap.size() == 1) {
+                    Object2IntMap.Entry<Holder<Enchantment>> entry = enchMap.entrySet().iterator().next(); // pull the first enchantment via iterator
+                    Holder<Enchantment> ench = entry.getKey();
+                    int level = entry.getIntValue();
+                    if (!ModList.get().isLoaded("enchdesc")) {
+                        String key = ench.getKey().location().toLanguageKey("enchantment") + ".desc";
+                        if (I18n.exists(key)) {
+                            tooltip.add(Component.translatable(key).withStyle(ChatFormatting.DARK_GRAY));
+                        }
+                    }
+                    if (ApothEnchConfig.showEnchantedBookMetadata) {
+                        EnchantmentInfo info = ApothicEnchanting.getEnchInfo(ench);
+                        Object[] args = new Object[4];
+                        args[0] = boolComp("info.apothic_enchanting.discoverable", ench.is(EnchantmentTags.IN_ENCHANTING_TABLE));
+                        args[1] = boolComp("info.apothic_enchanting.lootable", ench.is(EnchantmentTags.ON_RANDOM_LOOT));
+                        args[2] = boolComp("info.apothic_enchanting.tradeable", ench.is(EnchantmentTags.TRADEABLE));
+                        args[3] = boolComp("info.apothic_enchanting.treasure", ench.is(EnchantmentTags.TRADEABLE));
+                        if (e.getFlags().isAdvanced()) {
+                            tooltip.add(Component.translatable("%s \u2507 %s \u2507 %s \u2507 %s", args[0], args[1], args[2], args[3]).withStyle(ChatFormatting.DARK_GRAY));
+                            tooltip.add(Component.translatable("info.apothic_enchanting.book_range", info.getMinPower(level), info.getMaxPower(level)).withStyle(ChatFormatting.GREEN));
+                        }
+                        else {
+                            tooltip.add(Component.translatable("%s \u2507 %s", args[2], args[3]).withStyle(ChatFormatting.DARK_GRAY));
+                        }
+                    }
+                }
+            }
         }
 
         @SubscribeEvent
@@ -142,6 +183,10 @@ public class ApothEnchClient {
             }
         }
 
+    }
+
+    private static Component boolComp(String key, boolean flag) {
+        return Component.translatable(key + (flag ? "" : ".not")).withStyle(Style.EMPTY.withColor(flag ? 0x108810 : 0xAA1616));
     }
 
 }
