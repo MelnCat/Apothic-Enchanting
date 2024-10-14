@@ -20,6 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -50,7 +51,7 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
         BlockEntity be = world.getBlockEntity(pos);
         if (be instanceof FilteringShelfTile shelf) {
             Set<Holder<Enchantment>> blacklist = new HashSet<>();
-            for (ItemStack s : shelf.getBooks()) {
+            for (ItemStack s : shelf.getEnchantedBooks()) {
                 ItemEnchantments enchants = EnchantmentHelper.getEnchantmentsForCrafting(s);
                 if (enchants.size() != 1) {
                     continue; // Only books with one enchantment are legal.
@@ -75,7 +76,7 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
     public float getEnchantPowerBonus(BlockState state, LevelReader level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof FilteringShelfTile shelf) {
-            return shelf.getBooks().size() * 0.5F;
+            return shelf.getEnchantedBooks().size() * 0.5F;
         }
         return 0;
     }
@@ -84,7 +85,7 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
     public float getArcanaBonus(BlockState state, LevelReader world, BlockPos pos) {
         BlockEntity be = world.getBlockEntity(pos);
         if (be instanceof FilteringShelfTile shelf) {
-            return shelf.getBooks().size();
+            return shelf.getEnchantedBooks().size();
         }
         return 0;
     }
@@ -129,6 +130,10 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
     }
 
     public static boolean canInsert(ItemStack stack) {
+        return stack.is(ItemTags.BOOKSHELF_BOOKS);
+    }
+
+    public static boolean isEnchantedBook(ItemStack stack) {
         return stack.is(Items.ENCHANTED_BOOK) && EnchantmentHelper.getEnchantmentsForCrafting(stack).size() == 1;
     }
 
@@ -155,6 +160,10 @@ public class FilteringShelfBlock extends ChiseledBookShelfBlock implements Encha
                 if (!stack.isEmpty()) books.add(stack);
             }
             return books;
+        }
+
+        public List<ItemStack> getEnchantedBooks() {
+            return getBooks().stream().filter(FilteringShelfBlock::isEnchantedBook).toList();
         }
 
         @Override
